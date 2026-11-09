@@ -1,0 +1,53 @@
+# Database design proposal
+
+Milestone 01 status: no database packages, connections, collections, or credentials have been added. MongoDB Atlas and Better Auth remain later milestones; this document is a proposed future schema.
+
+Status: pending policy and adapter-version confirmation. Dates are BSON UTC dates; JSON exposes ISO 8601. Domain documents use ObjectId internally and string IDs at the API boundary. Auth references use one canonical representation of the adapter's user ID; verify its actual mapping during integration rather than assuming it equals a domain ObjectId.
+
+## Collections
+
+| Collection               | Important fields                                                                                                                                                                                                                   | Relationships and constraints                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Better Auth user         | Adapter-owned ID, name, email, emailVerified, image, timestamps; configured server-owned role and accountStatus extensions                                                                                                         | Unique normalized email consistent with adapter behavior; role defaults student, status defaults active; not client-writable |
+| Better Auth session      | ID, userId, token, expiresAt, timestamps and optional device metadata                                                                                                                                                              | Unique token, userId lookup; adapter-compatible expiry indexes; request-time expiry enforced regardless of TTL cleanup       |
+| Better Auth account      | ID, userId, providerId, accountId, adapter-owned credentials/provider tokens                                                                                                                                                       | Unique providerId + accountId; userId lookup; never copy password hashes into domain collections                             |
+| Better Auth verification | ID, identifier, value, expiresAt and timestamps                                                                                                                                                                                    | Adapter-compatible identifier lookup/expiry cleanup; never expose verification secrets                                       |
+| members                  | _id, userId, status, department, academicSession, collegeRoll, motivation, directoryConsent, publicProfile { displayName, slug, bio, interests, imageUrl }, submittedAt, reviewedAt, reviewedBy, reviewReason, version, timestamps | One document per user, unique userId and public slug; application and current member state share one source of truth         |
+| teachers                 | _id, optional userId, slug, displayName, designation, department, bio, imageUrl, published, archivedAt, timestamps, version                                                                                                        | Unique slug; partial unique userId for linked accounts only; no role implied by existence                                    |
+| quizzes                  | _id, title, description, status, createdBy, opensAt, closesAt, durationSeconds, resultReleaseAt, questions [{ id, prompt, options [{ id, text }], correctOptionId, points }], totalPoints, version, timestamps                     | Creator references auth user; questions embedded and bounded; correct answers restricted to authorized management views      |
+| quizAttempts             | _id, quizId, userId, quizVersion, status, startedAt, deadlineAt, answers [{ questionId, optionId }], submittedAt, finalizedAt, earnedPoints, maximumPoints, percentage, version, timestamps                                        | Unique quizId + userId for MVP one-attempt rule; score/result embedded to avoid a second results source of truth             |
+| events                   | _id, slug, title, summary, startsAt, endsAt, venue, publicationStatus, createdBy, timestamps                                                                                                                                       | Unique slug; future event feature, no MVP CRUD or seed requirement                                                           |
+| auditLogs                | _id, actorId or operator identifier, action, targetType, targetId, requestId, sanitized changes/reason, createdAt                                                                                                                  | Append-only through application; no passwords, cookies, full application bodies, or verification tokens                      |
+| systemState              | _id, initialization/admin invariant metadata                                                                                                                                                                                       | Unique singleton IDs serialize initial admin provisioning and last-admin protection                                          |
+
+Auth collection names and exact fields follow the installed adapter. Do not impose custom strict validators that break adapter writes. Confirm adapter-created indexes and add only documented compatible constraints. The four core auth models are described in [Better Auth database documentation](https://better-auth.com/docs/concepts/database).
+
+## Index plan
+
+- members: unique userId; unique publicProfile.slug; status + submittedAt + _id for reviews; status + directoryConsent + department + _id for public lists.
+- If college roll uniqueness is confirmed, scope it to department + academicSession + collegeRoll. Do not impose global roll uniqueness without college policy.
+- teachers: unique slug; partial unique userId (only stored when linked); published + department + _id.
+- quizzes: status + opensAt; createdBy + createdAt + _id.
+- quizAttempts: unique quizId + userId; userId + startedAt + _id; quizId + status; status + deadlineAt for finalization.
+- events: unique slug; publicationStatus + startsAt. auditLogs: targetType + targetId + createdAt; actorId + createdAt.
+- Search starts with bounded normalized prefix search and allowlisted filters. Explain its limitations for Bangla and partial-word matching; add Atlas Search only when requirements justify it. Validate actual query plans before adding indexes for every field.
+
+MongoDB unique indexes enforce uniqueness at the database level, including under concurrent requests. See [unique indexes](https://www.mongodb.com/docs/manual/core/index-unique/). Zod checks incoming payloads; app-collection JSON Schema validators additionally enforce required types, enums, ranges and dates on stored documents. See [schema validation](https://www.mongodb.com/docs/manual/core/schema-validation/).
+
+## State transitions and consistency
+
+Membership: absent -> pending -> approved/rejected; rejected -> pending on resubmission; approved -> suspended; suspended -> approved by admin. A review uses expected status/version to prevent two reviewers overwriting each other. Record transitions in auditLogs, not an unbounded history array. Private review notes never appear in directory responses.
+
+Approval, role changes, and audit records use transactions where multiple writes must agree. MongoDB does not provide foreign-key enforcement; services validate references and define archive/deletion behavior. Keep user access changes and account deletion coordinated with Better Auth and dependent data.
+
+Quizzes: draft -> published -> closed -> archived. Editing questions or scoring is allowed only in draft. Published content is immutable; corrections require a new quiz. The server validates question count, option IDs, one correct option, positive integer points, schedule and duration. No arbitrary HTML content in the MVP.
+
+Start an attempt only for an active approved student while the quiz is open. Set deadlineAt to the earlier of start + duration and closesAt. A repeated start returns the existing attempt rather than resetting its timer. Save answers only before the persisted deadline. Submission atomically changes an in-progress attempt to a final state and computes its server score. Retry returns the same result. Requests arriving after deadline are rejected for answer changes; finalization scores the last saved answers, including zero for unanswered questions. A periodic idempotent server job finalizes expired attempts; request-time checks remain authoritative if the job is delayed.
+
+Release results only at resultReleaseAt, which must be at or after closesAt in the MVP. Before release, students see attempt status but not score, answer keys, or correctness. Teacher/admin reporting is separate from student release. Do not publicly rank students without an approved policy.
+
+## Data lifecycle and privacy
+
+Public DTOs expose only consented display name, slug, department, academic session, short bio/interests, and approved image. Exclude user IDs where unnecessary, email, phone, college roll, reviewer notes, and results. A teacher's contact details also need explicit publication approval.
+
+Archive referenced teachers/quizzes instead of removing history. Account deletion needs an agreed retention policy: revoke sessions, remove auth credentials via supported APIs, remove public listing, and delete or pseudonymize domain records as approved. Define audit/result retention before launch; no TTL on long-lived records without approval. Session expiry cleanup is not an authorization mechanism. Use synthetic fixtures only; sample names such as Amina Rahman are fictional and emails use example.com.
