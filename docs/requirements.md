@@ -1,5 +1,23 @@
 # Requirements and decisions
 
+Milestone 04 Lesson 05 approved: admin-only membership analytics, five KPIs, monthly/department charts, date filters, anonymous recent activity and previous-period trends. KPIs use submission-date cohorts; membership charts use approval dates. Calculations stay on the backend, and no student identifiers/details enter analytics responses. See [metric definitions](membership-analytics.md). Stop before the next milestone.
+
+Milestone 04 Lesson 04 approved: approved-student own-profile page and GET/PATCH, editing fullName/phone/department/academicYear only. Student ID, role, approval and review metadata remain protected. Completion measures four saved fields; auth account name stays separate. No later lessons. See [profile management](member-profile-management.md).
+
+Milestone 04 Lesson 03 approved: public approved-member cards/profiles with name, department, academic year and approval date, search/filter/pagination, counts and department statistics. Phone/email/student ID and application/review details remain private. No new approval transitions or later lessons. See [directory scope](member-directory.md).
+
+Milestone 04 Lesson 02 approved: admin-only membership listing with status filters, confirmation before review, required rejection reasons, trusted reviewer/date and atomic pending-only decisions. Students can view their own outcome/reason. No role changes, resubmission, public listing, or later lesson. See [membership review](membership-review.md).
+
+Milestone 04 Lesson 01 approved: student-only membership form, pending submission, private own-status lookup, duplicate protection and dashboard status. No admin approval yet. Proposed validation defaults use free-text department/year and Bangladesh mobile format; no global student-ID uniqueness is assumed. One record per account is retained; reapplication policy is deferred. See [lesson decisions](membership-application.md).
+
+Milestone 03 Lesson 05 approved: audit and harden existing authentication/RBAC, add limits and headers, and verify isolated security regressions. No real role changes, deletion, deployment configuration changes, or Milestone 04 features. Local rate limits are per client address/path; distributed storage, shared-NAT policy, proxy trust, and production cookie topology require deployment review. See [security decisions](auth-security.md).
+
+Checkpoint D approved: role-aware navbar and placeholder student/teacher/admin dashboards, with `/dashboard` redirecting to the account's own role. Dashboard access mirrors Checkpoint C's explicit permission matrix (teacher/admin may access the student page; admin may access the teacher page). Guests redirect to login; invalid roles and disallowed access show 403 UI. No role assignment or full business workflows are included. See [dashboard scope](role-dashboards.md).
+
+Checkpoint C is approved: implement reusable server RBAC and three demonstration endpoints only. The application accepts exactly one student/teacher/admin role, rejects missing/unknown/multiple roles, and reads current role for every guarded request. Student and teacher have no Better Auth management permissions; default signup remains student. Testing must use isolated mocks and must not change real roles. No frontend role dashboards, role promotion endpoints, membership, quizzes, or Checkpoint D are approved. See [RBAC policy and testing](rbac.md). Previous checkpoint observations below describe their inspection time, not current account eligibility.
+
+Checkpoint B approval: implement secure first-admin bootstrap tooling only. Exact existing ID/email, explicit student role, verified email, independent recent ownership confirmation, no existing admins, interactive confirmation and one-time transaction guard are required. No database writes may execute without explicit user approval. Missing-role accounts must remain unprivileged and must not be bulk-migrated or promoted. No Checkpoint C/D features, deletion or Git history changes are authorized. See admin-bootstrap.md for current eligibility findings and procedure.
+
 Milestone 03 Lesson 01 authorization: integrate Better Auth email/password on the Express server with the existing MongoDB client/database, validated auth settings, trusted origins, credentialed CORS and auth endpoint tests. Preserve health/member count. Exclude frontend auth pages, RBAC, admins and custom JWT. This lesson allows unverified development-account login; production email verification/recovery policies remain later work. See milestone-03-lesson-01.md.
 
 Status: Phase 1 planning complete; Phase 2 Milestone 01 approved. Research checked 2026-11-09. Unconfirmed policies remain proposals.

@@ -21,8 +21,14 @@ export const envSchema = z
 
     DB_NAME: z.string().min(1),
 
-    BETTER_AUTH_SECRET: z.string().min(32),
-    BETTER_AUTH_URL: z.url(),
+    BETTER_AUTH_SECRET: z
+      .string()
+      .min(32)
+      .refine(
+        (value) => value.trim().length >= 32,
+        "Use at least 32 non-padding characters.",
+      ),
+    BETTER_AUTH_URL: httpOrigin,
   })
   .superRefine((values, context) => {
     if (values.NODE_ENV === "production") {

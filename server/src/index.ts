@@ -1,4 +1,3 @@
-
 import { createApp } from "./app.js";
 import { connectDB, closeDB } from "./config/db.js";
 import { env } from "./config/env.js";
@@ -12,9 +11,7 @@ async function startServer() {
     const app = createApp(auth);
 
     const server = app.listen(env.PORT, () => {
-      console.log(
-        `NGC Science Club API running on port ${env.PORT}`
-      );
+      console.log(`NGC Science Club API running on port ${env.PORT}`);
     });
 
     async function shutdown() {
@@ -26,8 +23,10 @@ async function startServer() {
 
     process.on("SIGINT", shutdown);
     process.on("SIGTERM", shutdown);
-  } catch (error) {
-    console.error("Server startup failed:", error);
+  } catch {
+    console.error(
+      "Server startup failed. Check server configuration and database connectivity.",
+    );
     await closeDB();
     process.exit(1);
   }

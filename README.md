@@ -1,5 +1,19 @@
 # NGC Science Club
 
+Milestone 04 Lesson 05 adds admin `/dashboard/admin/analytics` with backend-calculated membership KPIs and charts. See [analytics notes](docs/membership-analytics.md) for date/cohort definitions, privacy and checks.
+
+Milestone 04 Lesson 04 adds approved-student member profile management at `/dashboard/student/profile`. See [profile notes](docs/member-profile-management.md) for protected fields, synchronization and test commands.
+
+Milestone 04 Lesson 03 adds public `/members` directory and individual profiles from approved applications. See [directory notes](docs/member-directory.md) for privacy rules, API parameters and test commands.
+
+Milestone 04 Lesson 02 adds admin membership review at `/dashboard/admin/memberships`. See [review documentation](docs/membership-review.md) for confirmation, validation, concurrency rules and test commands.
+
+Milestone 04 Lesson 01 adds the student membership application and private dashboard status. See [membership application notes](docs/membership-application.md) for endpoints, files, commands and manual checks. Admin approval is not implemented.
+
+Milestone 03 Lesson 05 adds authentication rate limiting, security headers, safer error logging, environment validation, and isolated security tests. See [authentication hardening](docs/auth-security.md) for policies, commands, audit findings, and deployment limits.
+
+Current checkpoint: [secure first-administrator bootstrap](docs/admin-bootstrap.md). Offline tooling is implemented and tested without live database writes. Do not execute promotion without explicit approval for the reviewed account. The read-only inspection currently found no administrator and no eligible verified student.
+
 A planned Science Club management platform for Narsingdi Government College, Bangladesh.
 
 Status: Milestones 01/02 completed; Milestone 03, Lesson 01 adds Better Auth server integration. The Next.js homepage still connects to Express health. Frontend authentication, RBAC, membership workflows and quizzes remain later lessons.
@@ -144,3 +158,9 @@ The health endpoint checks process availability, not database readiness. English
 Runtime-only audits reported zero vulnerabilities. Full audits reported 8 moderate client and 10 moderate server development-tooling findings. Client ESLint 9 is retained because bundled Next.js plugins do not yet accept ESLint 10; server uses ESLint 10. Review compatible upstream fixes before launch rather than running npm audit fix --force.
 
 See [Milestone 01 notes](docs/milestone-01.md) for package explanations and verification evidence.
+
+## Milestone 03, Lesson 04, Checkpoint C
+
+Checkpoint D now adds role-aware navbar links, `/dashboard` routing, three guarded placeholder dashboards, and desktop/mobile regression coverage. See the [dashboard guide](docs/role-dashboards.md) for files, commands, permissions, and security limitations. Express remains the authorization boundary.
+
+Server role guards enforce exact student/teacher/admin permissions using verified Better Auth sessions and fresh MongoDB role reads. See [RBAC implementation and testing](docs/rbac.md) for the route matrix, file guide, commands, security policy, and limitations. No account roles are changed by this checkpoint.

@@ -1,5 +1,23 @@
 # REST API proposal
 
+Milestone 04 Lesson 05 adds admin-only GET `/api/admin/membership-analytics` with paired ISO from/to dates, inclusive UTC days and a 731-day maximum. Returns backend-calculated KPIs, monthly counts, department counts, anonymous recent statuses/dates and equal-period trends. No private student fields or new mutations. See [analytics contract](membership-analytics.md).
+
+Milestone 04 Lesson 04 adds GET/PATCH `/api/membership-applications/me/profile` for current students with approved membership. Identity comes only from the session. PATCH accepts four editable fields, requires trusted Origin and rejects protected/unknown fields; approved-state filtering applies inside the write. See [own-profile contract](member-profile-management.md).
+
+Milestone 04 Lesson 03 implements public GET `/api/members`, `/api/members/stats`, and `/api/members/:id`; `/api/members/count` now counts approved applications. List query parameters are validated and response fields strictly projected; unapproved/missing profiles return 404. See [public API contract](member-directory.md).
+
+Milestone 04 Lesson 02 adds GET `/api/admin/memberships` (status/page filters) and PATCH `/api/admin/memberships/:id/review` (pending-only decision), both admin-only. Reviews require trusted Origin and strict inputs, return 409 on unavailable/already-reviewed records, and save server reviewer/date. Student own-status responses now include optional review date/rejection reason. See [review API contract](membership-review.md).
+
+Milestone 04 Lesson 01 adds student-only POST `/api/membership-applications` and GET `/api/membership-applications/me`. Submission requires exact trusted Origin, validates an explicit six-field schema, and assigns identity/status/date server-side. Duplicate account submissions return 409. GET exposes only own status/date or null. See [application contract](membership-application.md).
+
+Milestone 03 Lesson 05: existing auth endpoints may return native HTTP 429 with `X-Retry-After` when limits are exceeded. API responses use private/no-store caching and security headers. No business endpoints are added. See [auth rate-limit contract](auth-security.md).
+
+Checkpoint D consumes the existing three role overview endpoints from the browser, with credentialed no-store requests. No endpoints or response contracts change. Their HTTP 401/403 responses control frontend login/Access Denied states. See [dashboard integration](role-dashboards.md).
+
+## Implemented through Checkpoint C
+
+Public GET `/api/health` and `/api/members/count`, Better Auth `/api/auth/*`, and authenticated GET `/api/me` remain available. Demonstration GET `/api/student/overview` permits all three recognized roles; `/api/teacher/overview` permits teacher/admin; `/api/admin/overview` permits admin only. These unversioned demonstration endpoints use `{ success, message }` with 200/401/403; the proposed business API contract below is future work. `/api/auth/admin/*` requires a fresh exact admin role in addition to the plugin's checks. See [RBAC details](rbac.md). Older milestone notes below describe their historical scope.
+
 Milestone 03 Lesson 01 implemented endpoints: GET /api/health, GET /api/members/count, and the Better Auth handler under /api/auth. Verified GET /api/auth/ok, GET /api/auth/get-session, POST /api/auth/sign-up/email, POST /api/auth/sign-in/email, and POST /api/auth/sign-out. Credentialed CORS trusts the exact configured client origin; auth mutation origin checks remain enabled. Better Auth responses use its own contract. Other auth/business endpoints below are planned until their corresponding lesson is implemented; no email transport, RBAC or frontend forms are configured yet.
 
 Status: design contract pending approval. Business routes use /api/v1; Better Auth owns /api/auth. IDs are strings in JSON. All protected routes require a valid active session; privileged routes additionally read current role and ownership.

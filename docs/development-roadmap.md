@@ -1,5 +1,21 @@
 # Milestone roadmap
 
+Latest approved scope: Milestone 04 Lesson 05 membership dashboard analytics/statistics. Stop before the next milestone. See [analytics lesson](membership-analytics.md).
+
+Latest approved scope: Milestone 04 Lesson 04 approved-student member profile editing and completion. Stop before subsequent lessons. See [profile implementation](member-profile-management.md).
+
+Latest approved lesson: Milestone 04 Lesson 03 approved-member directory/profiles and aggregate counts. Stop before subsequent lessons. See [directory implementation](member-directory.md).
+
+Latest approved scope: Milestone 04 Lesson 02 admin membership approval/rejection and student outcome display. Stop before further lessons; resubmission, public directory publication and additional workflows remain unapproved. See [review lesson](membership-review.md).
+
+Current approved lesson: Milestone 04 Lesson 01 student membership application and status only. Approval management, reapplication/editing, and later lessons require further approval. See [lesson implementation](membership-application.md).
+
+Latest scope: Milestone 03 Lesson 05 authentication hardening and verification only. See [security review and remaining deployment work](auth-security.md). Stop before Milestone 04; no membership or quiz implementation is approved.
+
+Latest approved checkpoint: D, frontend role-aware navigation and guarded dashboard placeholders. Stop after quality checks and browser verification; membership, quizzes, full dashboards, and later lessons require separate approval. See [Checkpoint D guide](role-dashboards.md). Earlier checkpoint notes below are historical.
+
+Current scope: Milestone 03 Lesson 04 Checkpoint C. Implement server RBAC, strict custom roles, demonstration endpoints, and isolated security tests while preserving the existing dashboard. See [RBAC guide](rbac.md). No real roles are changed in this checkpoint. Checkpoint D and frontend role dashboards require separate approval. Checkpoint B tooling remains documented in admin-bootstrap.md; its recorded inspection counts are historical.
+
 Current user-approved progress: Milestones 01 (foundation) and 02 (MongoDB Atlas/modular backend) complete; Milestone 03 Lesson 01 implements server-only Better Auth. See milestone-03-lesson-01.md for nine passing integration checks and the stop point. Subsequent frontend authentication, RBAC/admin provisioning and email workflows require further approval. Earlier milestone numbering below is the original phase-level roadmap.
 
 Progress: Phase 1 planning is complete. The user's Phase 2 Milestone 01 (Project Foundation) is approved and implemented: independent apps, local health integration/CORS, bilingual foundation, environment examples, scripts and checks. No subsequent milestone is authorized. The numbered roadmap below remains a phase-level plan; Milestone 01 notes record the actual foundation scope. Full Bangla/English support is confirmed and accompanies future product features.

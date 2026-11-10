@@ -1,5 +1,23 @@
 # Architecture proposal
 
+Milestone 04 Lesson 05 adds a read-only analytics module behind existing admin/session middleware and a guarded Next.js chart dashboard. MongoDB facets calculate all statistics; client Recharts 3.10.1 only presents validated aggregate data, with accessible tables and empty/error states. See [analytics architecture](membership-analytics.md).
+
+Milestone 04 Lesson 04 extends the membership module for approved students' own-profile management, with existing session/RBAC/origin checks and four-field Zod allowlisting. Next.js reuses RoleGuard, React Hook Form and shadcn form controls. Public profiles read the same record but retain their smaller projection. See [profile architecture](member-profile-management.md).
+
+Milestone 04 Lesson 03 extends the existing public member module and adds Next.js directory/profile views using shadcn cards. Approved membershipApplications are the shared source for review, public profiles and statistics. API queries enforce approval and public projections; client reads omit credentials and caching. See [directory architecture](member-directory.md).
+
+Milestone 04 Lesson 02 extends the existing membership module with admin listing and atomic review. The existing Express admin role guard and exact-origin mutation check protect every operation; Next.js adds a guarded management page and native confirmation dialog. Student status projections now include review outcome details. See [review architecture](membership-review.md).
+
+Milestone 04 Lesson 01 adds a modular membership-applications schema/routes/controller/service/repository using the existing MongoDB connection and session/RBAC middleware. The Next.js form reuses RoleGuard, shadcn form controls, React Hook Form, Zod and toast. No packages are added. See [membership flow](membership-application.md).
+
+Milestone 03 Lesson 05 adds native Better Auth in-memory rate limits with a server-owned socket IP header, Helmet API headers, no-store responses, safer logging, and compatible Next.js headers. Existing sessions, cookies, role lookups, and deployment trust settings are preserved. See [authentication security review](auth-security.md).
+
+Checkpoint D adds client-side RoleGuard and dashboard routing based on Better Auth session roles, followed by an authoritative Express overview request before rendering personalized content. No protected data is server-rendered and no backend or database changes are introduced. See [frontend dashboard architecture](role-dashboards.md).
+
+Checkpoint C adds request-scoped session verification, typed Express locals, strict single-role authorization, and fresh primary MongoDB role reads. Better Auth custom roles grant management permissions only to admin. Its existing admin HTTP prefix also passes through the application role guard. CORS precedes all routes; Better Auth still precedes the JSON parser. No frontend role UI or account role changes are included. See [RBAC implementation](rbac.md). Earlier checkpoint notes below are historical.
+
+Checkpoint B adds offline first-admin bootstrap tooling only. It is not imported by application startup or HTTP routes. Default/check/dry-run modes are read-only; execute requires server-only settings, independent ownership review and interactive confirmations. A MongoDB transaction plus a permanent unique systemState marker coordinates concurrent bootstrap runs. Auth and tooling share AUTH_USER_COLLECTION; auth's adapter can be injected in memory-only tests. No role middleware or dashboards were added. See admin-bootstrap.md.
+
 Milestone 03 Lesson 01 implemented: server-only Better Auth 1.7.18 with the matching MongoDB adapter shares the existing client/database. Startup connects MongoDB, ensures core auth indexes, initializes auth and creates the Express app. Credentialed CORS precedes /api/auth/*splat, which precedes express.json(). Health and /api/members/count remain public. See milestone-03-lesson-01.md for the installed-version findings and verification. Frontend auth and role enforcement are not part of this lesson.
 
 Status: pending approval. Two independent applications, one repository, one public origin recommended.

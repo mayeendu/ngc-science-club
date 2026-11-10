@@ -16,7 +16,15 @@
     "format:check": "prettier --check .",
     "pretest:auth": "npm run build",
     "test:auth": "node --test --test-concurrency=1 tests/auth.integration.test.mjs",
-    "auth:secret": "node scripts/create-auth-secret.mjs"
+    "auth:secret": "node scripts/create-auth-secret.mjs",
+    "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
+    "typecheck:scripts": "tsc -p tsconfig.scripts.json",
+    "test:bootstrap": "node --import tsx --test --test-concurrency=1 tests/bootstrap-admin.test.mjs",
+    "test:rbac": "node --import tsx --test --test-concurrency=1 tests/rbac.test.mjs",
+    "test:security": "node --import tsx --test --test-concurrency=1 tests/auth-security.test.mjs",
+    "test:membership": "node --import tsx --test --test-concurrency=1 tests/membership.test.mjs",
+    "test:members": "node --import tsx --test --test-concurrency=1 tests/member-directory.test.mjs",
+    "test:analytics": "node --import tsx --test --test-concurrency=1 tests/membership-analytics.test.mjs"
   },
   "dependencies": {
     "@better-auth/mongo-adapter": "1.7.18",
@@ -24,6 +32,7 @@
     "cors": "^2.8.6",
     "dotenv": "^18.0.10",
     "express": "^5.3.0",
+    "helmet": "8.3.0",
     "mongodb": "^7.8.0",
     "zod": "^4.6.7"
   },
