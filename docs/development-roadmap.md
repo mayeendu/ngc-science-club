@@ -1,5 +1,7 @@
 # Milestone roadmap
 
+Current user-approved progress: Milestones 01 (foundation) and 02 (MongoDB Atlas/modular backend) complete; Milestone 03 Lesson 01 implements server-only Better Auth. See milestone-03-lesson-01.md for nine passing integration checks and the stop point. Subsequent frontend authentication, RBAC/admin provisioning and email workflows require further approval. Earlier milestone numbering below is the original phase-level roadmap.
+
 Progress: Phase 1 planning is complete. The user's Phase 2 Milestone 01 (Project Foundation) is approved and implemented: independent apps, local health integration/CORS, bilingual foundation, environment examples, scripts and checks. No subsequent milestone is authorized. The numbered roadmap below remains a phase-level plan; Milestone 01 notes record the actual foundation scope. Full Bangla/English support is confirmed and accompanies future product features.
 
 Phase 1 is documentation only. Each row is an approval boundary; completing one row does not authorize the next. Split rows further when they are too large for a teaching session.

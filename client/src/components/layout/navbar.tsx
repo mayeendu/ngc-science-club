@@ -1,0 +1,108 @@
+"use client";
+
+import { useState } from "react";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Loader2, LogOut, UserRound } from "lucide-react";
+import toast from "react-hot-toast";
+
+import { signOut, useSession } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+
+export function Navbar() {
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const router = useRouter();
+  const { data: session, isPending } = useSession();
+
+  async function handleSignOut() {
+    if (isSigningOut) return;
+
+    setIsSigningOut(true);
+
+    try {
+      const { error } = await signOut();
+
+      if (error) {
+        toast.error(error.message || "Sign out failed");
+        return;
+      }
+
+      toast.success("Signed out successfully");
+      router.replace("/login");
+      router.refresh();
+    } catch {
+      toast.error("Unable to sign out");
+    } finally {
+      setIsSigningOut(false);
+    }
+  }
+  return (
+    <header className="border-b bg-white">
+      <nav className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4">
+        <Link href="/" className="text-lg font-bold text-blue-700">
+          NGC Science Club
+        </Link>
+
+        <div className="flex items-center gap-3">
+          <Link href="/" className="text-sm">
+            Home
+          </Link>
+
+          <Link href="/members" className="text-sm">
+            Members
+          </Link>
+
+          {isPending ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : session ? (
+            <>
+              <Link href="/dashboard" className="text-sm font-medium">
+                Dashboard
+              </Link>
+
+              <span className="hidden text-sm text-slate-600 sm:inline">
+                <UserRound className="mr-1 inline size-4" />
+                {session.user.name}
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+              >
+                {isSigningOut ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <LogOut className="size-4" />
+                )}
+                Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                render={<Link href="/login" />}
+                nativeButton={false}
+              >
+                Login
+              </Button>
+
+              <Button
+                size="sm"
+                render={<Link href="/signup" />}
+                nativeButton={false}
+              >
+                Sign up
+              </Button>
+            </>
+          )}
+        </div>
+      </nav>
+    </header>
+  );
+}

@@ -1,60 +1,64 @@
 import { expect, test } from "@playwright/test";
+import { getHealth } from "../src/lib/api";
 
-test("homepage connects to the real API and switches languages", async ({
-  page,
-}) => {
+const apiOrigin = `http://localhost:${process.env.E2E_SERVER_PORT ?? "5000"}`;
+const clientOrigin = `http://localhost:${process.env.E2E_CLIENT_PORT ?? "3000"}`;
+
+test("server-rendered homepage connects to the real API", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Explore science. Discover together.",
+    "NGC Science Club",
   );
   await expect(page.getByRole("status")).toHaveText(
-    "Connected — the club API is online.",
+    "NGC Science Club API is running!",
   );
-  await page.getByRole("button", { name: "বাংলা", exact: true }).click();
-  await expect(page.locator("html")).toHaveAttribute("lang", "bn");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "বিজ্ঞানকে জানি। একসাথে আবিষ্কার করি।",
-  );
-  await expect(page.getByRole("status")).toContainText("সংযোগ সফল");
-  await page.getByRole("button", { name: "English", exact: true }).click();
-  await expect(page.locator("html")).toHaveAttribute("lang", "en");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true);
-});
-
-test("failed connection can recover through retry", async ({ page }) => {
-  await page.route("**/api/health", (route) => route.abort());
-  await page.goto("/");
-  await expect(page.getByRole("status")).toContainText("We could not reach");
-  await page.unroute("**/api/health");
-  await page.getByRole("button", { name: "Check again" }).click();
-  await expect(page.getByRole("status")).toContainText("Connected");
+  await page.reload();
+  await expect(page.getByRole("status")).toHaveText(
+    "NGC Science Club API is running!",
+  );
 });
 
 test("API health, not-found response, and CORS origin are correct", async ({
   request,
 }) => {
-  const health = await request.get("http://localhost:4000/api/health", {
-    headers: { Origin: "http://localhost:3000" },
+  const health = await request.get(`${apiOrigin}/api/health`, {
+    headers: { Origin: clientOrigin },
   });
   expect(health.status()).toBe(200);
-  expect(await health.json()).toMatchObject({
-    status: "ok",
-    service: "ngc-science-club-api",
+  const body = await health.json();
+  expect(body).toMatchObject({
+    success: true,
+    message: "NGC Science Club API is running!",
+    timestamp: expect.any(String),
   });
-  expect(health.headers()["access-control-allow-origin"]).toBe(
-    "http://localhost:3000",
-  );
-  const otherOrigin = await request.get("http://localhost:4000/api/health", {
+  expect(Number.isFinite(Date.parse(body.timestamp))).toBe(true);
+  expect(health.headers()["cache-control"]).toBe("no-store");
+  expect(health.headers()["access-control-allow-origin"]).toBe(clientOrigin);
+  const otherOrigin = await request.get(`${apiOrigin}/api/health`, {
     headers: { Origin: "https://untrusted.example" },
   });
   expect(otherOrigin.headers()["access-control-allow-origin"]).not.toBe(
     "https://untrusted.example",
   );
-  expect(
-    (await request.get("http://localhost:4000/api/missing")).status(),
-  ).toBe(404);
+  expect((await request.get(`${apiOrigin}/api/missing`)).status()).toBe(404);
+});
+
+test("health helper rejects the old response contract", async () => {
+  const originalFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify({ status: "ok" }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    await expect(getHealth(new AbortController().signal)).rejects.toThrow(
+      "unexpected health response",
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

@@ -1,8 +1,10 @@
 # Architecture proposal
 
+Milestone 03 Lesson 01 implemented: server-only Better Auth 1.7.18 with the matching MongoDB adapter shares the existing client/database. Startup connects MongoDB, ensures core auth indexes, initializes auth and creates the Express app. Credentialed CORS precedes /api/auth/*splat, which precedes express.json(). Health and /api/members/count remain public. See milestone-03-lesson-01.md for the installed-version findings and verification. Frontend auth and role enforcement are not part of this lesson.
+
 Status: pending approval. Two independent applications, one repository, one public origin recommended.
 
-Milestone 01 update: Next.js/Vercel and a separate Express service are confirmed. Independent apps now exist. For this teaching milestone the browser directly fetches http://localhost:4000/api/health from http://localhost:3000, with exact-origin CORS. Production same-origin routing remains a recommendation to validate before authentication. Node 24.x, strict TypeScript and independent npm lockfiles are configured. Database/auth and the deeper module layout below remain planned. Bangla/English foundation messages are implemented.
+Milestone 01 update: Next.js/Vercel and a separate Express service are confirmed. Independent apps now exist. The active homepage fetches http://localhost:5000/api/health on the Next.js server at request time, inside a Suspense boundary. API_URL configures that server-side origin; the existing public API variable/default is a fallback. Exact-origin CORS remains configured for future browser requests. Production same-origin routing remains a recommendation to validate before authentication. Node 24.x, strict TypeScript and independent npm lockfiles are configured. Database/auth and the deeper module layout below remain planned. Earlier Bangla/English foundation messages remain available; the active simplified homepage is English.
 
 ## Boundaries and structure
 
@@ -46,7 +48,7 @@ flowchart LR
 
 The gateway is routing infrastructure, not a third application. Use a hosting reverse proxy or verified Next.js rewrites that preserve cookies, methods, and headers. Public URL example: https://club.example.edu.bd. Keep the domain hypothetical until confirmed.
 
-During development, Next.js runs on localhost:3000 and Express on localhost:4000. Prefer the same-origin /api proxy locally too. Test direct cross-origin access only when needed: explicit origin allowlist, credentials enabled, and browser fetch credentials included. Never combine credentialed CORS with wildcard origins.
+During development, Next.js runs on localhost:3000 and Express on localhost:5000. Prefer the same-origin /api proxy locally too. Test direct cross-origin access only when needed: explicit origin allowlist, credentials enabled, and browser fetch credentials included. Never combine credentialed CORS with wildcard origins.
 
 For example, the browser requests GET /api/v1/members?search=amina&page=1&limit=12. Express validates filters, queries indexed MongoDB data, projects public fields, and returns JSON. TanStack Query manages interactive fetching, caching, and invalidation. A successful application mutation invalidates that student's membership query. Its cache is a UI convenience, not authorization.
 

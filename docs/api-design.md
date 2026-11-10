@@ -1,8 +1,10 @@
 # REST API proposal
 
+Milestone 03 Lesson 01 implemented endpoints: GET /api/health, GET /api/members/count, and the Better Auth handler under /api/auth. Verified GET /api/auth/ok, GET /api/auth/get-session, POST /api/auth/sign-up/email, POST /api/auth/sign-in/email, and POST /api/auth/sign-out. Credentialed CORS trusts the exact configured client origin; auth mutation origin checks remain enabled. Better Auth responses use its own contract. Other auth/business endpoints below are planned until their corresponding lesson is implemented; no email transport, RBAC or frontend forms are configured yet.
+
 Status: design contract pending approval. Business routes use /api/v1; Better Auth owns /api/auth. IDs are strings in JSON. All protected routes require a valid active session; privileged routes additionally read current role and ownership.
 
-Milestone 01 implements only public GET /api/health, returning HTTP 200 with { status: "ok", service: "ngc-science-club-api", message: "NGC Science Club API is running." }. It has no database dependency. Unknown routes return a JSON 404. The business/auth routes below are planned and do not exist yet. This unversioned foundation endpoint is separate from future liveness/readiness probes.
+Milestone 01 implements only public GET /api/health on port 5000, returning HTTP 200 with { success: true, message: "NGC Science Club API is running!", timestamp: an ISO 8601 timestamp }. It has no database dependency and is not cached. Unknown routes return a JSON 404. The business/auth routes below are planned and do not exist yet. This unversioned foundation endpoint is separate from future liveness/readiness probes.
 
 ## Authentication
 

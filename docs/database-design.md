@@ -1,6 +1,8 @@
 # Database design proposal
 
-Milestone 01 status: no database packages, connections, collections, or credentials have been added. MongoDB Atlas and Better Auth remain later milestones; this document is a proposed future schema.
+Milestone 03 Lesson 01 update: default Better Auth user/session/account/verification collections are integrated. Startup explicitly creates core uniqueness, lookup and expiry indexes; no SQL migration or account-data migration is required. Auth uses the same MongoClient and Db as the existing member-count repository. Nine isolated Atlas integration tests passed, including hashed credentials, sessions, indexes and logout revocation. See milestone-03-lesson-01.md. The earlier public-directory repository was replaced by the user's countMembers() implementation; the broader members schema below remains planned.
+
+Implementation update: the server now contains a MongoDB connection helper and a read-only member repository. memberRepository.findPublicMembers(page, limit) and findPublicMemberBySlug(slug) require approved status and directory consent and project only public fields. The repository assumes the existing connectDB() helper has completed before use; it does not connect, create indexes, expose routes, or perform writes. TypeScript/build/lint checks passed; live Atlas queries have not been verified. The remaining schema below is a proposal, not an applied database migration.
 
 Status: pending policy and adapter-version confirmation. Dates are BSON UTC dates; JSON exposes ISO 8601. Domain documents use ObjectId internally and string IDs at the API boundary. Auth references use one canonical representation of the adapter's user ID; verify its actual mapping during integration rather than assuming it equals a domain ObjectId.
 

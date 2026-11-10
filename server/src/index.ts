@@ -1,27 +1,36 @@
 
-import "dotenv/config";
-import express from "express";
-import cors from "cors";
+import { createApp } from "./app.js";
+import { connectDB, closeDB } from "./config/db.js";
+import { env } from "./config/env.js";
+import { createAuth } from "./lib/auth.js";
 
-const app = express();
+async function startServer() {
+  try {
+    await connectDB();
 
-const PORT = Number(process.env.PORT) || 5000;
-const CLIENT_URL =
-  process.env.CLIENT_URL || "http://localhost:3000";
+    const auth = createAuth();
+    const app = createApp(auth);
 
-app.use(cors({ origin: CLIENT_URL }));
-app.use(express.json());
+    const server = app.listen(env.PORT, () => {
+      console.log(
+        `NGC Science Club API running on port ${env.PORT}`
+      );
+    });
 
-app.get("/api/health", (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "NGC Science Club API is running!",
-    timestamp: new Date().toISOString(),
-  });
-});
+    async function shutdown() {
+      server.close(async () => {
+        await closeDB();
+        process.exit(0);
+      });
+    }
 
-app.listen(PORT, () => {
-  console.log(
-    `NGC Science Club API running at http://localhost:${PORT}`
-  );
-});
+    process.on("SIGINT", shutdown);
+    process.on("SIGTERM", shutdown);
+  } catch (error) {
+    console.error("Server startup failed:", error);
+    await closeDB();
+    process.exit(1);
+  }
+}
+
+startServer();

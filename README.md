@@ -2,7 +2,15 @@
 
 A planned Science Club management platform for Narsingdi Government College, Bangladesh.
 
-Status: Phase 2, Milestone 01 foundation implemented. A bilingual Next.js homepage connects to a separate Express health endpoint. Database, authentication, membership workflows and quizzes follow in later milestones.
+Status: Milestones 01/02 completed; Milestone 03, Lesson 01 adds Better Auth server integration. The Next.js homepage still connects to Express health. Frontend authentication, RBAC, membership workflows and quizzes remain later lessons.
+
+Subsequently approved: the client auth helper, validation schemas, global Toaster and /signup page. See [signup page notes](docs/signup-page.md) for implementation details and ten passing mocked browser checks. Login, RBAC and membership workflows remain future tasks.
+
+## Better Auth server lesson
+
+See [Lesson 01 notes](docs/milestone-03-lesson-01.md) for configuration, index setup, test results and manual checks. The backend requires BETTER_AUTH_URL and a private BETTER_AUTH_SECRET in addition to MongoDB settings. Run `npm.cmd --prefix server run auth:secret` to generate a missing local secret without printing it; existing secrets are preserved. Do not overwrite your configured .env with an example.
+
+`npm.cmd --prefix server run test:auth` builds and tests email/password authentication using a temporary Atlas database and fictional accounts, then cleans it up. MongoDB access must permit that test database. Existing public endpoints are /api/health and /api/members/count; Better Auth runs under /api/auth.
 
 ## Planning documents
 
@@ -18,11 +26,15 @@ Use Node.js 24.x (verified: 24.19.0) and npm (verified: 12.2.1). Each app has it
 
 ```text
 client/src/app/          App Router pages, layout and styles
-client/src/components/  Bilingual foundation and API status UI
+client/src/components/  Earlier bilingual foundation components (not the active homepage)
 client/src/lib/         API request and translation dictionary
 client/tests/           Playwright smoke checks
 server/src/app.ts       Express routes and CORS
-server/src/config.ts    Validated environment configuration
+server/src/config/env.ts Validated environment configuration
+server/src/config/db.ts  Database placeholder for a later milestone
+server/src/middleware/   Not-found and centralized error handlers
+server/src/modules/members/ Member module placeholders
+server/src/utils/        Application error class
 server/src/index.ts     Listener and shutdown
 docs/                   Requirements, design and milestone notes
 AGENTS.md               Project and mentoring conventions
@@ -53,19 +65,20 @@ cd client
 npm.cmd run dev
 ```
 
-Open http://localhost:3000 and http://localhost:4000/api/health. Use localhost consistently; 127.0.0.1 is a different CORS origin. Stop each with Ctrl+C. Defaults work without environment files in this milestone.
+Open http://localhost:3000 and http://localhost:5000/api/health. Use localhost consistently; 127.0.0.1 is a different CORS origin. Stop each with Ctrl+C. Defaults work without environment files in this milestone.
 
 ## Environment variables
 
-| App    | Variable                 | Default / purpose                                               |
-| ------ | ------------------------ | --------------------------------------------------------------- |
-| Client | NEXT_PUBLIC_API_BASE_URL | http://localhost:4000; public API origin                        |
-| Server | PORT                     | 4000; integer from 1 to 65535                                   |
-| Server | CLIENT_ORIGIN            | http://localhost:3000; exact frontend origin, no trailing slash |
+| App    | Variable                 | Default / purpose                                                           |
+| ------ | ------------------------ | --------------------------------------------------------------------------- |
+| Client | API_URL                  | http://localhost:5000; server-side API origin, with public/default fallback |
+| Client | NEXT_PUBLIC_API_BASE_URL | http://localhost:5000; optional browser API origin                          |
+| Server | PORT                     | 5000; integer from 1 to 65535                                               |
+| Server | CLIENT_URL               | http://localhost:3000; exact frontend origin, no trailing slash             |
 
-Next.js loads .env.local. The backend loads .env through dotenv in config.ts. NEXT_PUBLIC values are visible in browser code: never put secrets there. Restart after config changes; rebuild production client for API URL changes.
+Next.js loads .env.local. The backend loads .env through dotenv in config/env.ts. NEXT_PUBLIC values are visible in browser code: never put secrets there. Restart after config changes; rebuild production client for API URL changes.
 
-The browser calls Express directly. CORS lets the configured frontend read the response; it is not authentication and does not block non-browser clients. Cookies are not used yet. Production cookie/origin integration must be reviewed before Better Auth.
+The active homepage calls Express from the Next.js server. API_URL takes priority there, then NEXT_PUBLIC_API_BASE_URL, then the localhost default. It validates the JSON response and streams the status inside Suspense; the static page shell builds without Express running. CORS is not required for this server-to-server call, but is configured and tested for future direct browser requests. CORS is not authentication. Cookies are not used yet. Production cookie/origin integration must be reviewed before Better Auth.
 
 ## Checks and production builds
 
@@ -94,7 +107,7 @@ npm.cmd --prefix client run start
 
 ## Browser checks
 
-Build both apps first. Playwright starts production servers if none are running, or reuses existing servers outside CI.
+Build both apps first. Playwright starts production servers if none are running, and refuses to reuse existing servers, so it always tests the built code.
 
 ```powershell
 cd client
@@ -112,21 +125,21 @@ npm.cmd run test:e2e
 Manual testing:
 
 1. Open the homepage and wait for the connected status.
-2. Switch to বাংলা and back; check mobile width and keyboard focus.
-3. Stop Express and select Check again. A readable failure appears within five seconds.
-4. Restart Express and select Check again; it recovers without a page reload.
-5. Inspect GET /api/health in browser Network tools: HTTP 200 and Access-Control-Allow-Origin: http://localhost:3000.
-6. Open http://localhost:4000/api/missing and confirm HTTP 404.
+2. Check the page at narrow/mobile widths.
+3. Stop Express and refresh the homepage. A readable failure appears within five seconds.
+4. Restart Express and refresh the homepage; it shows the live API message again.
+5. Inspect GET /api/health directly or run the automated CORS test. The homepage request runs on the Next.js server, so it does not appear as a browser-to-Express Network request.
+6. Open http://localhost:5000/api/missing and confirm HTTP 404.
 
 ```powershell
-Invoke-RestMethod http://localhost:4000/api/health
+Invoke-RestMethod http://localhost:5000/api/health
 ```
 
 ## Hosting and limits
 
-Vercel project root is client. Express is a separate service whose host is not yet selected. For deployment use its HTTPS URL in NEXT_PUBLIC_API_BASE_URL and the exact frontend origin in CLIENT_ORIGIN. No deployment has been performed. Production same-origin routing and session cookies remain future integration work.
+Vercel project root is client. Express is a separate service whose host is not yet selected. For deployment use its HTTPS URL in NEXT_PUBLIC_API_BASE_URL and the exact frontend origin in CLIENT_URL. No deployment has been performed. Production same-origin routing and session cookies remain future integration work.
 
-The health endpoint checks process availability, not database readiness. Translation currently covers the foundation page; persistent language selection and multilingual routing/content follow with later features.
+The health endpoint checks process availability, not database readiness. English/Bangla messages and the earlier foundation component remain available, but the active simplified homepage currently uses English. Full language support remains a confirmed requirement for subsequent UI milestones.
 
 Runtime-only audits reported zero vulnerabilities. Full audits reported 8 moderate client and 10 moderate server development-tooling findings. Client ESLint 9 is retained because bundled Next.js plugins do not yet accept ESLint 10; server uses ESLint 10. Review compatible upstream fixes before launch rather than running npm audit fix --force.
 

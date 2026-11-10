@@ -1,5 +1,7 @@
 # Requirements and decisions
 
+Milestone 03 Lesson 01 authorization: integrate Better Auth email/password on the Express server with the existing MongoDB client/database, validated auth settings, trusted origins, credentialed CORS and auth endpoint tests. Preserve health/member count. Exclude frontend auth pages, RBAC, admins and custom JWT. This lesson allows unverified development-account login; production email verification/recovery policies remain later work. See milestone-03-lesson-01.md.
+
 Status: Phase 1 planning complete; Phase 2 Milestone 01 approved. Research checked 2026-11-09. Unconfirmed policies remain proposals.
 
 ## Confirmed requirements

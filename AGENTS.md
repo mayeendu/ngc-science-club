@@ -25,8 +25,10 @@
 
 ## Decision status
 
-Phase 2, Milestone 01 (Project Foundation) is approved. Stop after implementation and verification; obtain approval before the next milestone. MongoDB and authentication are excluded from Milestone 01.
+Milestones 01 and 02 are complete per the user. Milestone 03, Lesson 01 (Better Auth server integration) is approved. Stop after server-only integration and verification; obtain approval before subsequent lessons. Frontend auth pages, RBAC, admin provisioning, and custom JWT authentication are excluded from this lesson.
+
+Subsequent explicit approvals cover the client auth helper, Zod auth schemas, global Toaster and the signup page. Implement and verify signup only; login pages, RBAC and admin provisioning still require their own approval.
 
 Confirmed: admin membership approval, full online science quizzes, Bangla and English, admin-only teacher creation, Next.js on Vercel, a separate Express server, MongoDB Atlas and Better Auth later, and one repository with independent client/server apps. Other defaults remain proposals. Record decisions in docs/requirements.md.
 
-Use Node 24.x and independent app lockfiles. Use npm.cmd/npx.cmd if PowerShell blocks .ps1 launchers. Local ports are 3000/4000. The foundation endpoint is GET /api/health; versioned business APIs remain planned. Never place secrets in NEXT_PUBLIC variables.
+Use Node 24.x and independent app lockfiles. Use npm.cmd/npx.cmd if PowerShell blocks .ps1 launchers. Local ports are 3000/5000. The foundation endpoint is GET /api/health; versioned business APIs remain planned. Never place secrets in NEXT_PUBLIC variables.
