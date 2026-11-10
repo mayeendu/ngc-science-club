@@ -1,5 +1,9 @@
 # NGC Science Club
 
+Milestone 05 Lessons 02–05 add approved-student quizzes, timed attempts, autosave, server scoring, released results/performance and teacher/admin reports. See [assessment guide](docs/quiz-assessments.md) for routes, policies, testing and MongoDB requirements. Earlier milestone notes below describe their original scope.
+
+Milestone 05 Lesson 01 adds teacher/admin quiz management at `/dashboard/teacher/quizzes`. See [quiz management notes](docs/quiz-management.md) for fields, permissions, state/version rules and checks.
+
 Milestone 04 Lesson 05 adds admin `/dashboard/admin/analytics` with backend-calculated membership KPIs and charts. See [analytics notes](docs/membership-analytics.md) for date/cohort definitions, privacy and checks.
 
 Milestone 04 Lesson 04 adds approved-student member profile management at `/dashboard/student/profile`. See [profile notes](docs/member-profile-management.md) for protected fields, synchronization and test commands.

@@ -2,6 +2,8 @@ import { createApp } from "./app.js";
 import { connectDB, closeDB } from "./config/db.js";
 import { env } from "./config/env.js";
 import { createAuth } from "./lib/auth.js";
+import { createAssessmentRepository } from "./modules/assessments/assessment.repository.js";
+import { startAssessmentWorker } from "./modules/assessments/assessment.worker.js";
 
 async function startServer() {
   try {
@@ -9,6 +11,7 @@ async function startServer() {
 
     const auth = createAuth();
     const app = createApp(auth);
+    const stopAssessments = startAssessmentWorker(createAssessmentRepository());
 
     const server = app.listen(env.PORT, () => {
       console.log(`NGC Science Club API running on port ${env.PORT}`);
@@ -16,6 +19,7 @@ async function startServer() {
 
     async function shutdown() {
       server.close(async () => {
+        await stopAssessments();
         await closeDB();
         process.exit(0);
       });

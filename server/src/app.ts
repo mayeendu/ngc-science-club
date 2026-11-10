@@ -2,6 +2,19 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { toNodeHandler } from "better-auth/node";
+import {
+  createAssessmentRepository,
+  type AssessmentRepository,
+} from "./modules/assessments/assessment.repository.js";
+import {
+  createStudentAssessmentRouter,
+  createStaffAssessmentRouter,
+} from "./modules/assessments/assessment.routes.js";
+import { createQuizRouter } from "./modules/quizzes/quiz.routes.js";
+import {
+  createQuizRepository,
+  type QuizRepository,
+} from "./modules/quizzes/quiz.repository.js";
 import type { Auth } from "./lib/auth.js";
 
 import { env } from "./config/env.js";
@@ -35,6 +48,8 @@ export function createApp(
     applicationRepository?: ApplicationRepository;
     memberRepository?: MemberRepository;
     analyticsRepository?: AnalyticsRepository;
+    quizRepository?: QuizRepository;
+    assessmentRepository?: AssessmentRepository;
   } = {},
 ) {
   const app = express();
@@ -78,7 +93,33 @@ export function createApp(
   // Register Better Auth BEFORE express.json()
   app.all("/api/auth/*splat", toNodeHandler(auth));
 
+  app.use(
+    "/api/manage/quizzes",
+    createQuizRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      options.quizRepository ?? createQuizRepository(),
+    ),
+  );
   app.use(express.json());
+  const assessments =
+    options.assessmentRepository ?? createAssessmentRepository();
+  app.use(
+    "/api/student/assessments",
+    createStudentAssessmentRouter(
+      authenticate,
+      requireRole("student"),
+      assessments,
+    ),
+  );
+  app.use(
+    "/api/manage/quiz-assessments",
+    createStaffAssessmentRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      assessments,
+    ),
+  );
 
   const profile: AuthHandler = (_req, res) => {
     const user = res.locals.user;

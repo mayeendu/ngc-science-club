@@ -1,5 +1,9 @@
 # Architecture proposal
 
+Milestone 05 assessment module reuses current Better Auth/fresh-role guards and MongoDB pool. Transactions serialize attempt start/save/submit, expiry and teacher close/release through a per-quiz write gate. MongoDB `$$NOW` supplies deadlines; immutable keys remain server-side. A 15-second worker settles abandoned attempts; request-time settlement independently enforces expiry. Next.js uses guarded student catalog/attempt/history and staff reports with existing Recharts. See [assessment architecture](quiz-assessments.md). No dependency additions or live database writes during verification.
+
+Milestone 05 Lesson 01 adds a modular management-only quiz schema/repository/service/router behind current auth/RBAC, with MongoDB ownership/version/state filters. Next.js uses the existing RoleGuard, RHF/Zod/shadcn plus a dynamic MCQ field array. Keys are never returned through student APIs. See [quiz architecture](quiz-management.md).
+
 Milestone 04 Lesson 05 adds a read-only analytics module behind existing admin/session middleware and a guarded Next.js chart dashboard. MongoDB facets calculate all statistics; client Recharts 3.10.1 only presents validated aggregate data, with accessible tables and empty/error states. See [analytics architecture](membership-analytics.md).
 
 Milestone 04 Lesson 04 extends the membership module for approved students' own-profile management, with existing session/RBAC/origin checks and four-field Zod allowlisting. Next.js reuses RoleGuard, React Hook Form and shadcn form controls. Public profiles read the same record but retain their smaller projection. See [profile architecture](member-profile-management.md).

@@ -25,6 +25,10 @@
 
 ## Decision status
 
+Current authorization: finish Milestone 05 Lessons 02–05 only: approved-student quizzes, one transactional attempt per quiz/account, database-timed autosave/submission/scoring, close-then-manual result release, own history/performance and owned teacher/admin reports. Freeze content after first attempt; never expose keys/scores before authorized release. Use isolated tests; no real roles/attempt data changes or Milestone 06. Earlier scope notes are historical.
+
+Current authorization: Milestone 05 Lesson 01 implements teacher/admin-owned quiz CRUD and draft/published transitions only. Teachers manage own quizzes; admins manage all. Compute total marks server-side, protect keys behind management APIs, require versioned updates, unpublish before edit/archive, and never build taking/results. Test only fictional memory fixtures; no real records, roles or migrations. Earlier scope notes are historical.
+
 Current authorization: Milestone 04 Lesson 05 adds read-only admin membership analytics and charts only. Aggregate on the backend, validate bounded UTC dates, exclude student identifiers and personal details, reuse fresh admin RBAC. KPI cohorts use submission dates; membership growth/distribution use approval dates. No real writes, role changes, migrations or next milestone. Earlier scope notes are historical.
 
 Current authorization: Milestone 04 Lesson 04 adds approved-student own-profile GET/PATCH and /dashboard/student/profile. Only member fullName, phone, department and academicYear are editable. Use session ID plus approved-state filtering; never change roles, student ID, approval/reviewer metadata. Keep phone private and public member projections unchanged. Completion measures four saved editable fields. No auth account name synchronization, migrations, real test writes or later lessons. Earlier scope notes are historical.

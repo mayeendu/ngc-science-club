@@ -1,5 +1,9 @@
 # Milestone roadmap
 
+Current approved scope: finish Milestone 05 Lessons 02–05, preserving Lesson 01. Student taking/autosave, authoritative scoring/expiry, explicit release, own history/performance and staff analytics are implemented. Verify isolated backend/browser regressions and both production builds; stop before Milestone 06. See [assessment walkthrough](quiz-assessments.md). Earlier scope notes below are historical.
+
+Latest approved scope: Milestone 05 Lesson 01 quiz creation/management only. Stop before quiz-taking or results. Attempt-aware immutability/versioning must be reviewed before those later features. See [quiz lesson](quiz-management.md).
+
 Latest approved scope: Milestone 04 Lesson 05 membership dashboard analytics/statistics. Stop before the next milestone. See [analytics lesson](membership-analytics.md).
 
 Latest approved scope: Milestone 04 Lesson 04 approved-student member profile editing and completion. Stop before subsequent lessons. See [profile implementation](member-profile-management.md).

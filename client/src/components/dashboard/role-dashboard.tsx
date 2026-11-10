@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MembershipApplication } from "@/components/membership/membership-application";
 
 const features: Record<AppRole, readonly string[]> = {
-  student: ["Science quizzes", "My results"],
-  teacher: ["Teaching activities", "Quiz preparation", "Student progress"],
+  student: [],
+  teacher: ["Teaching activities", "Student progress"],
   admin: ["Club administration", "Member applications", "Club reports"],
 };
 const icons = [Users, FlaskConical, BookOpen];
@@ -74,9 +74,33 @@ function DashboardContent({ role }: { role: AppRole }) {
             Membership analytics
           </Link>
         )}
+        {(role === "teacher" || role === "admin") && (
+          <Link
+            href="/dashboard/teacher/quizzes"
+            className="inline-block font-medium text-blue-700 underline"
+          >
+            Manage science quizzes
+          </Link>
+        )}
+        {role === "student" && accountRole === "student" && (
+          <div className="flex flex-wrap gap-5">
+            <Link
+              href="/dashboard/student/quizzes"
+              className="text-blue-700 underline"
+            >
+              Science quizzes
+            </Link>
+            <Link
+              href="/dashboard/student/results"
+              className="text-blue-700 underline"
+            >
+              My results and performance
+            </Link>
+          </div>
+        )}
         <section
           aria-label="Upcoming features"
-          className={`grid gap-5 ${role === "student" ? "md:grid-cols-2" : "md:grid-cols-3"}`}
+          className={`grid gap-5 ${role === "admin" ? "md:grid-cols-3" : "md:grid-cols-2"}`}
         >
           {features[role].map((title, index) => {
             const Icon = icons[index];

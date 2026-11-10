@@ -1,5 +1,9 @@
 # Requirements and decisions
 
+Milestone 05 Lessons 02–05 approved: complete quiz assessment system only. Implemented policy: one attempt per quiz/account, approved students only; server/database deadlines; persisted answers determine expired submissions; content locks on first attempt. Owner teacher/admin closes a quiz permanently before explicitly releasing scores/keys/explanations to its participants. Retakes, reopening, result reversal and Milestone 06 are excluded. These operational defaults should be reviewed with the college before real assessments. See [assessment decisions and limits](quiz-assessments.md). Older scope notes are historical.
+
+Milestone 05 Lesson 01 approved: teacher/admin quiz CRUD with four-option single-correct MCQs, draft/published transitions, dynamic editor, confirmation and notifications. Teachers manage own quizzes; admins manage all. Server computes total marks. Unpublish before editing/archiving; version checks prevent stale updates. Taking/results and later lessons are excluded. See [quiz decisions](quiz-management.md).
+
 Milestone 04 Lesson 05 approved: admin-only membership analytics, five KPIs, monthly/department charts, date filters, anonymous recent activity and previous-period trends. KPIs use submission-date cohorts; membership charts use approval dates. Calculations stay on the backend, and no student identifiers/details enter analytics responses. See [metric definitions](membership-analytics.md). Stop before the next milestone.
 
 Milestone 04 Lesson 04 approved: approved-student own-profile page and GET/PATCH, editing fullName/phone/department/academicYear only. Student ID, role, approval and review metadata remain protected. Completion measures four saved fields; auth account name stays separate. No later lessons. See [profile management](member-profile-management.md).

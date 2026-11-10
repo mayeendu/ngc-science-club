@@ -1,5 +1,9 @@
 # REST API proposal
 
+Milestone 05 adds student GET `/api/student/assessments/quizzes`, GET `/quizzes/:id`, POST `/quizzes/:id/start`, PUT `/quizzes/:id/answers`, POST `/quizzes/:id/submit`, GET `/results` and GET `/performance`, all under `/api/student/assessments`. Staff GET `/api/manage/quiz-assessments/:id` and POST `/:id/close` / `/:id/release` enforce teacher ownership or admin access. All require sessions and current roles; student access additionally requires approved membership. Mutations require trusted Origin and strict allowlisted bodies. See [full assessment API contract](quiz-assessments.md). Earlier management-only scope notes are historical.
+
+Milestone 05 Lesson 01 implements staff-only `/api/manage/quizzes`: list/detail/create, draft content PATCH, status PATCH, and versioned DELETE/archive. Ownership and expected status/version constrain writes. No public/student quiz or answer-key route exists. See [quiz API contract](quiz-management.md).
+
 Milestone 04 Lesson 05 adds admin-only GET `/api/admin/membership-analytics` with paired ISO from/to dates, inclusive UTC days and a 731-day maximum. Returns backend-calculated KPIs, monthly counts, department counts, anonymous recent statuses/dates and equal-period trends. No private student fields or new mutations. See [analytics contract](membership-analytics.md).
 
 Milestone 04 Lesson 04 adds GET/PATCH `/api/membership-applications/me/profile` for current students with approved membership. Identity comes only from the session. PATCH accepts four editable fields, requires trusted Origin and rejects protected/unknown fields; approved-state filtering applies inside the write. See [own-profile contract](member-profile-management.md).

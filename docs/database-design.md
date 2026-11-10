@@ -1,5 +1,9 @@
 # Database design proposal
 
+Milestone 05 adds `quizAttempts`: unique natural `_id = quizId:userId`, quizId/userId, private studentName snapshot, title/subject snapshot, status, nullable selected answers, revision, totalMarks, server startedAt/deadlineAt/submittedAt and server score/percentage/reason. No passwords/session tokens or duplicated keys. `quizzes` gains optional per-question explanation, hasAttempts, closedAt/resultsReleasedAt and internal assessmentNow/assessmentTick. Quiz content freezes permanently on first attempt, preserving grading integrity. Transactions require a replica set; staff rankings use `$setWindowFields` in transactions (MongoDB 5.3+). Recommended indexes and isolated-test limits are documented in [assessment storage](quiz-assessments.md); no migration/index command was executed.
+
+Milestone 05 Lesson 01 adds quizzes with server creator, metadata, four-option MCQs, correctOption, per-question marks, calculated totalMarks/questionCount, draft/published status, version and timestamps. Draft-only archive sets deletedAt. No attempts/results or startup indexes are added. See [quiz schema/state rules](quiz-management.md).
+
 Milestone 04 Lesson 05 reads membershipApplications through one projected/faceted aggregation bounded by submission/approval dates. KPI status is current; growth uses reviewedAt; department labels reflect current approved profiles. No new collection, index, schema write or audit history is introduced. See [analytics data semantics](membership-analytics.md).
 
 Milestone 04 Lesson 04 edits the same membershipApplications document using session _id plus approved-state filters. Only fullName, phone, department, academicYear and server profileUpdatedAt change. Review metadata, joining date, student ID and auth roles stay unchanged. No migration/index write is introduced. Public DTO projections remain unchanged. See [profile data rules](member-profile-management.md).

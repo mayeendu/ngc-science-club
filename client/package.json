@@ -17,7 +17,9 @@
     "test:signup": "playwright test --config playwright.signup.config.ts",
     "test:dashboard": "playwright test --config playwright.rbac.config.ts",
     "test:members": "playwright test --config playwright.members.config.ts",
-    "test:analytics": "playwright test --config playwright.analytics.config.ts"
+    "test:analytics": "playwright test --config playwright.analytics.config.ts",
+    "test:quizzes": "playwright test --config playwright.quizzes.config.ts",
+    "test:assessments": "playwright test --config playwright.assessments.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
