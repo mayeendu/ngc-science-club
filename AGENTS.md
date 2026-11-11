@@ -25,6 +25,10 @@
 
 ## Decision status
 
+Latest user instruction supersedes historical scope notes below: Milestones 01–06 are complete. Implement and verify Milestone 07 performance/analytics first, then work sequentially through the user-provided Milestones 08–18. Reuse existing architecture and isolated fictional tests; preserve real data and prior functionality. No live deployment, production infrastructure changes or launch without explicit approval. See docs/performance-analytics.md and docs/development-roadmap.md for current progress.
+
+Current authorization: Milestone 06 events/activities only: public published/cancelled events, staff-owned CRUD, approved-student registration/cancellation, own events, attendance and scoped statistics. Use transactional capacity counters and natural unique registration IDs, strict validation and private participant projections. No real test writes, role changes, deployment changes or Milestone 07. Earlier scope notes are historical.
+
 Current authorization: finish Milestone 05 Lessons 02–05 only: approved-student quizzes, one transactional attempt per quiz/account, database-timed autosave/submission/scoring, close-then-manual result release, own history/performance and owned teacher/admin reports. Freeze content after first attempt; never expose keys/scores before authorized release. Use isolated tests; no real roles/attempt data changes or Milestone 06. Earlier scope notes are historical.
 
 Current authorization: Milestone 05 Lesson 01 implements teacher/admin-owned quiz CRUD and draft/published transitions only. Teachers manage own quizzes; admins manage all. Compute total marks server-side, protect keys behind management APIs, require versioned updates, unpublish before edit/archive, and never build taking/results. Test only fictional memory fixtures; no real records, roles or migrations. Earlier scope notes are historical.

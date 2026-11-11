@@ -1,5 +1,11 @@
 # Architecture proposal
 
+## Milestone 07 analytics addition
+
+Read-only `performance` Express module reuses session/fresh-role middleware and approved student membership checks. One ownership/release-scoped MongoDB aggregation feeds all chart/table facets. A shared client component and Zod response parser serve guarded student/teacher pages with Recharts and accessible data tables. Existing assessment and event modules remain authoritative for participation/history. See [performance analytics](performance-analytics.md).
+
+Milestone 06 adds `modules/events` (strict schemas, repository and routers) using the existing Better Auth/fresh-role guards, MongoClient and injectable test pattern. Event registration, cancellation, attendance and staff changes share a transactional per-event write gate; capacity changes and registration storage commit together. Public and participant DTOs use explicit projections. Next.js adds event cards/details, staff forms/tables/statistics and student participation using existing shadcn/RHF/Zod/toasts. Images load directly from HTTPS URLs with Next Image optimization disabled, so Express/Next do not fetch arbitrary images server-side. See [event architecture](events.md).
+
 Milestone 05 assessment module reuses current Better Auth/fresh-role guards and MongoDB pool. Transactions serialize attempt start/save/submit, expiry and teacher close/release through a per-quiz write gate. MongoDB `$$NOW` supplies deadlines; immutable keys remain server-side. A 15-second worker settles abandoned attempts; request-time settlement independently enforces expiry. Next.js uses guarded student catalog/attempt/history and staff reports with existing Recharts. See [assessment architecture](quiz-assessments.md). No dependency additions or live database writes during verification.
 
 Milestone 05 Lesson 01 adds a modular management-only quiz schema/repository/service/router behind current auth/RBAC, with MongoDB ownership/version/state filters. Next.js uses the existing RoleGuard, RHF/Zod/shadcn plus a dynamic MCQ field array. Keys are never returned through student APIs. See [quiz architecture](quiz-management.md).

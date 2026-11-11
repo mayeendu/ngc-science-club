@@ -9,7 +9,7 @@ import { MembershipApplication } from "@/components/membership/membership-applic
 
 const features: Record<AppRole, readonly string[]> = {
   student: [],
-  teacher: ["Teaching activities", "Student progress"],
+  teacher: ["Teaching activities"],
   admin: ["Club administration", "Member applications", "Club reports"],
 };
 const icons = [Users, FlaskConical, BookOpen];
@@ -76,6 +76,26 @@ function DashboardContent({ role }: { role: AppRole }) {
         )}
         {(role === "teacher" || role === "admin") && (
           <Link
+            href="/dashboard/teacher/analytics"
+            className="inline-block font-medium text-blue-700 underline"
+          >
+            Student performance analytics
+          </Link>
+        )}
+        {(role === "teacher" || role === "admin") && (
+          <Link
+            href={
+              role === "admin"
+                ? "/dashboard/admin/events"
+                : "/dashboard/teacher/events"
+            }
+            className="inline-block font-medium text-blue-700 underline"
+          >
+            Manage events and activities
+          </Link>
+        )}
+        {(role === "teacher" || role === "admin") && (
+          <Link
             href="/dashboard/teacher/quizzes"
             className="inline-block font-medium text-blue-700 underline"
           >
@@ -84,6 +104,18 @@ function DashboardContent({ role }: { role: AppRole }) {
         )}
         {role === "student" && accountRole === "student" && (
           <div className="flex flex-wrap gap-5">
+            <Link
+              href="/dashboard/student/performance"
+              className="text-blue-700 underline"
+            >
+              My performance analytics
+            </Link>
+            <Link
+              href="/dashboard/student/events"
+              className="text-blue-700 underline"
+            >
+              My events
+            </Link>
             <Link
               href="/dashboard/student/quizzes"
               className="text-blue-700 underline"

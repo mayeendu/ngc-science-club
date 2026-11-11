@@ -1,5 +1,11 @@
 # Database design proposal
 
+## Milestone 07 reporting
+
+No schema or index migration. Aggregate existing `quizAttempts` joined to `quizzes`, requiring submitted attempts, published/unarchived quizzes, closed state and released results. Student identity and teacher ownership come from the session. Project private fields away before responding; no answers or keys enter the analytics payload. Proposed indexes and validation limits are documented in [performance analytics](performance-analytics.md); none are applied automatically.
+
+Milestone 06: `events` stores ObjectId, createdBy, title/description/category, startsAt UTC Date, venue, capacity, image URL, draft/published/cancelled status, version, registeredCount, timestamps and optional deletedAt/internal gate clock. `eventRegistrations` stores unique `_id = eventId:userId`, eventId/userId, private member-name snapshot, registered/cancelled status, unmarked/present/absent attendance, revision, registration/cancellation dates and trusted attendance reviewer/date. Transactions preserve capacity count consistency; MongoDB's built-in unique `_id` prevents duplicates. No migration/index writes were executed. See [storage and recommended indexes](events.md).
+
 Milestone 05 adds `quizAttempts`: unique natural `_id = quizId:userId`, quizId/userId, private studentName snapshot, title/subject snapshot, status, nullable selected answers, revision, totalMarks, server startedAt/deadlineAt/submittedAt and server score/percentage/reason. No passwords/session tokens or duplicated keys. `quizzes` gains optional per-question explanation, hasAttempts, closedAt/resultsReleasedAt and internal assessmentNow/assessmentTick. Quiz content freezes permanently on first attempt, preserving grading integrity. Transactions require a replica set; staff rankings use `$setWindowFields` in transactions (MongoDB 5.3+). Recommended indexes and isolated-test limits are documented in [assessment storage](quiz-assessments.md); no migration/index command was executed.
 
 Milestone 05 Lesson 01 adds quizzes with server creator, metadata, four-option MCQs, correctOption, per-question marks, calculated totalMarks/questionCount, draft/published status, version and timestamps. Draft-only archive sets deletedAt. No attempts/results or startup indexes are added. See [quiz schema/state rules](quiz-management.md).

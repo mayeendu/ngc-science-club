@@ -1,5 +1,11 @@
 # Requirements and decisions
 
+## Milestone 07 scope update
+
+The user confirms Milestones 01–06 complete and requests sequential Milestones 07–18. Milestone 07 adds own released student scores/progress/history and teacher-owned cross-quiz comparisons/rankings with date/subject filters. Admins can inspect all released quiz data. Retain private event participation history and existing per-quiz reports. No public leaderboard; no unreleased score disclosure. See [performance analytics](performance-analytics.md) for definitions and limitations.
+
+Milestone 06 approved: events and activities management only; stop before Milestone 07. Implemented defaults: categories activity/workshop/seminar/competition/achievement; HTTPS image URL (no uploads); Asia/Dhaka date/time entry stored as UTC; capacity 1–1000; approved current students register/cancel before start; teacher-owner/admin attendance after start. Content edits/archives require empty drafts; unpublish requires no active registrations and future start; only upcoming published events may be permanently cancelled. Achievements may be historical and do not accept registrations. Cancelled events retain their participant history. These operational defaults need college review before real use. See [event policies](events.md). Earlier scope notes are historical.
+
 Milestone 05 Lessons 02–05 approved: complete quiz assessment system only. Implemented policy: one attempt per quiz/account, approved students only; server/database deadlines; persisted answers determine expired submissions; content locks on first attempt. Owner teacher/admin closes a quiz permanently before explicitly releasing scores/keys/explanations to its participants. Retakes, reopening, result reversal and Milestone 06 are excluded. These operational defaults should be reviewed with the college before real assessments. See [assessment decisions and limits](quiz-assessments.md). Older scope notes are historical.
 
 Milestone 05 Lesson 01 approved: teacher/admin quiz CRUD with four-option single-correct MCQs, draft/published transitions, dynamic editor, confirmation and notifications. Teachers manage own quizzes; admins manage all. Server computes total marks. Unpublish before editing/archiving; version checks prevent stale updates. Taking/results and later lessons are excluded. See [quiz decisions](quiz-management.md).

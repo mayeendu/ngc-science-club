@@ -1,5 +1,11 @@
 # Milestone roadmap
 
+Latest instruction (supersedes historical scope notes below): Milestones 01–06 are complete per the user. Implement and verify Milestone 07 student performance/analytics first; then proceed sequentially through 08 faculty mentors, 09 feedback, 10 notifications, 11 bilingual support, 12 resources, 13 achievements/gallery/certificates, 14 admin reporting, 15 accessibility/UI, 16 security/performance/tests, 17 deployment preparation, and 18 launch preparation. Never deploy, modify production infrastructure or launch without explicit approval. Milestone 07 implementation and verification details: [performance analytics](performance-analytics.md).
+
+Current checkpoint: Milestone 07 complete. Both apps pass typecheck/lint/build; 6 performance API/pipeline tests, 42 existing quiz/assessment/event regressions and 8 desktop/mobile browser checks pass. Milestones 08–18 remain to implement. No live data, roles, indexes or deployment settings changed. Continue with Milestone 08 using the checkpoint in the performance guide.
+
+Latest approved scope: Milestone 06 is events/activities (superseding earlier suggested next-step names). Implement public events, staff CRUD, approved-member registration, own participation, attendance and scoped statistics, then verify isolated concurrency/security/browser regressions and both builds. Stop before Milestone 07. See [event milestone](events.md).
+
 Current approved scope: finish Milestone 05 Lessons 02–05, preserving Lesson 01. Student taking/autosave, authoritative scoring/expiry, explicit release, own history/performance and staff analytics are implemented. Verify isolated backend/browser regressions and both production builds; stop before Milestone 06. See [assessment walkthrough](quiz-assessments.md). Earlier scope notes below are historical.
 
 Latest approved scope: Milestone 05 Lesson 01 quiz creation/management only. Stop before quiz-taking or results. Attempt-aware immutability/versioning must be reviewed before those later features. See [quiz lesson](quiz-management.md).

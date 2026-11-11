@@ -64,6 +64,9 @@ export function Navbar() {
           <Link href="/members" className="text-sm">
             Members
           </Link>
+          <Link href="/events" className="text-sm">
+            Events
+          </Link>
 
           {isPending ? (
             <span role="status">

@@ -1,7 +1,21 @@
 import express from "express";
+import {
+  createPerformanceRepository,
+  type PerformanceRepository,
+} from "./modules/performance/performance.repository.js";
+import { createPerformanceRouter } from "./modules/performance/performance.routes.js";
 import cors from "cors";
 import helmet from "helmet";
 import { toNodeHandler } from "better-auth/node";
+import {
+  createEventRepository,
+  type EventRepository,
+} from "./modules/events/event.repository.js";
+import {
+  createPublicEventRouter,
+  createStudentEventRouter,
+  createStaffEventRouter,
+} from "./modules/events/event.routes.js";
 import {
   createAssessmentRepository,
   type AssessmentRepository,
@@ -50,6 +64,8 @@ export function createApp(
     analyticsRepository?: AnalyticsRepository;
     quizRepository?: QuizRepository;
     assessmentRepository?: AssessmentRepository;
+    eventRepository?: EventRepository;
+    performanceRepository?: PerformanceRepository;
   } = {},
 ) {
   const app = express();
@@ -102,6 +118,34 @@ export function createApp(
     ),
   );
   app.use(express.json());
+  const performance =
+    options.performanceRepository ?? createPerformanceRepository();
+  app.use(
+    "/api/student/performance",
+    createPerformanceRouter(authenticate, requireRole("student"), performance),
+  );
+  app.use(
+    "/api/manage/performance",
+    createPerformanceRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      performance,
+    ),
+  );
+  const events = options.eventRepository ?? createEventRepository();
+  app.use("/api/events", createPublicEventRouter(events));
+  app.use(
+    "/api/student/events",
+    createStudentEventRouter(authenticate, requireRole("student"), events),
+  );
+  app.use(
+    "/api/manage/events",
+    createStaffEventRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      events,
+    ),
+  );
   const assessments =
     options.assessmentRepository ?? createAssessmentRepository();
   app.use(

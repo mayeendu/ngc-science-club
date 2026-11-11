@@ -26,7 +26,9 @@
     "test:members": "node --import tsx --test --test-concurrency=1 tests/member-directory.test.mjs",
     "test:analytics": "node --import tsx --test --test-concurrency=1 tests/membership-analytics.test.mjs",
     "test:quizzes": "node --import tsx --test --test-concurrency=1 tests/quizzes.test.mjs",
-    "test:assessments": "node --import tsx --test --test-concurrency=1 tests/assessments.test.mjs"
+    "test:assessments": "node --import tsx --test --test-concurrency=1 tests/assessments.test.mjs",
+    "test:events": "node --import tsx --test --test-concurrency=1 tests/events.test.mjs",
+    "test:performance": "node --import tsx --test --test-concurrency=1 tests/performance.test.mjs"
   },
   "dependencies": {
     "@better-auth/mongo-adapter": "1.7.18",

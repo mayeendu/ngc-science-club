@@ -1,5 +1,11 @@
 # REST API proposal
 
+## Milestone 07 analytics APIs
+
+`GET /api/student/performance` (approved student, own records) and `GET /api/manage/performance` (teacher-owned quizzes/admin all) accept paired UTC `from`/`to`, exact `subject`, and bounded `page`. Return released-attempt count, average/best percentages, monthly progress, paginated quiz comparisons, own score history or staff rankings, and separate pagination flags. Strict query allowlist, fresh roles and no-store responses are required. See [complete semantics](performance-analytics.md).
+
+Milestone 06: public GET `/api/events` and `/:id`; approved-student GET `/api/student/events`, GET `/:id`, POST `/:id/register` and `/:id/cancel`; teacher/admin `/api/manage/events` CRUD, GET `/stats`, GET `/:id/participants`, PATCH `/:id/status` and `/:id/attendance`. Ownership is enforced on the backend, identity is session-derived, mutation Origin is checked, and protected fields are rejected. Public data never includes participant names/auth IDs. See [full event contract](events.md).
+
 Milestone 05 adds student GET `/api/student/assessments/quizzes`, GET `/quizzes/:id`, POST `/quizzes/:id/start`, PUT `/quizzes/:id/answers`, POST `/quizzes/:id/submit`, GET `/results` and GET `/performance`, all under `/api/student/assessments`. Staff GET `/api/manage/quiz-assessments/:id` and POST `/:id/close` / `/:id/release` enforce teacher ownership or admin access. All require sessions and current roles; student access additionally requires approved membership. Mutations require trusted Origin and strict allowlisted bodies. See [full assessment API contract](quiz-assessments.md). Earlier management-only scope notes are historical.
 
 Milestone 05 Lesson 01 implements staff-only `/api/manage/quizzes`: list/detail/create, draft content PATCH, status PATCH, and versioned DELETE/archive. Ownership and expected status/version constrain writes. No public/student quiz or answer-key route exists. See [quiz API contract](quiz-management.md).

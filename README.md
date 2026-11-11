@@ -1,5 +1,11 @@
 # NGC Science Club
 
+## Milestone 07
+
+Student/teacher performance analytics: [behavior, APIs, verification and manual review](docs/performance-analytics.md).
+
+Milestone 06 adds public `/events`, activities/achievements, approved-member registration and My Events, staff-owned event CRUD, attendance and admin statistics. See [event management guide](docs/events.md) for routes, policies, files, test commands and MongoDB requirements.
+
 Milestone 05 Lessons 02–05 add approved-student quizzes, timed attempts, autosave, server scoring, released results/performance and teacher/admin reports. See [assessment guide](docs/quiz-assessments.md) for routes, policies, testing and MongoDB requirements. Earlier milestone notes below describe their original scope.
 
 Milestone 05 Lesson 01 adds teacher/admin quiz management at `/dashboard/teacher/quizzes`. See [quiz management notes](docs/quiz-management.md) for fields, permissions, state/version rules and checks.
