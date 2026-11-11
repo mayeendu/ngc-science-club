@@ -50,3 +50,27 @@ Start each application using its existing `npm.cmd run dev` command. Sign in as 
 The key concepts are server-owned identity, separate role/membership states, matching client/server validation, private response projections, and database-enforced concurrency safety. No admin approval, membership editing, resubmission, or later lesson is implemented.
 
 Verification: both apps passed typecheck, lint and production build. All 8 isolated membership API tests and 34 RBAC regression tests passed. The browser suite initially passed 65/66 cases; the mobile submission assertion matched a hidden cached page as well as the visible page. After scoping it to the visible main landmark, both desktop/mobile submission flows passed on a targeted rerun (2/2). No product-code change was required for that test failure. Live read-only checks returned health 200 and unauthenticated membership status 401. No real applications or role changes were made during verification.
+
+
+## Reference membership form update (2026-11-11)
+
+The application at /membership/apply follows the supplied printed reference: teal header and section/admission bands, club logo, pale yellow inputs, two columns on larger screens and one column on phones. Native radio groups allow exactly one section, optional subject, residence and admission goal.
+
+New details: SSC GPA (0-5, up to two decimals), SSC registration (6-20 digits), Science 1/2/3, guardian mobile, WhatsApp mobile, guide teacher, Math/Biology, College Hostel/Others, Medical/Engineering/University and typed signature. Class Roll maps to studentId; Session maps to academicYear. The form supplies Science as department and a standard application reason for compatibility. The server records the submission date; users cannot forge it. The signature is a typed name, not an uploaded or drawn signature.
+
+New details are stored on the application and explicitly projected only for admin review. Public member responses and own status summaries do not expose these details. Existing applications remain readable without a migration; absent details display as unavailable. The API still accepts the original six-field contract for compatibility, but any supplied new field requires the complete new field set. The current client requires every reference field. Approval, duplicate-submission protection and four-field profile editing remain unchanged.
+
+Affected areas: client membership component, validation, application page, admin review and Bangla dictionary; server application schema, validation service and private admin projection. No dependencies, live database writes, indexes, roles or deployment changes.
+
+Manual check: sign in as a fictional student without an application; open /membership/apply; check mobile and desktop layout, empty/invalid inputs, one choice per group and submission. Confirm pending status and duplicate prevention. As admin, check private new details in review and verify an older application still loads.
+
+Validation: both apps pass typecheck, lint and production build. All 179 database-disabled backend tests pass, including reference-form persistence/privacy and invalid/partial/forged-field cases. Eight targeted Playwright checks passed on desktop and mobile, including complete reference-form submission and access restrictions. Translation coverage check passes (693 statically discovered UI keys; dynamic reference field labels/options are also translated). No Atlas integration tests ran.
+
+Browser runner limitation: all eight cases reported success, but the Playwright command remained open during teardown without a final summary. It was interrupted after the completed cases; the runner did not exit cleanly.
+
+
+## Membership UI refinement (2026-11-11)
+
+The membership component now uses the existing theme colors and brand hero, a rounded card, consistent 48px inputs, selectable option cards, and three numbered sections: student details, contact details, and preferences/signature. The submit footer explains the automatic date and typed signature. Mobile choices stack; desktop choices share rows. Focus, error, loading, disabled and selected states use the same visual language. English/Bangla section labels are included. Changes are local Tailwind utilities in the component; global CSS and server behavior are unchanged.
+
+UI validation: client typecheck, lint, production build, translation coverage and both translation unit tests pass. Existing complete membership submission checks report success on desktop and mobile (6.0s/6.1s). Playwright again remained open after successful cases during teardown and was interrupted. No backend or live data changes were made for this visual refinement.

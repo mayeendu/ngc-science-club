@@ -73,6 +73,28 @@ function adminDetails(record: ApplicationDocument): AdminApplication {
     academicYear: record.academicYear,
     phone: record.phone,
     reason: record.reason,
+    ...(record.sscGpa !== undefined ? { sscGpa: record.sscGpa } : {}),
+    ...(record.sscRegistration !== undefined
+      ? { sscRegistration: record.sscRegistration }
+      : {}),
+    ...(record.section !== undefined ? { section: record.section } : {}),
+    ...(record.guardianPhone !== undefined
+      ? { guardianPhone: record.guardianPhone }
+      : {}),
+    ...(record.whatsappPhone !== undefined
+      ? { whatsappPhone: record.whatsappPhone }
+      : {}),
+    ...(record.guideTeacher !== undefined
+      ? { guideTeacher: record.guideTeacher }
+      : {}),
+    ...(record.optionalSubject !== undefined
+      ? { optionalSubject: record.optionalSubject }
+      : {}),
+    ...(record.residence !== undefined ? { residence: record.residence } : {}),
+    ...(record.admissionGoal !== undefined
+      ? { admissionGoal: record.admissionGoal }
+      : {}),
+    ...(record.signature !== undefined ? { signature: record.signature } : {}),
     ...summary(record),
   };
 }
@@ -161,6 +183,16 @@ export function createApplicationRepository(
               academicYear: 1,
               phone: 1,
               reason: 1,
+              sscGpa: 1,
+              sscRegistration: 1,
+              section: 1,
+              guardianPhone: 1,
+              whatsappPhone: 1,
+              guideTeacher: 1,
+              optionalSubject: 1,
+              residence: 1,
+              admissionGoal: 1,
+              signature: 1,
               status: 1,
               submittedAt: 1,
               reviewedAt: 1,

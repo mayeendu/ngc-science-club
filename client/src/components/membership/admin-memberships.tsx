@@ -185,10 +185,41 @@ export function AdminMemberships() {
                 <CardContent className="space-y-4">
                   <dl className="grid gap-3 text-sm sm:grid-cols-2">
                     {[
-                      ["Student ID", application.studentId],
+                      ["Class Roll", application.studentId],
                       ["Department", application.department],
-                      ["Academic year", application.academicYear],
-                      ["Phone", application.phone],
+                      ["Session", application.academicYear],
+                      ["Mobile No.", application.phone],
+                      ["SSC GPA", application.sscGpa ?? "Unavailable"],
+                      [
+                        "SSC Reg No.",
+                        application.sscRegistration ?? "Unavailable",
+                      ],
+                      ["Section", application.section ?? "Unavailable"],
+                      [
+                        "Father's / Mother's Mobile No.",
+                        application.guardianPhone ?? "Unavailable",
+                      ],
+                      [
+                        "WhatsApp No.",
+                        application.whatsappPhone ?? "Unavailable",
+                      ],
+                      [
+                        "Guide Teacher's Name",
+                        application.guideTeacher ?? "Unavailable",
+                      ],
+                      [
+                        "Optional Subject",
+                        application.optionalSubject ?? "Unavailable",
+                      ],
+                      [
+                        "Student's Residence",
+                        application.residence ?? "Unavailable",
+                      ],
+                      [
+                        "Admission Goal",
+                        application.admissionGoal ?? "Unavailable",
+                      ],
+                      ["Signature", application.signature ?? "Unavailable"],
                       [
                         "Submitted",
                         new Date(application.submittedAt).toLocaleString(

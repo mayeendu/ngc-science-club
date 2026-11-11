@@ -128,7 +128,7 @@ export function StudentResults() {
                       <Line
                         dataKey="percentage"
                         name={t("Percentage")}
-                        stroke="#0f766e"
+                        stroke="var(--chart-2)"
                         strokeWidth={2}
                         isAnimationActive={false}
                       />

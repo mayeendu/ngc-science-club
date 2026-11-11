@@ -41,6 +41,28 @@ async function mockAuth(page: Page, fixture: Fixture) {
     "access-control-allow-origin": new URL(page.url()).origin,
     "access-control-allow-credentials": "true",
   });
+  await page.route("**/api/*/performance?**", (route) =>
+    route.fulfill({
+      status: 200,
+      headers: headers(),
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        range: { from: "2026-01-01", to: "2026-12-31" },
+        completed: 0,
+        averagePercentage: 0,
+        bestPercentage: 0,
+        page: 1,
+        quizzesHasNext: false,
+        historyHasNext: false,
+        rankingsHasNext: false,
+        quizzes: [],
+        timeline: [],
+        history: [],
+        rankings: [],
+      }),
+    }),
+  );
   await page.route("**/api/admin/memberships**", (route) => {
     const url = new URL(route.request().url());
     const respond = (status: number, body: unknown) =>
@@ -275,7 +297,7 @@ for (const account of roles) {
       page.getByRole("heading", { name: "Welcome, Fictional Learner!" }),
     ).toBeVisible();
     await expect(page.getByText("Coming later", { exact: true })).toHaveCount(
-      account === "admin" ? 3 : 0,
+      0,
     );
     expect(
       await page.evaluate(
@@ -457,17 +479,29 @@ test("student can validate, submit once and see pending status on dashboard", as
     .getByRole("button", { name: "Submit application", exact: true })
     .click();
   await expect(
-    page.getByText("Student ID is required", { exact: true }),
+    page.getByText("Class roll is required", { exact: true }),
   ).toBeVisible();
   await page
-    .getByLabel("Student ID", { exact: true })
+    .getByLabel("Class Roll", { exact: true })
     .fill("FICTIONAL-2026-01");
-  await page.getByLabel("Department", { exact: true }).fill("Science");
-  await page.getByLabel("Academic year", { exact: true }).fill("2026-2027");
-  await page.getByLabel("Phone", { exact: true }).fill("01712345678");
+  await page.getByLabel("Session", { exact: true }).fill("2026-2027");
+  await page.getByLabel("Mobile No.", { exact: true }).fill("01712345678");
+  await page.getByLabel("SSC GPA", { exact: true }).fill("4.75");
+  await page.getByLabel("SSC Reg No.", { exact: true }).fill("1234567890");
   await page
-    .getByLabel("Reason for joining", { exact: true })
-    .fill("I would like to learn science through experiments.");
+    .getByLabel("Father's / Mother's Mobile No.", { exact: true })
+    .fill("01812345678");
+  await page.getByLabel("WhatsApp No.", { exact: true }).fill("01912345678");
+  await page
+    .getByLabel("Guide Teacher's Name", { exact: true })
+    .fill("Fictional Teacher");
+  await page.getByRole("radio", { name: "Science 1", exact: true }).check();
+  await page.getByRole("radio", { name: "Math", exact: true }).check();
+  await page
+    .getByRole("radio", { name: "College Hostel", exact: true })
+    .check();
+  await page.getByRole("radio", { name: "Medical", exact: true }).check();
+  await page.getByLabel("Signature", { exact: true }).fill("Fictional Student");
   const request = page.waitForRequest(
     (req) =>
       req.method() === "POST" &&
@@ -477,14 +511,18 @@ test("student can validate, submit once and see pending status on dashboard", as
     .getByRole("button", { name: "Submit application", exact: true })
     .click();
   const body = (await request).postDataJSON();
-  expect(Object.keys(body).sort()).toEqual([
-    "academicYear",
-    "department",
-    "fullName",
-    "phone",
-    "reason",
-    "studentId",
-  ]);
+  expect(body).toMatchObject({
+    studentId: "FICTIONAL-2026-01",
+    academicYear: "2026-2027",
+    sscGpa: "4.75",
+    sscRegistration: "1234567890",
+    section: "Science 1",
+    optionalSubject: "Math",
+    residence: "College Hostel",
+    admissionGoal: "Medical",
+    signature: "Fictional Student",
+  });
+  expect(body).not.toHaveProperty("submittedAt");
   await expect(
     page
       .getByRole("main")
@@ -593,6 +631,7 @@ test("admin confirms approval, filters results and student sees approved status"
   await mockAuth(page, fixture);
   await page.goto("/dashboard/admin");
   await page
+    .locator(".dashboard-tool-grid")
     .getByRole("link", { name: "Manage membership applications", exact: true })
     .click();
   await expect(
@@ -924,4 +963,126 @@ test("expired session while saving own profile redirects to login", async ({
   fixture.profileSaveFailure = 401;
   await page.getByRole("button", { name: "Save profile", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
+});
+
+for (const role of roles) {
+  test(`${role} reference dashboard has responsive navigation and real performance charts`, async ({
+    page,
+  }, testInfo) => {
+    await mockAuth(page, { role });
+    await page.route("**/api/*/performance?**", (route) =>
+      route.fulfill({
+        status: 200,
+        headers: {
+          "access-control-allow-origin": new URL(page.url()).origin,
+          "access-control-allow-credentials": "true",
+        },
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          range: { from: "2026-01-01", to: "2026-12-31" },
+          completed: 7,
+          averagePercentage: 74.5,
+          bestPercentage: 95,
+          page: 1,
+          quizzesHasNext: false,
+          historyHasNext: false,
+          rankingsHasNext: false,
+          quizzes: [],
+          timeline: [
+            { month: "2026-01", completed: 2, averagePercentage: 65 },
+            { month: "2026-02", completed: 3, averagePercentage: 80 },
+            { month: "2026-03", completed: 2, averagePercentage: 78.5 },
+          ],
+          history: [],
+          rankings: [],
+        }),
+      }),
+    );
+    await page.goto(`/dashboard/${role}`);
+    await expect(
+      page.getByRole("heading", {
+        name: `${label(role)} Dashboard`,
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(page.locator(".dashboard-stat-grid")).toContainText("74.5%");
+    await expect(page.locator(".dashboard-chart svg")).toHaveCount(2);
+    await page.getByText("View data table", { exact: true }).click();
+    await expect(page.locator(".dashboard-chart-table table")).toContainText(
+      "2026-02",
+    );
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    if (testInfo.project.name.startsWith("mobile")) {
+      await page
+        .getByRole("button", { name: "Main navigation", exact: true })
+        .click();
+      await expect(page.locator("#dashboard-sidebar")).toHaveClass(/is-open/);
+      await page
+        .locator("#dashboard-sidebar")
+        .getByRole("button", { name: "Close", exact: true })
+        .click();
+      await expect(page.locator("#dashboard-sidebar")).not.toHaveClass(
+        /is-open/,
+      );
+    }
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({
+      path: testInfo.outputPath(`${role}-dashboard.png`),
+      fullPage: true,
+    });
+  });
+}
+
+test("dashboard performance handles API failure, retry and empty released results", async ({
+  page,
+}) => {
+  await mockAuth(page, { role: "student" });
+  let fail = true;
+  await page.route("**/api/*/performance?**", (route) =>
+    route.fulfill({
+      status: fail ? 500 : 200,
+      headers: {
+        "access-control-allow-origin": new URL(page.url()).origin,
+        "access-control-allow-credentials": "true",
+      },
+      contentType: "application/json",
+      body: JSON.stringify(
+        fail
+          ? { success: false }
+          : {
+              success: true,
+              range: { from: "2026-01-01", to: "2026-12-31" },
+              completed: 0,
+              averagePercentage: 0,
+              bestPercentage: 0,
+              page: 1,
+              quizzesHasNext: false,
+              historyHasNext: false,
+              rankingsHasNext: false,
+              quizzes: [],
+              timeline: [],
+              history: [],
+              rankings: [],
+            },
+      ),
+    }),
+  );
+  await page.goto("/dashboard/student");
+  await expect(page.locator(".dashboard-progress")).toContainText(
+    "Unable to load performance. Please retry.",
+  );
+  fail = false;
+  await page
+    .locator(".dashboard-progress")
+    .getByRole("button", { name: "Retry", exact: true })
+    .click();
+  await expect(page.locator(".dashboard-progress")).toContainText(
+    "No released results in this range.",
+  );
+  await expect(page.locator(".dashboard-chart svg")).toHaveCount(0);
 });

@@ -199,7 +199,7 @@ export function PerformanceDashboard({
                         <Line
                           dataKey="averagePercentage"
                           name={t("Average %")}
-                          stroke="#0f766e"
+                          stroke="var(--chart-2)"
                           isAnimationActive={false}
                         />
                       </LineChart>
@@ -254,7 +254,7 @@ export function PerformanceDashboard({
                         <Bar
                           dataKey="averagePercentage"
                           name={t("Average %")}
-                          fill="#2563eb"
+                          fill="var(--chart-1)"
                           isAnimationActive={false}
                         />
                       </BarChart>

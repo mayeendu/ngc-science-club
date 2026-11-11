@@ -182,7 +182,7 @@ export function AdminReports() {
                 <XAxis dataKey="label" />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="count" name={t("Total")} fill="#0f766e" />
+                <Bar dataKey="count" name={t("Total")} fill="var(--chart-2)" />
               </BarChart>
             </ResponsiveContainer>
           </section>

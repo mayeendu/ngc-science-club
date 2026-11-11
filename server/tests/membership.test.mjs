@@ -762,3 +762,48 @@ test("legacy missing fields have useful completion and can be completed without 
     assert.equal(response.status, 200);
     assert.equal((await response.json()).profile.completion, 100);
   }));
+
+const referenceDetails = {
+  sscGpa: "4.75",
+  sscRegistration: "1234567890",
+  section: "Science 2",
+  guardianPhone: "01812345678",
+  whatsappPhone: "01912345678",
+  guideTeacher: "Fictional Teacher",
+  optionalSubject: "Biology",
+  residence: "College Hostel",
+  admissionGoal: "Medical",
+  signature: "Fictional Student",
+};
+test("reference form fields persist privately and appear only in admin review", () =>
+  fixture(async ({ send, adminSend, state, records }) => {
+    const response = await send("POST", { ...input, ...referenceDetails });
+    assert.equal(response.status, 201);
+    assert.equal(records.get(state.userId).sscGpa, "4.75");
+    const own = await (await send()).json();
+    assert.equal(JSON.stringify(own).includes("guardianPhone"), false);
+    state.role = "admin";
+    const list = await (await adminSend()).json();
+    for (const [key, value] of Object.entries(referenceDetails))
+      assert.equal(list.applications[0][key], value);
+  }));
+test("reference form rejects partial details, invalid GPA, choices, contacts and forged dates", () =>
+  fixture(async ({ send, records }) => {
+    for (const change of [
+      { sscGpa: "5.01" },
+      { sscGpa: "-1" },
+      { section: "Science 4" },
+      { guardianPhone: "123" },
+      { sscRegistration: "abc" },
+      { signature: "" },
+      { submittedAt: "2026-01-01" },
+      { optionalSubject: "Chemistry" },
+    ])
+      assert.equal(
+        (await send("POST", { ...input, ...referenceDetails, ...change }))
+          .status,
+        400,
+      );
+    assert.equal((await send("POST", { ...input, sscGpa: "4.5" })).status, 400);
+    assert.equal(records.size, 0);
+  }));

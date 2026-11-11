@@ -2,11 +2,12 @@
 
 import { useT } from "@/components/i18n/language";
 import { Appearance } from "@/components/layout/appearance";
+import { ClubLogo } from "@/components/layout/club-logo";
 import { LanguageSettings } from "@/components/i18n/language";
 import { NotificationBell } from "@/components/communication/notifications";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Loader2, LogOut, UserRound } from "lucide-react";
 import toast from "@/lib/i18n/toast";
 import { signOut, useSession } from "@/lib/auth-client";
@@ -22,6 +23,7 @@ export function Navbar() {
   const t = useT();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, isPending, error } = useSession();
   const role = parseRole(session?.user.role);
   async function handleSignOut() {
@@ -42,14 +44,22 @@ export function Navbar() {
       setIsSigningOut(false);
     }
   }
+  if (pathname.startsWith("/dashboard")) return null;
   return (
     <header className="border-b bg-white">
       <nav
         aria-label={t("Main navigation")}
         className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4"
       >
-        <Link href="/" className="text-lg font-bold text-blue-700">
-          {t("NGC Science Club")}
+        <Link
+          href="/"
+          className="flex items-center gap-3 text-lg font-bold text-blue-700"
+        >
+          <ClubLogo
+            decorative
+            className="w-16 rounded-lg border border-blue-100 p-1"
+          />
+          <span>{t("NGC Science Club")}</span>
         </Link>
 
         <LanguageSettings />

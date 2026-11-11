@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { Geist } from "next/font/google";
@@ -12,6 +13,10 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 export const metadata: Metadata = {
   title: "NGC Science Club",
   description: "Science learning and student growth",
+  icons: {
+    icon: { url: "/brand/ngc-science-club.png", type: "image/png" },
+    apple: "/brand/ngc-science-club.png",
+  },
 };
 
 export default function RootLayout({
@@ -23,7 +28,9 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           <Translated text="Skip to main content" />
         </a>
-        <Navbar />
+        <Suspense fallback={null}>
+          <Navbar />
+        </Suspense>
         <div id="main-content" tabIndex={-1}>
           {children}
         </div>

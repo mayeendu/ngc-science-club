@@ -271,7 +271,7 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
                       type="monotone"
                       dataKey="applications"
                       name={t("Applications")}
-                      stroke="#1d4ed8"
+                      stroke="var(--chart-1)"
                       strokeWidth={2}
                       isAnimationActive={false}
                     />
@@ -279,7 +279,7 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
                       type="monotone"
                       dataKey="approvedMembers"
                       name="New approved members"
-                      stroke="#0f766e"
+                      stroke="var(--chart-2)"
                       strokeWidth={2}
                       isAnimationActive={false}
                     />
@@ -312,7 +312,7 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
                       <Bar
                         dataKey="members"
                         name="New approved members"
-                        fill="#0f766e"
+                        fill="var(--chart-2)"
                         radius={[4, 4, 0, 0]}
                         isAnimationActive={false}
                       />

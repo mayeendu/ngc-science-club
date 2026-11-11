@@ -173,7 +173,7 @@ export function QuizReport({ id }: { id: string }) {
                       <Bar
                         dataKey="accuracy"
                         name={t("Accuracy %")}
-                        fill="#0f766e"
+                        fill="var(--chart-2)"
                         isAnimationActive={false}
                       />
                     </BarChart>

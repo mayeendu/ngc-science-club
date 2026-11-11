@@ -1,5 +1,7 @@
 # Milestone roadmap
 
+Current additional approved scope: refresh all three dashboard designs from the supplied reference while retaining club content, workflows and permissions. See [dashboard visual refresh](dashboard-redesign.md) for implementation, commands and review paths. Existing launch blockers and separate deployment approval still apply.
+
 See [final project status](final-project-status.md), [deployment preparation](deployment-guide.md) and [launch checklist](launch-checklist.md) for final evidence and release blockers.
 
 Latest user scope: Milestones 17–18 deployment preparation and final local launch checks are complete. No live deployment, production infrastructure/index/role writes or publishing was approved or performed. Historical continuation instructions below are superseded.
@@ -124,3 +126,6 @@ git diff --check
 ## Approval gate
 
 Phase 2 starts only after the user approves the plan/setup scope. Package installation, scaffolding, Atlas writes, credentials, and application implementation have not been performed in Phase 1.
+
+
+Membership reference-form update (2026-11-11): see [membership application](membership-application.md#reference-membership-form-update-2026-11-11) for fields, layout, compatibility and privacy decisions.

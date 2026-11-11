@@ -1,6 +1,31 @@
 import { z } from "zod";
 
+export const applicationFormFields = z.strictObject({
+  sscGpa: z
+    .string()
+    .trim()
+    .regex(/^(?:[0-4](?:\.\d{1,2})?|5(?:\.0{1,2})?)$/),
+  sscRegistration: z
+    .string()
+    .trim()
+    .regex(/^\d{6,20}$/),
+  section: z.enum(["Science 1", "Science 2", "Science 3"]),
+  guardianPhone: z
+    .string()
+    .trim()
+    .regex(/^(?:\+?88)?01[3-9]\d{8}$/),
+  whatsappPhone: z
+    .string()
+    .trim()
+    .regex(/^(?:\+?88)?01[3-9]\d{8}$/),
+  guideTeacher: z.string().trim().min(2).max(100),
+  optionalSubject: z.enum(["Math", "Biology"]),
+  residence: z.enum(["College Hostel", "Others"]),
+  admissionGoal: z.enum(["Medical", "Engineering", "University"]),
+  signature: z.string().trim().min(2).max(100),
+});
 export const applicationSchema = z.strictObject({
+  ...applicationFormFields.partial().shape,
   fullName: z.string().trim().min(2).max(100),
   studentId: z
     .string()

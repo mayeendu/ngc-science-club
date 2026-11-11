@@ -1,5 +1,7 @@
 # Architecture proposal
 
+Dashboard visual refresh: a shared App Router dashboard layout wraps all role pages in a responsive sidebar/toolbar shell. A common role-link configuration supplies navigation and overview tools; compact charts reuse the existing scoped performance API. Existing RoleGuard and Express authorization remain authoritative. See [dashboard visual refresh](dashboard-redesign.md).
+
 Deployment preparation: Next.js/Vercel frontend plus independent long-running Express host, HTTPS same-site custom subdomains, exact credentialed origins and host-only Lax cookies. Readiness pings MongoDB with a deadline; graceful shutdown drains HTTP/expiry work and closes the pool. No services provisioned. See deployment-guide.md.
 
 Milestones 14–16 add an admin-only report module with date-matched facets; shared appearance and skip navigation; bounded per-process business API limiting and exact auth mutation Origin enforcement before Better Auth. Safe test runners disable MongoDB connections; production authentication remains exclusively on Better Auth. See security-performance-testing.md.
@@ -147,3 +149,6 @@ Deploy client and server independently with Atlas, private secrets, staging, rea
 | Lost updates and audit gaps               | Version/expected-state updates, transactional state and audit writes, retry-safe operations                                                   |
 | Email failure or missing budget           | Choose provider early, test delivery and recovery; local test mailbox for development                                                         |
 | Growing scope                             | One approved milestone at a time; defer enhancements and document decisions                                                                   |
+
+
+Membership reference-form update (2026-11-11): see [membership application](membership-application.md#reference-membership-form-update-2026-11-11) for fields, layout, compatibility and privacy decisions.

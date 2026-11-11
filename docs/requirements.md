@@ -1,5 +1,7 @@
 # Requirements and decisions
 
+Confirmed dashboard UI refresh: apply the supplied education dashboard's visual style across admin, teacher and student dashboards, retaining Science Club content, real data and permissions. Include mobile navigation, existing language/theme controls and accessible chart tables. This authorizes local UI changes only; deployment remains separately gated. See [dashboard visual refresh](dashboard-redesign.md).
+
 Milestones 17–18: production preparation and final local launch checks are approved; no live deployment or publishing. Vercel/client and long-running Node/Express settings, private production templates, offline environment preflights, database readiness and bounded shutdown are implemented. Setup/admin/release guides and connected memory-browser verification are added. See final-project-status.md for verified counts and unresolved staging prerequisites.
 
 Milestones 14–16: unified admin aggregate reports with CSV/browser PDF, saved system/light/dark appearance, shared accessibility improvements, exact auth mutation Origin checks, bounded API limits, and database-disabled test tooling. No production deployment, index writes or launch is authorized. See admin-reporting.md, ui-accessibility.md and security-performance-testing.md.
@@ -122,3 +124,6 @@ All permissions are enforced in Express, including resource ownership. A student
 9. Who will own the initial admin account and production services? What retention periods apply to rejected applications, results, and audit logs?
 
 No answers are assumed to authorize implementation. Resolve policy questions before their dependent milestone; hosting/origin and auth email decisions are needed before authentication deployment.
+
+
+Membership reference-form update (2026-11-11): see [membership application](membership-application.md#reference-membership-form-update-2026-11-11) for fields, layout, compatibility and privacy decisions.

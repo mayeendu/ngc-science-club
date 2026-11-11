@@ -1,5 +1,6 @@
 import { Translated } from "@/components/i18n/language";
 import Link from "next/link";
+import { ClubLogo } from "@/components/layout/club-logo";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { getHealth } from "@/lib/api";
@@ -19,34 +20,45 @@ async function BackendConnection() {
 export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-[80vh] max-w-6xl flex-col items-center gap-8 px-4 py-12 text-center sm:py-20">
-      <h1 className="text-4xl font-bold text-blue-700">
-        <Translated text="NGC Science Club" />
-      </h1>
+      <section className="brand-hero grid w-full items-center gap-8 rounded-3xl border px-5 py-8 sm:px-10 lg:grid-cols-[1.2fr_1fr] lg:text-left">
+        <div className="space-y-6">
+          <h1 className="text-4xl font-bold text-blue-700">
+            <Translated text="NGC Science Club" />
+          </h1>
 
-      <p className="text-lg text-slate-600">
-        <Translated text="Narsingdi Government College" />
-      </p>
-      <p className="max-w-2xl text-lg">
-        <Translated text="Explore science together. Learn, experiment, and share your discoveries with the college community." />
-      </p>
-      <div className="flex flex-wrap justify-center gap-4">
-        <Link
-          href="/signup"
-          className="rounded-lg bg-blue-700 px-6 py-3 font-semibold text-white"
-        >
-          <Translated text="Join the science community" />
-        </Link>
-        <Link
-          href="/events"
-          className="rounded-lg border px-6 py-3 font-semibold"
-        >
-          <Translated text="Explore club events" />
-        </Link>
-      </div>
+          <p className="text-lg text-slate-600">
+            <Translated text="Narsingdi Government College" />
+          </p>
+          <p className="max-w-2xl text-lg">
+            <Translated text="Explore science together. Learn, experiment, and share your discoveries with the college community." />
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
+            <Link
+              href="/signup"
+              className="rounded-lg bg-blue-700 px-6 py-3 font-semibold text-white"
+            >
+              <Translated text="Join the science community" />
+            </Link>
+            <Link
+              href="/events"
+              className="rounded-lg border px-6 py-3 font-semibold"
+            >
+              <Translated text="Explore club events" />
+            </Link>
+          </div>
+        </div>
+        <div className="brand-logo-plate mx-auto w-full max-w-72 rounded-3xl p-4 shadow-lg ring-1 ring-black/5 sm:max-w-80">
+          <ClubLogo
+            sizes="(max-width: 640px) 256px, 288px"
+            preload
+            className="w-full rounded-xl"
+          />
+        </div>
+      </section>
       <div className="grid w-full gap-5 text-left sm:grid-cols-3">
         <Link
           href="/faculty"
-          className="rounded-2xl border bg-white p-6 shadow-sm"
+          className="rounded-2xl border border-t-4 border-t-blue-700 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
         >
           <h2 className="text-xl font-semibold">
             <Translated text="Learn with mentors" />
@@ -57,7 +69,7 @@ export default function HomePage() {
         </Link>
         <Link
           href="/achievements"
-          className="rounded-2xl border bg-white p-6 shadow-sm"
+          className="rounded-2xl border border-t-4 border-t-teal-600 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
         >
           <h2 className="text-xl font-semibold">
             <Translated text="Celebrate discovery" />
@@ -68,7 +80,7 @@ export default function HomePage() {
         </Link>
         <Link
           href="/gallery"
-          className="rounded-2xl border bg-white p-6 shadow-sm"
+          className="rounded-2xl border border-t-4 border-t-green-500 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
         >
           <h2 className="text-xl font-semibold">
             <Translated text="Science in action" />
