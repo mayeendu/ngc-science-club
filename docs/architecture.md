@@ -1,5 +1,21 @@
 # Architecture proposal
 
+Deployment preparation: Next.js/Vercel frontend plus independent long-running Express host, HTTPS same-site custom subdomains, exact credentialed origins and host-only Lax cookies. Readiness pings MongoDB with a deadline; graceful shutdown drains HTTP/expiry work and closes the pool. No services provisioned. See deployment-guide.md.
+
+Milestones 14–16 add an admin-only report module with date-matched facets; shared appearance and skip navigation; bounded per-process business API limiting and exact auth mutation Origin enforcement before Better Auth. Safe test runners disable MongoDB connections; production authentication remains exclusively on Better Auth. See security-performance-testing.md.
+
+Milestone 13 separates showcase content from transactional certificates. Issuance locks source event/registration documents and atomically reserves a unique verification token plus natural-key certificate. Public verification has its own minimal projection. A native-dialog body portal isolates print/PDF content. See [Milestone 13 architecture](achievements-gallery-certificates.md).
+
+Milestone 11 uses a shared hydration-safe language store, explicit text translation and a checked Bangla dictionary. Milestone 12 adds an injectable resources repository/storage layer; GridFS files are accessible only through membership/ownership-checked attachment routes. Existing auth and business transactions are preserved. See [bilingual support](bilingual-support.md) and [resource architecture](learning-resources.md).
+
+Milestone 10: communication module owns versioned announcements and a source-derived inbox, with audience predicates before each union/read-state join. No writes occur during notification reads and no domain transaction is changed. See [communication architecture](notifications-announcements.md).
+
+Milestone 09: separate feedback Express module with session-derived owner/assignment filters shared by reads and atomic replies. The shared club API client, RHF/Zod and existing guards/components support both own and management boards. See [feedback communication](feedback-communication.md).
+
+## Milestone 08 faculty module
+
+Faculty profiles use an independent Express module and collection, fresh admin-only management and teacher-scoped assignment reads. Public list/detail queries use explicit projections. Shared client API errors and accessible forms reuse existing UI/auth patterns. See [faculty architecture and permission rules](faculty-management.md).
+
 ## Milestone 07 analytics addition
 
 Read-only `performance` Express module reuses session/fresh-role middleware and approved student membership checks. One ownership/release-scoped MongoDB aggregation feeds all chart/table facets. A shared client component and Zod response parser serve guarded student/teacher pages with Recharts and accessible data tables. Existing assessment and event modules remain authoritative for participation/history. See [performance analytics](performance-analytics.md).

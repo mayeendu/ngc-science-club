@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EventCard, EventSkeletons } from "./event-shared";
 export function MyEvents() {
+  const t = useT();
   const [data, setData] = useState<{
       items: {
         event: ClubEvent;
@@ -42,9 +45,9 @@ export function MyEvents() {
   }, [page, revision, router]);
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
-      <h1 className="text-3xl font-bold">My events and participation</h1>
+      <h1 className="text-3xl font-bold">{t("My events and participation")}</h1>
       <Link href="/events" className="text-blue-700 underline">
-        Explore events
+        {t("Explore events")}
       </Link>
       <Button
         variant="outline"
@@ -55,31 +58,36 @@ export function MyEvents() {
           setRevision((v) => v + 1);
         }}
       >
-        Refresh my events
+        {t("Refresh my events")}
       </Button>
       {error ? (
-        <p role="alert">{error}</p>
+        <p role="alert">{t(error, undefined, true)}</p>
       ) : !data ? (
         <EventSkeletons />
       ) : data.items.length === 0 ? (
-        <p role="status">You have not registered for any events yet.</p>
+        <p role="status">{t("You have not registered for any events yet.")}</p>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {data.items.map((item) => (
             <EventCard key={item.event.id} event={item.event}>
-              <p>Registration: {item.registration.status}</p>
               <p>
-                Attendance:{" "}
+                {t("Registration:")} {t(item.registration.status)}
+              </p>
+              <p>
+                {t("Attendance:")}{" "}
                 {item.event.status === "cancelled"
-                  ? "Event cancelled"
-                  : item.registration.attendance}
+                  ? t("Event cancelled")
+                  : t(item.registration.attendance)}
               </p>
             </EventCard>
           ))}
         </div>
       )}
       {data && !error && (
-        <nav className="flex items-center gap-4" aria-label="My event pages">
+        <nav
+          className="flex items-center gap-4"
+          aria-label={t("My event pages")}
+        >
           <Button
             variant="outline"
             disabled={page === 1}
@@ -88,9 +96,11 @@ export function MyEvents() {
               setPage((v) => v - 1);
             }}
           >
-            Previous page
+            {t("Previous page")}
           </Button>
-          <span>Page {page}</span>
+          <span>
+            {t("Page")} {page}
+          </span>
           <Button
             variant="outline"
             disabled={!data.hasNext}
@@ -99,7 +109,7 @@ export function MyEvents() {
               setPage((v) => v + 1);
             }}
           >
-            Next page
+            {t("Next page")}
           </Button>
         </nav>
       )}

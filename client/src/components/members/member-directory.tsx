@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { GraduationCap, Users } from "lucide-react";
@@ -13,11 +14,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
 export function MemberSkeletons() {
+  const t = useT();
   return (
-    <div role="status" aria-label="Loading members">
-      <span className="sr-only">Loading members…</span>
+    <div role="status" aria-label={t("Loading members")}>
+      <span className="sr-only">{t("Loading members\u2026")}</span>
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, index) => (
           <div
@@ -31,6 +32,7 @@ export function MemberSkeletons() {
   );
 }
 export function MemberDirectory() {
+  const t = useT();
   const [draft, setDraft] = useState("");
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("");
@@ -84,21 +86,22 @@ export function MemberDirectory() {
       <div className="mx-auto max-w-6xl space-y-8">
         <header className="space-y-3">
           <p className="text-sm font-semibold text-teal-700">
-            NGC Science Club community
+            {t("NGC Science Club community")}
           </p>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Meet our members
+            {t("Meet our members")}
           </h1>
           <p className="max-w-2xl text-slate-600">
-            Meet the students exploring science together at Narsingdi Government
-            College.
+            {t(
+              "Meet the students exploring science together at Narsingdi Government College.",
+            )}
           </p>
         </header>
         {stats && !error && (
-          <section aria-label="Member statistics" className="space-y-3">
+          <section aria-label={t("Member statistics")} className="space-y-3">
             <div className="flex items-center gap-2 font-semibold text-blue-800">
               <Users className="size-5" aria-hidden="true" />
-              {stats.totalMembers} approved members
+              {stats.totalMembers} {t("approved members")}
             </div>
             <div className="flex flex-wrap gap-2">
               {stats.departments.map((item) => (
@@ -126,14 +129,14 @@ export function MemberDirectory() {
               htmlFor="member-search"
               className="mb-2 block text-sm font-medium"
             >
-              Search by name
+              {t("Search by name")}
             </label>
             <Input
               id="member-search"
               value={draft}
               maxLength={80}
               onChange={(event) => setDraft(event.target.value)}
-              placeholder="Member name"
+              placeholder={t("Member name")}
             />
           </div>
           <div>
@@ -141,7 +144,7 @@ export function MemberDirectory() {
               htmlFor="member-department"
               className="mb-2 block text-sm font-medium"
             >
-              Department
+              {t("Department")}
             </label>
             <select
               id="member-department"
@@ -153,7 +156,7 @@ export function MemberDirectory() {
               }}
               className="w-full rounded-md border bg-white px-3 py-2 text-sm"
             >
-              <option value="">All departments</option>
+              <option value="">{t("All departments")}</option>
               {stats?.departments.map((item) => (
                 <option key={item.department} value={item.department}>
                   {item.department}
@@ -166,7 +169,7 @@ export function MemberDirectory() {
               htmlFor="member-year"
               className="mb-2 block text-sm font-medium"
             >
-              Academic year
+              {t("Academic year")}
             </label>
             <select
               id="member-year"
@@ -178,31 +181,31 @@ export function MemberDirectory() {
               }}
               className="w-full rounded-md border bg-white px-3 py-2 text-sm"
             >
-              <option value="">All academic years</option>
+              <option value="">{t("All academic years")}</option>
               {stats?.academicYears.map((year) => (
                 <option key={year}>{year}</option>
               ))}
             </select>
           </div>
           <Button className="self-end" type="submit">
-            Search members
+            {t("Search members")}
           </Button>
         </form>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-slate-600">
             {list
-              ? `${list.pagination.total} matching members`
-              : "Approved student profiles"}
+              ? t("{0} matching members", [list.pagination.total])
+              : t("Approved student profiles")}
           </p>
           <Button variant="outline" onClick={reload}>
-            Refresh directory
+            {t("Refresh directory")}
           </Button>
         </div>
         {error ? (
           <div role="alert" className="rounded-xl border bg-white p-6">
-            <p>Unable to load members. Please try again.</p>
+            <p>{t("Unable to load members. Please try again.")}</p>
             <Button variant="outline" className="mt-3" onClick={reload}>
-              Retry members
+              {t("Retry members")}
             </Button>
           </div>
         ) : !list ? (
@@ -212,10 +215,11 @@ export function MemberDirectory() {
             role="status"
             className="rounded-xl border bg-white p-10 text-center"
           >
-            <h2 className="text-xl font-semibold">No members found</h2>
+            <h2 className="text-xl font-semibold">{t("No members found")}</h2>
             <p className="mt-2 text-slate-600">
-              Try another name or filter, or return after new memberships are
-              approved.
+              {t(
+                "Try another name or filter, or return after new memberships are approved.",
+              )}
             </p>
           </div>
         ) : (
@@ -235,17 +239,17 @@ export function MemberDirectory() {
                     {member.department}
                   </p>
                   <p className="text-sm text-slate-600">
-                    Academic year: {member.academicYear}
+                    {t("Academic year:")} {member.academicYear}
                   </p>
                   <p className="text-sm text-slate-500">
-                    Member since: {membershipDate(member.membershipDate)}
+                    {t("Member since:")} {membershipDate(member.membershipDate)}
                   </p>
                   <Link
                     href={`/members/${member.id}`}
                     className="mt-3 inline-block font-medium text-blue-700 underline"
-                    aria-label={`View profile of ${member.name}`}
+                    aria-label={t("View profile of {0}", [member.name])}
                   >
-                    View profile
+                    {t("View profile")}
                   </Link>
                 </CardContent>
               </Card>
@@ -254,7 +258,7 @@ export function MemberDirectory() {
         )}
         {list && list.pagination.totalPages > 0 && (
           <nav
-            aria-label="Member pagination"
+            aria-label={t("Member pagination")}
             className="flex flex-wrap items-center justify-center gap-4"
           >
             <Button
@@ -265,10 +269,10 @@ export function MemberDirectory() {
                 setList(null);
               }}
             >
-              Previous members
+              {t("Previous members")}
             </Button>
             <span className="text-sm">
-              Page {page} of {list.pagination.totalPages}
+              {t("Page")} {page} {t("of")} {list.pagination.totalPages}
             </span>
             <Button
               variant="outline"
@@ -278,7 +282,7 @@ export function MemberDirectory() {
                 setList(null);
               }}
             >
-              Next members
+              {t("Next members")}
             </Button>
           </nav>
         )}

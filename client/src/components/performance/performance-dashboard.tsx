@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,12 +20,12 @@ import { AssessmentError } from "@/lib/assessment-api";
 import { AccessDenied } from "@/components/auth/access-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 export function PerformanceDashboard({
   student = false,
 }: {
   student?: boolean;
 }) {
+  const t = useT();
   const router = useRouter();
   const [filters, setFilters] = useState({ from: "", to: "", subject: "" });
   const [query, setQuery] = useState("");
@@ -63,15 +65,15 @@ export function PerformanceDashboard({
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
       <h1 className="text-3xl font-bold">
-        {student ? "My performance" : "Student performance"}
+        {student ? t("My performance") : t("Student performance")}
       </h1>
       <p>
-        Released quiz results only. Averages give each submitted quiz attempt
-        equal weight. Dates use UTC submission days; the default range is the
-        last 12 calendar months.
+        {t(
+          "Released quiz results only. Averages give each submitted quiz attempt equal weight. Dates use UTC submission days; the default range is the last 12 calendar months.",
+        )}
       </p>
       <nav
-        aria-label="Participation history"
+        aria-label={t("Participation history")}
         className="flex flex-wrap gap-5 text-blue-700 underline"
       >
         <Link
@@ -82,8 +84,8 @@ export function PerformanceDashboard({
           }
         >
           {student
-            ? "All quiz participation and results"
-            : "Per-quiz reports and rankings"}
+            ? t("All quiz participation and results")
+            : t("Per-quiz reports and rankings")}
         </Link>
         <Link
           href={
@@ -91,8 +93,8 @@ export function PerformanceDashboard({
           }
         >
           {student
-            ? "My event participation and attendance"
-            : "Event participation reports"}
+            ? t("My event participation and attendance")
+            : t("Event participation reports")}
         </Link>
       </nav>
       <form
@@ -118,10 +120,10 @@ export function PerformanceDashboard({
         {(["from", "to", "subject"] as const).map((key) => (
           <label key={key} className="grid gap-1 text-sm font-medium">
             {key === "from"
-              ? "From (UTC)"
+              ? t("From (UTC)")
               : key === "to"
-                ? "To (UTC)"
-                : "Subject (exact match)"}
+                ? t("To (UTC)")
+                : t("Subject (exact match)")}
             <input
               type={key === "subject" ? "text" : "date"}
               maxLength={key === "subject" ? 100 : undefined}
@@ -138,22 +140,22 @@ export function PerformanceDashboard({
             />
           </label>
         ))}
-        <Button type="submit">Apply filters</Button>
+        <Button type="submit">{t("Apply filters")}</Button>
         <Button type="button" variant="outline" onClick={reload}>
-          Refresh
+          {t("Refresh")}
         </Button>
       </form>
       {error ? (
-        <p role="alert">{error}</p>
+        <p role="alert">{t(error, undefined, true)}</p>
       ) : !data ? (
-        <p role="status">Loading performance…</p>
+        <p role="status">{t("Loading performance\u2026")}</p>
       ) : (
         <>
           <p className="text-sm text-slate-600">
-            {data.range.from} to {data.range.to} (UTC)
+            {data.range.from} {t("to")} {data.range.to} {t("(UTC)")}
           </p>
           <section
-            aria-label="Performance summary"
+            aria-label={t("Performance summary")}
             className="grid gap-4 sm:grid-cols-3"
           >
             {[
@@ -164,7 +166,7 @@ export function PerformanceDashboard({
               <Card key={label}>
                 <CardHeader>
                   <CardTitle>
-                    <h2>{label}</h2>
+                    <h2>{t(label)}</h2>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -174,17 +176,20 @@ export function PerformanceDashboard({
             ))}
           </section>
           {data.completed === 0 ? (
-            <p role="status">No released results match these filters.</p>
+            <p role="status">{t("No released results match these filters.")}</p>
           ) : (
             <>
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    <h2>Monthly progress</h2>
+                    <h2>{t("Monthly progress")}</h2>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div role="img" aria-label="Monthly average percentage chart">
+                  <div
+                    role="img"
+                    aria-label={t("Monthly average percentage chart")}
+                  >
                     <ResponsiveContainer width="100%" height={260} minWidth={0}>
                       <LineChart data={data.timeline} accessibilityLayer>
                         <CartesianGrid strokeDasharray="3 3" />
@@ -193,7 +198,7 @@ export function PerformanceDashboard({
                         <Tooltip />
                         <Line
                           dataKey="averagePercentage"
-                          name="Average %"
+                          name={t("Average %")}
                           stroke="#0f766e"
                           isAnimationActive={false}
                         />
@@ -203,13 +208,13 @@ export function PerformanceDashboard({
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                       <caption className="sr-only">
-                        Monthly progress data
+                        {t("Monthly progress data")}
                       </caption>
                       <thead>
                         <tr>
-                          <th className="p-2">Month</th>
-                          <th className="p-2">Attempts</th>
-                          <th className="p-2">Average %</th>
+                          <th className="p-2">{t("Month")}</th>
+                          <th className="p-2">{t("Attempts")}</th>
+                          <th className="p-2">{t("Average %")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -228,13 +233,13 @@ export function PerformanceDashboard({
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    <h2>Quiz comparisons</h2>
+                    <h2>{t("Quiz comparisons")}</h2>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div
                     role="img"
-                    aria-label="Quiz average percentage comparison"
+                    aria-label={t("Quiz average percentage comparison")}
                   >
                     <ResponsiveContainer width="100%" height={280} minWidth={0}>
                       <BarChart data={data.quizzes} accessibilityLayer>
@@ -248,7 +253,7 @@ export function PerformanceDashboard({
                         />
                         <Bar
                           dataKey="averagePercentage"
-                          name="Average %"
+                          name={t("Average %")}
                           fill="#2563eb"
                           isAnimationActive={false}
                         />
@@ -258,17 +263,20 @@ export function PerformanceDashboard({
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                       <caption className="sr-only">
-                        Quiz comparison data
+                        {t("Quiz comparison data")}
                       </caption>
                       <thead>
                         <tr>
-                          {["Quiz", "Subject", "Attempts", "Average %"].map(
-                            (label) => (
-                              <th key={label} className="p-2">
-                                {label}
-                              </th>
-                            ),
-                          )}
+                          {[
+                            t("Quiz"),
+                            t("Subject"),
+                            t("Attempts"),
+                            t("Average %"),
+                          ].map((label) => (
+                            <th key={label} className="p-2">
+                              {t(label)}
+                            </th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody>
@@ -288,20 +296,20 @@ export function PerformanceDashboard({
               {student ? (
                 <section>
                   <h2 className="text-xl font-semibold">
-                    Released score history
+                    {t("Released score history")}
                   </h2>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                       <thead>
                         <tr>
                           {[
-                            "Quiz",
-                            "Submitted (UTC)",
-                            "Score",
-                            "Percentage",
+                            t("Quiz"),
+                            t("Submitted (UTC)"),
+                            t("Score"),
+                            t("Percentage"),
                           ].map((label) => (
                             <th key={label} className="p-2">
-                              {label}
+                              {t(label)}
                             </th>
                           ))}
                         </tr>
@@ -325,23 +333,28 @@ export function PerformanceDashboard({
                 </section>
               ) : (
                 <section>
-                  <h2 className="text-xl font-semibold">Student rankings</h2>
+                  <h2 className="text-xl font-semibold">
+                    {t("Student rankings")}
+                  </h2>
                   <p className="text-sm text-slate-600">
-                    Ranked by average percentage rounded to two decimals; ties
-                    share a rank. Students may have taken different quizzes.
-                    Teachers see their own quizzes; admins see all.
+                    {t(
+                      "Ranked by average percentage rounded to two decimals; ties share a rank. Students may have taken different quizzes. Teachers see their own quizzes; admins see all.",
+                    )}
                   </p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                       <thead>
                         <tr>
-                          {["Rank", "Member", "Attempts", "Average %"].map(
-                            (label) => (
-                              <th key={label} className="p-2">
-                                {label}
-                              </th>
-                            ),
-                          )}
+                          {[
+                            t("Rank"),
+                            t("Member"),
+                            t("Attempts"),
+                            t("Average %"),
+                          ].map((label) => (
+                            <th key={label} className="p-2">
+                              {t(label)}
+                            </th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody>
@@ -359,7 +372,7 @@ export function PerformanceDashboard({
                 </section>
               )}
               <nav
-                aria-label="Performance pages"
+                aria-label={t("Performance pages")}
                 className="flex items-center gap-4"
               >
                 <Button
@@ -370,9 +383,11 @@ export function PerformanceDashboard({
                     setData(null);
                   }}
                 >
-                  Previous
+                  {t("Previous")}
                 </Button>
-                <span>Page {page}</span>
+                <span>
+                  {t("Page")} {page}
+                </span>
                 <Button
                   variant="outline"
                   disabled={
@@ -387,7 +402,7 @@ export function PerformanceDashboard({
                     setData(null);
                   }}
                 >
-                  Next
+                  {t("Next")}
                 </Button>
               </nav>
             </>

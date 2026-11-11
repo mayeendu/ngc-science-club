@@ -275,7 +275,7 @@ for (const account of roles) {
       page.getByRole("heading", { name: "Welcome, Fictional Learner!" }),
     ).toBeVisible();
     await expect(page.getByText("Coming later", { exact: true })).toHaveCount(
-      account === "admin" ? 3 : account === "student" ? 0 : 2,
+      account === "admin" ? 3 : 0,
     );
     expect(
       await page.evaluate(

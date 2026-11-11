@@ -1,3 +1,5 @@
+Current checkpoint: see [development roadmap](development-roadmap.md). Continuation instructions below are historical and superseded by the latest Milestone 13 checkpoint.
+
 # Milestone 07 — Student performance and analytics
 
 Milestones 01–06 are complete per the user. This milestone adds read-only cross-quiz analytics while retaining existing quiz taking, result release, per-quiz reports, and event participation screens.

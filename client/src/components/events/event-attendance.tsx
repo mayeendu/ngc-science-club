@@ -1,8 +1,10 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import toast from "@/lib/i18n/toast";
 import {
   eventParticipants,
   markAttendance,
@@ -14,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { AccessDenied } from "@/components/auth/access-state";
 import { EventSkeletons, EventConfirmation } from "./event-shared";
 export function EventAttendance({ id }: { id: string }) {
+  const t = useT();
   const [data, setData] = useState<Participants | null>(null),
     [error, setError] = useState(""),
     [denied, setDenied] = useState(false),
@@ -77,14 +80,16 @@ export function EventAttendance({ id }: { id: string }) {
         href="/dashboard/teacher/events"
         className="text-blue-700 underline"
       >
-        Back to event management
+        {t("Back to event management")}
       </Link>
-      <h1 className="text-3xl font-bold">Event participants and attendance</h1>
+      <h1 className="text-3xl font-bold">
+        {t("Event participants and attendance")}
+      </h1>
       <Button variant="outline" onClick={refresh} disabled={busy}>
-        Refresh participants
+        {t("Refresh participants")}
       </Button>
       {error ? (
-        <p role="alert">{error}</p>
+        <p role="alert">{t(error, undefined, true)}</p>
       ) : !data ? (
         <EventSkeletons />
       ) : (
@@ -93,31 +98,34 @@ export function EventAttendance({ id }: { id: string }) {
             {data.event.title}
           </h2>
           <p>
-            {eventDate(data.event.startsAt)} (Dhaka) · {data.event.status}
+            {eventDate(data.event.startsAt)}
+            {t("(Dhaka) \u00B7")} {t(data.event.status)}
           </p>
           <p>
-            Registered: {data.counts.registered} · Present:{" "}
-            {data.counts.present} · Absent: {data.counts.absent} · Unmarked:{" "}
+            {t("Registered:")} {data.counts.registered} {t("\u00B7 Present:")}{" "}
+            {data.counts.present} {t("\u00B7 Absent:")} {data.counts.absent}{" "}
+            {t("\u00B7 Unmarked:")}{" "}
             {data.counts.registered - data.counts.present - data.counts.absent}
           </p>
           <p className="text-sm text-slate-600">
-            Attendance is available only after a published event starts.
-            Cancelled registrations are excluded.
+            {t(
+              "Attendance is available only after a published event starts. Cancelled registrations are excluded.",
+            )}
           </p>
           {data.items.length === 0 ? (
-            <p role="status">No registered participants.</p>
+            <p role="status">{t("No registered participants.")}</p>
           ) : (
             <div className="overflow-x-auto rounded-xl border">
               <table className="w-full min-w-[560px] text-left text-sm">
                 <caption className="sr-only">
-                  Private event participant list
+                  {t("Private event participant list")}
                 </caption>
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="p-3">Member</th>
-                    <th className="p-3">Registered (Dhaka)</th>
-                    <th className="p-3">Attendance</th>
-                    <th className="p-3">Mark attendance</th>
+                    <th className="p-3">{t("Member")}</th>
+                    <th className="p-3">{t("Registered (Dhaka)")}</th>
+                    <th className="p-3">{t("Attendance")}</th>
+                    <th className="p-3">{t("Mark attendance")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -125,7 +133,7 @@ export function EventAttendance({ id }: { id: string }) {
                     <tr key={item.id} className="border-t">
                       <td className="break-words p-3">{item.name}</td>
                       <td className="p-3">{eventDate(item.registeredAt)}</td>
-                      <td className="p-3">{item.attendance}</td>
+                      <td className="p-3">{t(item.attendance)}</td>
                       <td className="p-3">
                         <div className="flex gap-2">
                           {(["present", "absent"] as const).map(
@@ -142,8 +150,8 @@ export function EventAttendance({ id }: { id: string }) {
                                 onClick={() => setAction({ item, attendance })}
                               >
                                 {attendance === "present"
-                                  ? "Present"
-                                  : "Absent"}
+                                  ? t("Present")
+                                  : t("Absent")}
                               </Button>
                             ),
                           )}
@@ -156,7 +164,7 @@ export function EventAttendance({ id }: { id: string }) {
             </div>
           )}
           <nav
-            aria-label="Participant pages"
+            aria-label={t("Participant pages")}
             className="flex items-center gap-4"
           >
             <Button
@@ -167,9 +175,11 @@ export function EventAttendance({ id }: { id: string }) {
                 setPage((v) => v - 1);
               }}
             >
-              Previous page
+              {t("Previous page")}
             </Button>
-            <span>Page {page}</span>
+            <span>
+              {t("Page")} {page}
+            </span>
             <Button
               variant="outline"
               disabled={!data.hasNext}
@@ -178,19 +188,19 @@ export function EventAttendance({ id }: { id: string }) {
                 setPage((v) => v + 1);
               }}
             >
-              Next page
+              {t("Next page")}
             </Button>
           </nav>
         </>
       )}
       {action && (
         <EventConfirmation
-          title="Confirm attendance record?"
+          title={t("Confirm attendance record?")}
           busy={busy}
           onCancel={() => setAction(null)}
           onConfirm={() => void confirm()}
         >
-          Mark {action.item.name} as {action.attendance}?
+          {t("Mark")} {action.item.name} {t("as")} {t(action.attendance)}?
         </EventConfirmation>
       )}
     </main>

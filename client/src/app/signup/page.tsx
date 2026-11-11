@@ -1,13 +1,13 @@
 "use client";
 
+import { useT } from "@/components/i18n/language";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import toast from "react-hot-toast";
-
+import toast from "@/lib/i18n/toast";
 import { signUp } from "@/lib/auth-client";
 import { signupSchema, type SignupValues } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
@@ -27,15 +27,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 export default function SignupPage() {
+  const t = useT();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
-
   async function onSubmit(values: SignupValues) {
     try {
       const { error } = await signUp.email({
@@ -54,15 +53,14 @@ export default function SignupPage() {
       toast.error("Unable to connect to the server");
     }
   }
-
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">
-            <h1>Join NGC Science Club</h1>
+            <h1>{t("Join NGC Science Club")}</h1>
           </CardTitle>
-          <CardDescription>Create your student account</CardDescription>
+          <CardDescription>{t("Create your student account")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -72,10 +70,10 @@ export default function SignupPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full name</FormLabel>
+                    <FormLabel>{t("Full name")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Your full name"
+                        placeholder={t("Your full name")}
                         autoComplete="name"
                         {...field}
                       />
@@ -89,11 +87,11 @@ export default function SignupPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email address</FormLabel>
+                    <FormLabel>{t("Email address")}</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="student@example.com"
+                        placeholder={t("student@example.com")}
                         autoComplete="email"
                         {...field}
                       />
@@ -107,12 +105,12 @@ export default function SignupPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t("Password")}</FormLabel>
                     <div className="relative">
                       <FormControl>
                         <Input
                           type={showPassword ? "text" : "password"}
-                          placeholder="At least 8 characters"
+                          placeholder={t("At least 8 characters")}
                           autoComplete="new-password"
                           className="pr-10"
                           {...field}
@@ -121,7 +119,7 @@ export default function SignupPage() {
                       <button
                         type="button"
                         aria-label={
-                          showPassword ? "Hide password" : "Show password"
+                          showPassword ? t("Hide password") : t("Show password")
                         }
                         aria-pressed={showPassword}
                         onClick={() => setShowPassword((visible) => !visible)}
@@ -143,11 +141,11 @@ export default function SignupPage() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm password</FormLabel>
+                    <FormLabel>{t("Confirm password")}</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Re-enter your password"
+                        placeholder={t("Re-enter your password")}
                         autoComplete="new-password"
                         {...field}
                       />
@@ -164,21 +162,21 @@ export default function SignupPage() {
                 {form.formState.isSubmitting ? (
                   <>
                     <Loader2 className="animate-spin" aria-hidden="true" />
-                    Creating account...
+                    {t("Creating account...")}
                   </>
                 ) : (
-                  "Create account"
+                  t("Create account")
                 )}
               </Button>
             </form>
           </Form>
           <p className="mt-6 text-center text-sm text-slate-600">
-            Already have an account?{" "}
+            {t("Already have an account?")}{" "}
             <Link
               href="/login"
               className="font-medium text-blue-700 hover:underline"
             >
-              Sign in
+              {t("Sign in")}
             </Link>
           </p>
         </CardContent>

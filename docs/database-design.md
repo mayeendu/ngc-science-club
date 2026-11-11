@@ -1,5 +1,21 @@
 # Database design proposal
 
+Milestones 17–18 add no production collections or migrations. Production readiness performs only a bounded ping. Connected launch tests use fictional memory storage with both application database connection entry points disabled; live Atlas/GridFS verification remains pending.
+
+Milestones 14–16 introduce no collections or migrations. Reporting reads existing cohorts without personal projections. Certificate validity uses two batched source reads. Pool limits and candidate indexes are documented in query-index-plan.md; no Atlas indexes were applied.
+
+Milestone 13 adds `clubShowcase`, natural-registration-key `certificates` and token-key `certificateVerification`. Event/registration `certificateTick` counters serialize issuance with attendance updates. Public verification returns initials only. No live migrations or data writes are executed. See [certificate schema/uniqueness](achievements-gallery-certificates.md).
+
+Milestone 12 adds `learningResources` metadata with optimistic versions and private `resourceFiles` GridFS storage. Temporary uploads are linked by owner/version checks and cleaned on conflicts. No live migrations or uploads are run. See [resource storage design](learning-resources.md). Milestone 11 stores only a browser-local language preference and changes no business records.
+
+Milestone 10: `announcements` stores staff-owned public content and versions; `notificationReadStates` uses natural account/source keys and authoritative source revisions. Existing domain records supply the inbox. No indexes or migrations are applied. See [communication data and limitations](notifications-announcements.md).
+
+Milestone 09: `feedbackThreads` embeds at most 50 plain-text messages with server timestamps and versions. Private owner/teacher-assignment fields stay off non-admin responses. No schema/index migration is run. See [feedback fields and indexes](feedback-communication.md).
+
+## Milestone 08 faculty profiles
+
+`facultyProfiles` stores bounded public content, private teacher links and event assignments, optimistic versions and server timestamps. Archive clears assignments and unpublishes content. No account/role writes, migration or live index changes. See [schema and proposed indexes](faculty-management.md).
+
 ## Milestone 07 reporting
 
 No schema or index migration. Aggregate existing `quizAttempts` joined to `quizzes`, requiring submitted attempts, published/unarchived quizzes, closed state and released results. Student identity and teacher ownership come from the session. Project private fields away before responding; no answers or keys enter the analytics payload. Proposed indexes and validation limits are documented in [performance analytics](performance-analytics.md); none are applied automatically.

@@ -34,7 +34,11 @@ export function createAuthWithDatabase(
     trustedOrigins: [env.CLIENT_URL],
 
     rateLimit: authRateLimit,
-    advanced: { ipAddress: { ipAddressHeaders: [AUTH_IP_HEADER] } },
+    advanced: {
+      ipAddress: { ipAddressHeaders: [AUTH_IP_HEADER] },
+      ...(env.NODE_ENV === "production" ? { useSecureCookies: true } : {}),
+      defaultCookieAttributes: { httpOnly: true, sameSite: "lax" },
+    },
 
     emailAndPassword: {
       enabled: true,

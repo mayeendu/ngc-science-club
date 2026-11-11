@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import type { z } from "zod";
 import Link from "next/link";
@@ -22,6 +24,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 export function StudentResults() {
+  const t = useT();
   const [history, setHistory] = useState<z.infer<typeof historySchema> | null>(
       null,
     ),
@@ -64,23 +67,25 @@ export function StudentResults() {
   }
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
-      <h1 className="text-3xl font-bold">My quiz results and performance</h1>
+      <h1 className="text-3xl font-bold">
+        {t("My quiz results and performance")}
+      </h1>
       <p className="text-slate-600">
-        Only released results contribute to performance statistics.
+        {t("Only released results contribute to performance statistics.")}
       </p>
       <Button variant="outline" onClick={refresh}>
-        Refresh results
+        {t("Refresh results")}
       </Button>
       <Link
         href="/dashboard/student/quizzes"
         className="ml-4 text-blue-700 underline"
       >
-        Available quizzes
+        {t("Available quizzes")}
       </Link>
       {error ? (
-        <p role="alert">{error}</p>
+        <p role="alert">{t(error, undefined, true)}</p>
       ) : !history || !performance ? (
-        <p role="status">Loading results…</p>
+        <p role="status">{t("Loading results\u2026")}</p>
       ) : (
         <>
           <section className="grid gap-4 sm:grid-cols-3">
@@ -92,7 +97,7 @@ export function StudentResults() {
               <Card key={title}>
                 <CardHeader>
                   <CardTitle>
-                    <h2>{title}</h2>
+                    <h2>{t(title)}</h2>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -105,13 +110,13 @@ export function StudentResults() {
             <Card className="min-w-0">
               <CardHeader>
                 <CardTitle>
-                  <h2>Performance progress</h2>
+                  <h2>{t("Performance progress")}</h2>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div
                   role="img"
-                  aria-label="Student performance chart"
+                  aria-label={t("Student performance chart")}
                   className="min-w-0"
                 >
                   <ResponsiveContainer width="100%" height={280} minWidth={0}>
@@ -122,7 +127,7 @@ export function StudentResults() {
                       <Tooltip />
                       <Line
                         dataKey="percentage"
-                        name="Percentage"
+                        name={t("Percentage")}
                         stroke="#0f766e"
                         strokeWidth={2}
                         isAnimationActive={false}
@@ -133,11 +138,11 @@ export function StudentResults() {
               </CardContent>
             </Card>
           ) : (
-            <p role="status">No released results yet.</p>
+            <p role="status">{t("No released results yet.")}</p>
           )}
           {performance.subjects.length > 0 && (
             <section
-              aria-label="Subject performance"
+              aria-label={t("Subject performance")}
               className="grid gap-3 sm:grid-cols-2"
             >
               {performance.subjects.map((subject) => (
@@ -145,8 +150,8 @@ export function StudentResults() {
                   <CardContent className="pt-5">
                     <h2 className="font-semibold">{subject.subject}</h2>
                     <p>
-                      {subject.averagePercentage}% average across{" "}
-                      {subject.completed} results
+                      {subject.averagePercentage} {t("% average across")}{" "}
+                      {subject.completed} {t("results")}
                     </p>
                   </CardContent>
                 </Card>
@@ -154,21 +159,27 @@ export function StudentResults() {
             </section>
           )}
           <section>
-            <h2 className="mb-4 text-xl font-semibold">Attempt history</h2>
+            <h2 className="mb-4 text-xl font-semibold">
+              {t("Attempt history")}
+            </h2>
             {history.items.length === 0 ? (
-              <p>No attempts yet.</p>
+              <p>{t("No attempts yet.")}</p>
             ) : (
               <div className="overflow-x-auto rounded-xl border">
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr>
-                      {["Quiz", "Status", "Score", "Percentage", "Attempt"].map(
-                        (title) => (
-                          <th key={title} className="p-3">
-                            {title}
-                          </th>
-                        ),
-                      )}
+                      {[
+                        t("Quiz"),
+                        t("Status"),
+                        t("Score"),
+                        t("Percentage"),
+                        t("Attempt"),
+                      ].map((title) => (
+                        <th key={title} className="p-3">
+                          {t(title)}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
@@ -177,19 +188,19 @@ export function StudentResults() {
                         <td className="p-3">{item.title}</td>
                         <td className="p-3">
                           {item.status === "in_progress"
-                            ? "In progress"
+                            ? t("In progress")
                             : item.released
-                              ? "Released"
-                              : "Awaiting release"}
+                              ? t("Released")
+                              : t("Awaiting release")}
                         </td>
                         <td className="p-3">
                           {item.score === null
-                            ? "Held"
+                            ? t("Held")
                             : `${item.score} / ${item.totalMarks}`}
                         </td>
                         <td className="p-3">
                           {item.percentage === null
-                            ? "Held"
+                            ? t("Held")
                             : `${item.percentage}%`}
                         </td>
                         <td className="p-3">
@@ -198,8 +209,8 @@ export function StudentResults() {
                             className="text-blue-700 underline"
                           >
                             {item.status === "in_progress"
-                              ? "Resume attempt"
-                              : "View result"}
+                              ? t("Resume attempt")
+                              : t("View result")}
                           </Link>
                         </td>
                       </tr>
@@ -209,7 +220,7 @@ export function StudentResults() {
               </div>
             )}
           </section>
-          <nav className="flex gap-4" aria-label="Attempt history pages">
+          <nav className="flex gap-4" aria-label={t("Attempt history pages")}>
             <Button
               variant="outline"
               disabled={page === 1}
@@ -218,9 +229,11 @@ export function StudentResults() {
                 setPage((value) => value - 1);
               }}
             >
-              Previous
+              {t("Previous")}
             </Button>
-            <span>Page {page}</span>
+            <span>
+              {t("Page")} {page}
+            </span>
             <Button
               variant="outline"
               disabled={!history.hasNext}
@@ -229,7 +242,7 @@ export function StudentResults() {
                 setPage((value) => value + 1);
               }}
             >
-              Next
+              {t("Next")}
             </Button>
           </nav>
         </>

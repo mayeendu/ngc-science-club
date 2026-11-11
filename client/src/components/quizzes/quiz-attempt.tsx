@@ -1,8 +1,10 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import toast from "@/lib/i18n/toast";
 import {
   AssessmentError,
   readAttempt,
@@ -14,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 export function QuizAttempt({ id }: { id: string }) {
+  const t = useT();
   const [data, setData] = useState<AttemptState | null>(null),
     [choices, setChoices] = useState<(number | null)[]>([]),
     [index, setIndex] = useState(0);
@@ -178,24 +181,25 @@ export function QuizAttempt({ id }: { id: string }) {
         href="/dashboard/student/quizzes"
         className="text-blue-700 underline"
       >
-        Back to quizzes
+        {t("Back to quizzes")}
       </Link>
       {message && (
         <div role="alert" className="rounded-md border p-3">
           <p>{message}</p>
           {blocked && (
             <p className="mt-2 text-sm">
-              Reload server answers to continue. Unsaved local choices will be
-              replaced.
+              {t(
+                "Reload server answers to continue. Unsaved local choices will be replaced.",
+              )}
             </p>
           )}
         </div>
       )}
       {!data ? (
         <div>
-          <p role="status">Loading quiz…</p>
+          <p role="status">{t("Loading quiz\u2026")}</p>
           <Button variant="outline" onClick={() => void reload()}>
-            Retry quiz
+            {t("Retry quiz")}
           </Button>
         </div>
       ) : (
@@ -206,30 +210,29 @@ export function QuizAttempt({ id }: { id: string }) {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2>Quiz instructions</h2>
+                  <h2>{t("Quiz instructions")}</h2>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  {data.quiz.questionCount} questions ·{" "}
-                  {data.quiz.durationMinutes} minutes · {data.quiz.totalMarks}{" "}
-                  marks
+                  {data.quiz.questionCount} {t("questions \u00B7")}{" "}
+                  {data.quiz.durationMinutes} {t("minutes \u00B7")}{" "}
+                  {data.quiz.totalMarks} {t("marks")}
                 </p>
                 <p>
-                  One attempt only. The server starts and enforces your
-                  deadline. Answers autosave after selection; only successfully
-                  saved answers count if time expires. Results are held until
-                  the teacher closes the quiz and releases them.
+                  {t(
+                    "One attempt only. The server starts and enforces your deadline. Answers autosave after selection; only successfully saved answers count if time expires. Results are held until the teacher closes the quiz and releases them.",
+                  )}
                 </p>
                 <Button
                   disabled={busy || data.quiz.closed}
                   onClick={() => void start()}
                 >
                   {data.quiz.closed
-                    ? "Quiz closed"
+                    ? t("Quiz closed")
                     : busy
-                      ? "Starting…"
-                      : "Start quiz"}
+                      ? t("Starting\u2026")
+                      : t("Start quiz")}
                 </Button>
               </CardContent>
             </Card>
@@ -237,17 +240,19 @@ export function QuizAttempt({ id }: { id: string }) {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2>Attempt submitted</h2>
+                  <h2>{t("Attempt submitted")}</h2>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
                 {!attempt.result ? (
-                  <p role="status">Results are awaiting teacher release.</p>
+                  <p role="status">
+                    {t("Results are awaiting teacher release.")}
+                  </p>
                 ) : (
                   <>
                     <p className="text-xl font-bold">
-                      Score: {attempt.result.score} / {data.quiz.totalMarks} (
-                      {attempt.result.percentage}%)
+                      {t("Score:")} {attempt.result.score} /{" "}
+                      {data.quiz.totalMarks} ({attempt.result.percentage}%)
                     </p>
                     {attempt.result.review.map((review, i) => (
                       <section
@@ -255,19 +260,20 @@ export function QuizAttempt({ id }: { id: string }) {
                         className="space-y-2 rounded-md border p-4"
                       >
                         <h3 className="font-semibold">
-                          Question {i + 1}: {review.text}
+                          {t("Question")} {i + 1}: {review.text}
                         </h3>
                         <p>
-                          Your answer:{" "}
+                          {t("Your answer:")}{" "}
                           {review.selectedOption === null
-                            ? "Unanswered"
+                            ? t("Unanswered")
                             : review.options[review.selectedOption]}
                         </p>
                         <p>
-                          Correct answer: {review.options[review.correctOption]}
+                          {t("Correct answer:")}{" "}
+                          {review.options[review.correctOption]}
                         </p>
                         <p>
-                          Marks: {review.earnedMarks} / {review.marks}
+                          {t("Marks:")} {review.earnedMarks} / {review.marks}
                         </p>
                         <p className="whitespace-pre-wrap break-words">
                           {review.explanation}
@@ -281,50 +287,51 @@ export function QuizAttempt({ id }: { id: string }) {
                   onClick={() => void reload()}
                   disabled={busy}
                 >
-                  Refresh result
+                  {t("Refresh result")}
                 </Button>
                 <Link
                   href="/dashboard/student/results"
                   className="ml-4 text-blue-700 underline"
                 >
-                  My results
+                  {t("My results")}
                 </Link>
               </CardContent>
             </Card>
           ) : (
             <>
               <div className="flex flex-wrap justify-between gap-3 rounded-xl border bg-white p-4">
-                <p role="timer" aria-label="Time remaining">
+                <p role="timer" aria-label={t("Time remaining")}>
                   {Math.floor(remaining / 60)}:
-                  {String(remaining % 60).padStart(2, "0")} remaining
+                  {String(remaining % 60).padStart(2, "0")}
+                  {t("remaining")}
                 </p>
                 <p>
                   {choices.filter((value) => value !== null).length} /{" "}
-                  {attempt.questions.length} answered
+                  {attempt.questions.length} {t("answered")}
                 </p>
                 <p role="status">
                   {saving
-                    ? "Saving answers…"
+                    ? t("Saving answers\u2026")
                     : message
-                      ? "Check save status"
-                      : "Answers saved"}
+                      ? t("Check save status")
+                      : t("Answers saved")}
                 </p>
               </div>
               <progress
-                aria-label="Quiz progress"
+                aria-label={t("Quiz progress")}
                 max={attempt.questions.length}
                 value={choices.filter((value) => value !== null).length}
                 className="h-3 w-full accent-teal-600"
               />
               <nav
-                aria-label="Question navigation"
+                aria-label={t("Question navigation")}
                 className="flex flex-wrap gap-2"
               >
                 {attempt.questions.map((_, i) => (
                   <Button
                     key={i}
                     variant={index === i ? "default" : "outline"}
-                    aria-label={`Go to question ${i + 1}`}
+                    aria-label={t("Go to question {0}", [i + 1])}
                     aria-current={index === i ? "step" : undefined}
                     onClick={() => setIndex(i)}
                   >
@@ -338,17 +345,21 @@ export function QuizAttempt({ id }: { id: string }) {
                   <CardHeader>
                     <CardTitle>
                       <h2>
-                        Question {index + 1}: {question.text}
+                        {t("Question")} {index + 1}: {question.text}
                       </h2>
                     </CardTitle>
-                    <p>{question.marks} marks</p>
+                    <p>
+                      {question.marks} {t("marks")}
+                    </p>
                   </CardHeader>
                   <CardContent>
                     <fieldset
                       disabled={busy || blocked || remaining === 0}
                       className="space-y-3"
                     >
-                      <legend className="sr-only">Choose one answer</legend>
+                      <legend className="sr-only">
+                        {t("Choose one answer")}
+                      </legend>
                       {question.options.map((option, value) => (
                         <label
                           key={value}
@@ -365,7 +376,7 @@ export function QuizAttempt({ id }: { id: string }) {
                         </label>
                       ))}
                       <Button variant="outline" onClick={() => choose(null)}>
-                        Clear answer
+                        {t("Clear answer")}
                       </Button>
                     </fieldset>
                   </CardContent>
@@ -377,21 +388,21 @@ export function QuizAttempt({ id }: { id: string }) {
                   disabled={index === 0}
                   onClick={() => setIndex((value) => value - 1)}
                 >
-                  Previous question
+                  {t("Previous question")}
                 </Button>
                 <Button
                   variant="outline"
                   disabled={index >= attempt.questions.length - 1}
                   onClick={() => setIndex((value) => value + 1)}
                 >
-                  Next question
+                  {t("Next question")}
                 </Button>
                 <Button
                   variant="outline"
                   disabled={busy}
                   onClick={() => void reload()}
                 >
-                  Reload server answers
+                  {t("Reload server answers")}
                 </Button>
                 <Button
                   disabled={busy || blocked || remaining === 0}
@@ -404,7 +415,7 @@ export function QuizAttempt({ id }: { id: string }) {
                       void finish(false);
                   }}
                 >
-                  {busy ? "Submitting…" : "Submit quiz"}
+                  {busy ? t("Submitting\u2026") : t("Submit quiz")}
                 </Button>
                 {remaining === 0 && (
                   <Button
@@ -412,7 +423,7 @@ export function QuizAttempt({ id }: { id: string }) {
                     disabled={busy}
                     onClick={() => void finish(true)}
                   >
-                    Finalize expired attempt
+                    {t("Finalize expired attempt")}
                   </Button>
                 )}
               </div>

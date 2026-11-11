@@ -1,10 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { getHealth } from "../src/lib/api";
 
-const apiOrigin = `http://localhost:${process.env.E2E_SERVER_PORT ?? "5000"}`;
-const clientOrigin = `http://localhost:${process.env.E2E_CLIENT_PORT ?? "3000"}`;
+const apiOrigin = `http://localhost:${process.env.E2E_SERVER_PORT ?? "5101"}`;
+const clientOrigin = `http://localhost:${process.env.E2E_CLIENT_PORT ?? "3100"}`;
 
-test("server-rendered homepage connects to the real API", async ({ page }) => {
+test("server-rendered homepage connects to the isolated Express API", async ({
+  page,
+}) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "NGC Science Club",
@@ -37,7 +39,7 @@ test("API health, not-found response, and CORS origin are correct", async ({
     timestamp: expect.any(String),
   });
   expect(Number.isFinite(Date.parse(body.timestamp))).toBe(true);
-  expect(health.headers()["cache-control"]).toBe("no-store");
+  expect(health.headers()["cache-control"]).toBe("private, no-store");
   expect(health.headers()["access-control-allow-origin"]).toBe(clientOrigin);
   const otherOrigin = await request.get(`${apiOrigin}/api/health`, {
     headers: { Origin: "https://untrusted.example" },

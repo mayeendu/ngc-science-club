@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "check:production": "node scripts/check-production.mjs",
+    "check:links": "node scripts/check-links.mjs",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
@@ -21,7 +23,21 @@
     "test:quizzes": "playwright test --config playwright.quizzes.config.ts",
     "test:assessments": "playwright test --config playwright.assessments.config.ts",
     "test:events": "playwright test --config playwright.events.config.ts",
-    "test:performance": "playwright test --config playwright.performance.config.ts"
+    "test:performance": "playwright test --config playwright.performance.config.ts",
+    "test:faculty": "playwright test --config playwright.faculty.config.ts",
+    "test:feedback": "playwright test --config playwright.feedback.config.ts",
+    "test:communication": "playwright test --config playwright.communication.config.ts",
+    "test:club": "playwright test --config playwright.club.config.ts",
+    "test:i18n": "playwright test --config playwright.i18n.config.ts",
+    "check:i18n": "node scripts/build-translations.mjs && node scripts/check-translations.mjs",
+    "test:resources": "playwright test --config playwright.resources.config.ts",
+    "test:showcase": "playwright test --config playwright.showcase.config.ts",
+    "test:translations": "node --test tests/translations.test.mjs",
+    "test:deployment": "node --test tests/deployment.test.mjs",
+    "test:launch": "playwright test --config playwright.launch.config.ts",
+    "test:reports": "playwright test --config playwright.reports.config.ts",
+    "test:accessibility": "playwright test --config playwright.accessibility.config.ts",
+    "test:isolated": "playwright test --config playwright.isolated.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -36,7 +52,6 @@
     "react-hook-form": "^7.91.0",
     "react-hot-toast": "^2.6.1",
     "recharts": "3.10.1",
-    "shadcn": "^4.23.0",
     "tw-animate-css": "^1.4.0",
     "zod": "^4.6.7"
   },
@@ -50,6 +65,7 @@
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.5",
     "prettier": "3.9.10",
+    "shadcn": "4.23.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

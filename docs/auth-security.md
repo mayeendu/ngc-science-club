@@ -1,5 +1,7 @@
 # Milestone 03, Lesson 05: authentication hardening
 
+Latest verification: see [Milestone 16 security/testing](security-performance-testing.md) and [the roadmap](development-roadmap.md). Earlier failure counts and continuation scopes below describe their original checkpoint.
+
 ## Audit and implemented changes
 
 Authentication continues to use Better Auth 1.7.18 sessions and the existing MongoDB adapter. No real users, sessions, indexes, secrets, roles, deployment settings, or data were changed by this lesson. All test writes are to fictional memory fixtures.

@@ -1,176 +1,82 @@
 # NGC Science Club
 
-## Milestone 07
+Science Club management for Narsingdi Government College, Bangladesh. One repository contains an independent Next.js frontend and Express API, using TypeScript, MongoDB Atlas/GridFS and Better Auth.
 
-Student/teacher performance analytics: [behavior, APIs, verification and manual review](docs/performance-analytics.md).
+Milestones 01–16 are locally implemented and verified. Milestones 17–18 deployment and launch preparation are now complete within the local scope. **The platform has not been deployed or launched.** See [final project status](docs/final-project-status.md) for current verification and unresolved release requirements. This checkpoint includes Milestones 08–18; see Git history for its revision. The user has authorized committing and pushing this checkpoint.
 
-Milestone 06 adds public `/events`, activities/achievements, approved-member registration and My Events, staff-owned event CRUD, attendance and admin statistics. See [event management guide](docs/events.md) for routes, policies, files, test commands and MongoDB requirements.
+## Start here
 
-Milestone 05 Lessons 02–05 add approved-student quizzes, timed attempts, autosave, server scoring, released results/performance and teacher/admin reports. See [assessment guide](docs/quiz-assessments.md) for routes, policies, testing and MongoDB requirements. Earlier milestone notes below describe their original scope.
+- [Local setup and safe test commands](docs/setup-guide.md)
+- [Admin and teacher guide](docs/admin-guide.md)
+- [Production deployment preparation](docs/deployment-guide.md)
+- [Launch checklist and approval boundaries](docs/launch-checklist.md)
+- [Final project status](docs/final-project-status.md)
+- [Development roadmap and historical checkpoints](docs/development-roadmap.md)
 
-Milestone 05 Lesson 01 adds teacher/admin quiz management at `/dashboard/teacher/quizzes`. See [quiz management notes](docs/quiz-management.md) for fields, permissions, state/version rules and checks.
+Use Node 24.x and independent npm lockfiles. Local development runs at frontend port 3000 and API port 5000. Preserve existing private environment files; examples contain placeholders, not usable credentials. Never put secrets in NEXT_PUBLIC variables. Production requires reviewed HTTPS same-site frontend/API domains and private host-managed backend credentials.
 
-Milestone 04 Lesson 05 adds admin `/dashboard/admin/analytics` with backend-calculated membership KPIs and charts. See [analytics notes](docs/membership-analytics.md) for date/cohort definitions, privacy and checks.
+## Features
 
-Milestone 04 Lesson 04 adds approved-student member profile management at `/dashboard/student/profile`. See [profile notes](docs/member-profile-management.md) for protected fields, synchronization and test commands.
+| Area                        | Behavior and guide                                                                                                                                                    |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Authentication and roles    | Better Auth credentials/sessions; students by default; fresh Express RBAC. [Security](docs/security-performance-testing.md)                                           |
+| Membership                  | Student applications, admin decisions, approved public directory and private own-profile editing. [Membership](docs/membership-review.md)                             |
+| Quizzes                     | Staff ownership, transactional timed attempts, autosave, server scoring, close/manual release and scoped reports. [Quizzes](docs/quiz-assessments.md)                 |
+| Events                      | Published/cancelled events, capacity-safe registration, attendance and assignments. [Events](docs/events.md)                                                          |
+| Analytics                   | Own student performance, scoped teacher comparisons and admin aggregate reports/exports. [Reports](docs/admin-reporting.md)                                           |
+| Faculty                     | Public mentor profiles, admin CRUD and existing-teacher activity assignments; profiles never grant roles. [Faculty](docs/faculty-management.md)                       |
+| Communication               | Private feedback, assigned staff replies, announcements and user-specific notification inbox. [Communication](docs/notifications-announcements.md)                    |
+| Languages and accessibility | Default Bangla/English, persistent preference, light/dark/system mode, keyboard focus and responsive UI. [UI](docs/ui-accessibility.md)                               |
+| Learning resources          | Category/search filters, private GridFS downloads, file validation and staff-owned publishing. [Library](docs/learning-resources.md)                                  |
+| Showcase and certificates   | Public achievements/gallery, attendance-based printable certificates and initials-only public verification. [Certificates](docs/achievements-gallery-certificates.md) |
 
-Milestone 04 Lesson 03 adds public `/members` directory and individual profiles from approved applications. See [directory notes](docs/member-directory.md) for privacy rules, API parameters and test commands.
-
-Milestone 04 Lesson 02 adds admin membership review at `/dashboard/admin/memberships`. See [review documentation](docs/membership-review.md) for confirmation, validation, concurrency rules and test commands.
-
-Milestone 04 Lesson 01 adds the student membership application and private dashboard status. See [membership application notes](docs/membership-application.md) for endpoints, files, commands and manual checks. Admin approval is not implemented.
-
-Milestone 03 Lesson 05 adds authentication rate limiting, security headers, safer error logging, environment validation, and isolated security tests. See [authentication hardening](docs/auth-security.md) for policies, commands, audit findings, and deployment limits.
-
-Current checkpoint: [secure first-administrator bootstrap](docs/admin-bootstrap.md). Offline tooling is implemented and tested without live database writes. Do not execute promotion without explicit approval for the reviewed account. The read-only inspection currently found no administrator and no eligible verified student.
-
-A planned Science Club management platform for Narsingdi Government College, Bangladesh.
-
-Status: Milestones 01/02 completed; Milestone 03, Lesson 01 adds Better Auth server integration. The Next.js homepage still connects to Express health. Frontend authentication, RBAC, membership workflows and quizzes remain later lessons.
-
-Subsequently approved: the client auth helper, validation schemas, global Toaster and /signup page. See [signup page notes](docs/signup-page.md) for implementation details and ten passing mocked browser checks. Login, RBAC and membership workflows remain future tasks.
-
-## Better Auth server lesson
-
-See [Lesson 01 notes](docs/milestone-03-lesson-01.md) for configuration, index setup, test results and manual checks. The backend requires BETTER_AUTH_URL and a private BETTER_AUTH_SECRET in addition to MongoDB settings. Run `npm.cmd --prefix server run auth:secret` to generate a missing local secret without printing it; existing secrets are preserved. Do not overwrite your configured .env with an example.
-
-`npm.cmd --prefix server run test:auth` builds and tests email/password authentication using a temporary Atlas database and fictional accounts, then cleans it up. MongoDB access must permit that test database. Existing public endpoints are /api/health and /api/members/count; Better Auth runs under /api/auth.
-
-## Planning documents
-
-- [Requirements and open questions](docs/requirements.md)
-- [Architecture and security](docs/architecture.md)
-- [Database design](docs/database-design.md)
-- [API design](docs/api-design.md)
-- [Development roadmap](docs/development-roadmap.md)
-
-## Requirements and structure
-
-Use Node.js 24.x (verified: 24.19.0) and npm (verified: 12.2.1). Each app has its own package.json and lockfile. On Windows PowerShell use npm.cmd/npx.cmd if .ps1 execution is blocked; no execution-policy change is needed.
+## Structure
 
 ```text
-client/src/app/          App Router pages, layout and styles
-client/src/components/  Earlier bilingual foundation components (not the active homepage)
-client/src/lib/         API request and translation dictionary
-client/tests/           Playwright smoke checks
-server/src/app.ts       Express routes and CORS
-server/src/config/env.ts Validated environment configuration
-server/src/config/db.ts  Database placeholder for a later milestone
-server/src/middleware/   Not-found and centralized error handlers
-server/src/modules/members/ Member module placeholders
-server/src/utils/        Application error class
-server/src/index.ts     Listener and shutdown
-docs/                   Requirements, design and milestone notes
-AGENTS.md               Project and mentoring conventions
+client/src/app/          Public pages and guarded App Router dashboards
+client/src/components/  Shared UI, localization, theme and feature components
+client/src/lib/         Browser API helpers, schemas and dictionaries
+client/tests/           Mocked, connected-memory and foundation browser suites
+server/src/modules/     Validated business APIs and MongoDB repositories
+server/src/lib/         Better Auth, authorization and lifecycle helpers
+server/src/config/      Private environment and database configuration
+server/scripts/         Offline/admin tooling and isolated test fixtures
+server/tests/           Memory-only security/workflow/concurrency tests
+docs/                   Architecture, operations, milestones and release evidence
 ```
 
-## First-time setup
+## Verify locally
 
-Run from the repository root. Preserve existing environment files if already configured.
-
-```powershell
-npm.cmd --prefix client ci
-npm.cmd --prefix server ci
-Copy-Item client/.env.example client/.env.local
-Copy-Item server/.env.example server/.env
-```
-
-Start the backend in terminal 1:
+From the repository root, install each app with `npm.cmd --prefix server ci` and `npm.cmd --prefix client ci --include=dev`. Follow [setup](docs/setup-guide.md) before starting real services. The isolated suites require no Atlas connection.
 
 ```powershell
-cd server
-npm.cmd run dev
-```
-
-Start the frontend in terminal 2:
-
-```powershell
-cd client
-npm.cmd run dev
-```
-
-Open http://localhost:3000 and http://localhost:5000/api/health. Use localhost consistently; 127.0.0.1 is a different CORS origin. Stop each with Ctrl+C. Defaults work without environment files in this milestone.
-
-## Environment variables
-
-| App    | Variable                 | Default / purpose                                                           |
-| ------ | ------------------------ | --------------------------------------------------------------------------- |
-| Client | API_URL                  | http://localhost:5000; server-side API origin, with public/default fallback |
-| Client | NEXT_PUBLIC_API_BASE_URL | http://localhost:5000; optional browser API origin                          |
-| Server | PORT                     | 5000; integer from 1 to 65535                                               |
-| Server | CLIENT_URL               | http://localhost:3000; exact frontend origin, no trailing slash             |
-
-Next.js loads .env.local. The backend loads .env through dotenv in config/env.ts. NEXT_PUBLIC values are visible in browser code: never put secrets there. Restart after config changes; rebuild production client for API URL changes.
-
-The active homepage calls Express from the Next.js server. API_URL takes priority there, then NEXT_PUBLIC_API_BASE_URL, then the localhost default. It validates the JSON response and streams the status inside Suspense; the static page shell builds without Express running. CORS is not required for this server-to-server call, but is configured and tested for future direct browser requests. CORS is not authentication. Cookies are not used yet. Production cookie/origin integration must be reviewed before Better Auth.
-
-## Checks and production builds
-
-Both apps provide dev, build, start, lint, typecheck, format, and format:check. dev watches source; build produces production output; start runs that output. Run from the repository root:
-
-```powershell
-npm.cmd --prefix server run lint
 npm.cmd --prefix server run typecheck
+npm.cmd --prefix server run typecheck:scripts
+npm.cmd --prefix server run lint
 npm.cmd --prefix server run build
-npm.cmd --prefix server run format:check
-npm.cmd --prefix client run lint
+npm.cmd --prefix server run test:isolated
+npm.cmd --prefix client run check:i18n
+npm.cmd --prefix client run check:links
+npm.cmd --prefix client run test:translations
+npm.cmd --prefix client run test:deployment
 npm.cmd --prefix client run typecheck
+npm.cmd --prefix client run lint
 npm.cmd --prefix client run build
-npm.cmd --prefix client run format:check
+$env:PLAYWRIGHT_CHANNEL = 'msedge'
+npm.cmd --prefix client run test:isolated
+npm.cmd --prefix client run test:i18n
+npm.cmd --prefix client run test:e2e
+npm.cmd --prefix client run test:launch
 ```
 
-After building, stop development servers and run production servers in separate terminals:
+Run browser commands sequentially; reserve ports 3100/5101/5102 and build the backend before fixture APIs. Use the Playwright Chromium option in the setup guide if Edge is unavailable. `test:isolated` disables application database connections and excludes Atlas integration. `test:auth` now uses memory, not Atlas. Never run wildcard backend tests. The explicit Atlas authentication test and first-admin execution write data and require separate approval.
 
-```powershell
-npm.cmd --prefix server run start
-```
+`GET /api/health` reports liveness; `GET /api/ready` checks database readiness. Production preparation adds environment preflights, graceful shutdown and Vercel settings without creating hosting resources. No startup command applies application indexes or promotes an account.
 
-```powershell
-npm.cmd --prefix client run start
-```
+## Known release limits
 
-## Browser checks
+Live Atlas/GridFS transaction tests, staging cookie/DNS/TLS checks, index provisioning, production load/monitoring/recovery exercises, verified admin/teacher provisioning, email verification/recovery delivery, and exhaustive manual accessibility review remain external release requirements. Full development dependency audits retain documented findings even when runtime audits are clean. Notifications are in-app; certificates are browser printable PDFs, not digitally signed credentials. See [final status](docs/final-project-status.md) and [launch checklist](docs/launch-checklist.md).
 
-Build both apps first. Playwright starts production servers if none are running, and refuses to reuse existing servers, so it always tests the built code.
+## Design references
 
-```powershell
-cd client
-npx.cmd playwright install chromium
-npm.cmd run test:e2e
-```
-
-Alternatively, use an already-installed Microsoft Edge:
-
-```powershell
-$env:PLAYWRIGHT_CHANNEL = "msedge"
-npm.cmd run test:e2e
-```
-
-Manual testing:
-
-1. Open the homepage and wait for the connected status.
-2. Check the page at narrow/mobile widths.
-3. Stop Express and refresh the homepage. A readable failure appears within five seconds.
-4. Restart Express and refresh the homepage; it shows the live API message again.
-5. Inspect GET /api/health directly or run the automated CORS test. The homepage request runs on the Next.js server, so it does not appear as a browser-to-Express Network request.
-6. Open http://localhost:5000/api/missing and confirm HTTP 404.
-
-```powershell
-Invoke-RestMethod http://localhost:5000/api/health
-```
-
-## Hosting and limits
-
-Vercel project root is client. Express is a separate service whose host is not yet selected. For deployment use its HTTPS URL in NEXT_PUBLIC_API_BASE_URL and the exact frontend origin in CLIENT_URL. No deployment has been performed. Production same-origin routing and session cookies remain future integration work.
-
-The health endpoint checks process availability, not database readiness. English/Bangla messages and the earlier foundation component remain available, but the active simplified homepage currently uses English. Full language support remains a confirmed requirement for subsequent UI milestones.
-
-Runtime-only audits reported zero vulnerabilities. Full audits reported 8 moderate client and 10 moderate server development-tooling findings. Client ESLint 9 is retained because bundled Next.js plugins do not yet accept ESLint 10; server uses ESLint 10. Review compatible upstream fixes before launch rather than running npm audit fix --force.
-
-See [Milestone 01 notes](docs/milestone-01.md) for package explanations and verification evidence.
-
-## Milestone 03, Lesson 04, Checkpoint C
-
-Checkpoint D now adds role-aware navbar links, `/dashboard` routing, three guarded placeholder dashboards, and desktop/mobile regression coverage. See the [dashboard guide](docs/role-dashboards.md) for files, commands, permissions, and security limitations. Express remains the authorization boundary.
-
-Server role guards enforce exact student/teacher/admin permissions using verified Better Auth sessions and fresh MongoDB role reads. See [RBAC implementation and testing](docs/rbac.md) for the route matrix, file guide, commands, security policy, and limitations. No account roles are changed by this checkpoint.
+[Requirements](docs/requirements.md), [architecture](docs/architecture.md), [database design](docs/database-design.md), [API design](docs/api-design.md), [query/index plan](docs/query-index-plan.md), and [first-admin bootstrap](docs/admin-bootstrap.md). Historical milestone guides preserve their original scope and evidence; the roadmap and final status supersede old continuation instructions.

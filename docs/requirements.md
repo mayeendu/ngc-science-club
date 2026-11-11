@@ -1,5 +1,19 @@
 # Requirements and decisions
 
+Milestones 17–18: production preparation and final local launch checks are approved; no live deployment or publishing. Vercel/client and long-running Node/Express settings, private production templates, offline environment preflights, database readiness and bounded shutdown are implemented. Setup/admin/release guides and connected memory-browser verification are added. See final-project-status.md for verified counts and unresolved staging prerequisites.
+
+Milestones 14–16: unified admin aggregate reports with CSV/browser PDF, saved system/light/dark appearance, shared accessibility improvements, exact auth mutation Origin checks, bounded API limits, and database-disabled test tooling. No production deployment, index writes or launch is authorized. See admin-reporting.md, ui-accessibility.md and security-performance-testing.md.
+
+Milestone 13 adds public achievements/gallery with staff-owned management, attendance-based transactional certificates, own history and browser print/Save as PDF. Public verification exposes initials and event metadata only; full recipient data remains private. Corrections/revocations affect online validity. See [certificate and showcase policies](achievements-gallery-certificates.md). This request ends at Milestone 13; no deployment/launch is performed.
+
+Milestone 11 adds application-wide Bangla/English switching, default Bangla, stored preference and dictionary/coverage checks; user-authored content is preserved. See [bilingual support](bilingual-support.md). Milestone 12 adds private GridFS learning resources in six science categories, teacher-owned management, approved-student browsing/downloads, HTTPS links and 5 MiB structural file validation. See [learning resource policies](learning-resources.md).
+
+Milestone 10 adds staff-owned announcement publish controls, public announcements and a current-state private notification inbox covering own membership decisions, approved-student quizzes/results and registered events. Read/unread state is account/revision scoped. No external delivery. See [notifications and announcements](notifications-announcements.md).
+
+Milestone 09 adds authenticated private feedback/suggestions, own history, versioned replies and status tracking, admin assignment, and assigned-teacher management. Plain text, bounded threads, no public or external messages. See [feedback policies](feedback-communication.md).
+
+Milestone 08 adds admin-managed faculty profiles and explicitly assigned teacher activities, separate from authentication accounts. Profile creation never grants roles; links require an existing active teacher. Public profiles exclude account links and assignments. See [faculty management](faculty-management.md). The user has authorized sequential implementation through Milestone 18; deployment and launch still require explicit approval.
+
 ## Milestone 07 scope update
 
 The user confirms Milestones 01–06 complete and requests sequential Milestones 07–18. Milestone 07 adds own released student scores/progress/history and teacher-owned cross-quiz comparisons/rankings with date/subject filters. Admins can inspect all released quiz data. Retain private event participation history and existing per-quiz reports. No public leaderboard; no unreleased score disclosure. See [performance analytics](performance-analytics.md) for definitions and limitations.

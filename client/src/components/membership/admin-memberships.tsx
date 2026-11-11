@@ -1,8 +1,9 @@
 "use client";
 
+import { useT } from "@/components/i18n/language";
 import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import toast from "@/lib/i18n/toast";
 import {
   AdminMembershipError,
   listMemberships,
@@ -15,12 +16,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AccessDenied } from "@/components/auth/access-state";
-
 type Selection = {
   application: AdminMembership;
   decision: "approved" | "rejected";
 };
 export function AdminMemberships() {
+  const t = useT();
   const [status, setStatus] = useState<MembershipStatus>("pending");
   const [page, setPage] = useState(1);
   const [revision, setRevision] = useState(0);
@@ -35,7 +36,6 @@ export function AdminMemberships() {
   const heading = useId();
   const reasonId = useId();
   const router = useRouter();
-
   useEffect(() => {
     const controller = new AbortController();
     listMemberships(status, page, controller.signal)
@@ -122,14 +122,15 @@ export function AdminMemberships() {
   if (denied) return <AccessDenied />;
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-10">
-      <h1 className="text-3xl font-bold">Membership applications</h1>
+      <h1 className="text-3xl font-bold">{t("Membership applications")}</h1>
       <p className="text-slate-600">
-        Review student applications. Each pending application can be reviewed
-        once.
+        {t(
+          "Review student applications. Each pending application can be reviewed once.",
+        )}
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor="membership-filter" className="font-medium">
-          Status
+          {t("Status")}
         </label>
         <select
           id="membership-filter"
@@ -149,24 +150,26 @@ export function AdminMemberships() {
           }}
           className="rounded-md border bg-white px-3 py-2"
         >
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
+          <option value="pending">{t("Pending")}</option>
+          <option value="approved">{t("Approved")}</option>
+          <option value="rejected">{t("Rejected")}</option>
         </select>
         <Button variant="outline" onClick={refresh}>
-          Refresh applications
+          {t("Refresh applications")}
         </Button>
       </div>
       {error ? (
         <p role="alert" className="text-red-700">
-          {error}
+          {t(error, undefined, true)}
         </p>
       ) : !result ? (
-        <p role="status">Loading applications…</p>
+        <p role="status">{t("Loading applications\u2026")}</p>
       ) : (
         <>
           {result.applications.length === 0 && (
-            <p role="status">No {status} applications on this page.</p>
+            <p role="status">
+              {t("No")} {status} {t("applications on this page.")}
+            </p>
           )}
           <div className="space-y-5">
             {result.applications.map((application) => (
@@ -176,7 +179,7 @@ export function AdminMemberships() {
                     <h2 className="text-xl">{application.fullName}</h2>
                   </CardTitle>
                   <span className="w-fit rounded-full bg-teal-50 px-3 py-1 text-sm font-medium capitalize text-teal-800">
-                    {application.status}
+                    {t(application.status)}
                   </span>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -194,38 +197,40 @@ export function AdminMemberships() {
                       ],
                     ].map(([label, value]) => (
                       <div key={label} className="min-w-0">
-                        <dt className="font-medium text-slate-600">{label}</dt>
+                        <dt className="font-medium text-slate-600">
+                          {t(label)}
+                        </dt>
                         <dd className="break-words">{value}</dd>
                       </div>
                     ))}
                   </dl>
                   <div>
-                    <h3 className="font-medium">Reason for joining</h3>
+                    <h3 className="font-medium">{t("Reason for joining")}</h3>
                     <p className="whitespace-pre-wrap break-words text-slate-600">
                       {application.reason}
                     </p>
                   </div>
                   {application.reviewedAt && (
                     <p className="text-sm">
-                      Reviewed:{" "}
+                      {t("Reviewed:")}{" "}
                       {new Date(application.reviewedAt).toLocaleString("en-GB")}
                     </p>
                   )}
                   {application.rejectionReason && (
                     <p className="whitespace-pre-wrap break-words text-red-700">
-                      Rejection reason: {application.rejectionReason}
+                      {t("Rejection reason:")} {application.rejectionReason}
                     </p>
                   )}
                   {application.status === "pending" && (
                     <div className="flex flex-wrap gap-3">
                       <Button onClick={() => open(application, "approved")}>
-                        Approve
+                        {t("Approve")}
                       </Button>
                       <Button
                         variant="outline"
                         onClick={() => open(application, "rejected")}
                       >
-                        Reject
+                        {t("Reject")}
                       </Button>
                     </div>
                   )}
@@ -242,9 +247,11 @@ export function AdminMemberships() {
                 setResult(null);
               }}
             >
-              Previous
+              {t("Previous")}
             </Button>
-            <span>Page {page}</span>
+            <span>
+              {t("Page")} {page}
+            </span>
             <Button
               variant="outline"
               disabled={!result.hasNext || page >= 1000}
@@ -253,7 +260,7 @@ export function AdminMemberships() {
                 setResult(null);
               }}
             >
-              Next
+              {t("Next")}
             </Button>
           </div>
         </>
@@ -278,17 +285,17 @@ export function AdminMemberships() {
           >
             <h2 id={heading} className="text-xl font-bold">
               {selection.decision === "approved"
-                ? "Approve application?"
-                : "Reject application?"}
+                ? t("Approve application?")
+                : t("Reject application?")}
             </h2>
             <p>
-              Confirm your decision for {selection.application.fullName}. Only
-              pending applications can be reviewed.
+              {t("Confirm your decision for")} {selection.application.fullName}{" "}
+              {t(". Only pending applications can be reviewed.")}
             </p>
             {selection.decision === "rejected" && (
               <div>
                 <label htmlFor={reasonId} className="font-medium">
-                  Rejection reason
+                  {t("Rejection reason")}
                 </label>
                 <textarea
                   id={reasonId}
@@ -301,7 +308,9 @@ export function AdminMemberships() {
                   className="mt-2 w-full rounded-md border p-3"
                 />
                 <p className="text-sm text-slate-600">
-                  5–1000 characters. This reason is visible to the student.
+                  {t(
+                    "5\u20131000 characters. This reason is visible to the student.",
+                  )}
                 </p>
               </div>
             )}
@@ -317,14 +326,14 @@ export function AdminMemberships() {
                 disabled={busy}
                 onClick={() => setSelection(null)}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={busy}>
                 {busy
-                  ? "Saving review…"
+                  ? t("Saving review\u2026")
                   : selection.decision === "approved"
-                    ? "Confirm approval"
-                    : "Confirm rejection"}
+                    ? t("Confirm approval")
+                    : t("Confirm rejection")}
               </Button>
             </div>
           </form>

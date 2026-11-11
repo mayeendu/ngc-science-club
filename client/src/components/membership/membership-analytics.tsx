@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -24,11 +25,11 @@ import { AccessDenied } from "@/components/auth/access-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
 export function AnalyticsSkeleton() {
+  const t = useT();
   return (
-    <div role="status" aria-label="Loading analytics">
-      <span className="sr-only">Loading membership analytics</span>
+    <div role="status" aria-label={t("Loading analytics")}>
+      <span className="sr-only">{t("Loading membership analytics")}</span>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {Array.from({ length: 5 }, (_, index) => (
           <div
@@ -46,6 +47,7 @@ export function AnalyticsSkeleton() {
   );
 }
 export function MembershipAnalyticsDashboard() {
+  const t = useT();
   const [draft, setDraft] = useState(defaultAnalyticsDates);
   const [dates, setDates] = useState(draft);
   const [data, setData] = useState<MembershipAnalytics | null>(null);
@@ -84,12 +86,13 @@ export function MembershipAnalyticsDashboard() {
       <div className="mx-auto max-w-7xl space-y-6">
         <header>
           <p className="mb-2 text-sm font-semibold text-teal-700">
-            NGC Science Club
+            {t("NGC Science Club")}
           </p>
-          <h1 className="text-3xl font-bold">Membership analytics</h1>
+          <h1 className="text-3xl font-bold">{t("Membership analytics")}</h1>
           <p className="mt-3 text-slate-600">
-            Application activity and newly approved membership, calculated by
-            the API.
+            {t(
+              "Application activity and newly approved membership, calculated by the API.",
+            )}
           </p>
         </header>
         <form
@@ -102,7 +105,7 @@ export function MembershipAnalyticsDashboard() {
               !Number.isFinite(start) ||
               !Number.isFinite(end) ||
               start > end ||
-              end - start >= 731 * 86_400_000
+              end - start >= 731 * 86400000
             ) {
               setError("Select valid dates in order, at most 731 days apart.");
               setData(null);
@@ -117,7 +120,7 @@ export function MembershipAnalyticsDashboard() {
               htmlFor="analytics-from"
               className="mb-2 block text-sm font-medium"
             >
-              From date (UTC)
+              {t("From date (UTC)")}
             </label>
             <Input
               id="analytics-from"
@@ -136,7 +139,7 @@ export function MembershipAnalyticsDashboard() {
               htmlFor="analytics-to"
               className="mb-2 block text-sm font-medium"
             >
-              To date (UTC)
+              {t("To date (UTC)")}
             </label>
             <Input
               id="analytics-to"
@@ -150,16 +153,16 @@ export function MembershipAnalyticsDashboard() {
               }
             />
           </div>
-          <Button type="submit">Apply date range</Button>
+          <Button type="submit">{t("Apply date range")}</Button>
           <Button type="button" variant="outline" onClick={refresh}>
-            Refresh analytics
+            {t("Refresh analytics")}
           </Button>
         </form>
         {error ? (
           <div role="alert" className="rounded-xl border bg-white p-5">
-            <p>{error}</p>
+            <p>{t(error, undefined, true)}</p>
             <Button className="mt-3" variant="outline" onClick={refresh}>
-              Retry analytics
+              {t("Retry analytics")}
             </Button>
           </div>
         ) : !data ? (
@@ -172,6 +175,7 @@ export function MembershipAnalyticsDashboard() {
   );
 }
 function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
+  const t = useT();
   const kpis = [
     ["Total applications", data.kpis.totalApplications],
     ["Pending", data.kpis.pending],
@@ -185,19 +189,20 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
   return (
     <>
       <p className="text-sm text-slate-600">
-        {data.range.from} to {data.range.to}, inclusive UTC. KPIs use submission
-        dates and current status; approval rate is approved / total
-        applications. Charts of members use approval dates.
+        {data.range.from} {t("to")} {data.range.to}{" "}
+        {t(
+          ", inclusive UTC. KPIs use submission dates and current status; approval rate is approved / total applications. Charts of members use approval dates.",
+        )}
       </p>
       <section
-        aria-label="Membership KPIs"
+        aria-label={t("Membership KPIs")}
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5"
       >
         {kpis.map(([label, value]) => (
           <Card key={label}>
             <CardHeader>
               <CardTitle>
-                <h2 className="text-sm text-slate-600">{label}</h2>
+                <h2 className="text-sm text-slate-600">{t(label)}</h2>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -209,20 +214,21 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
       <Card>
         <CardHeader>
           <CardTitle>
-            <h2>Application trend</h2>
+            <h2>{t("Application trend")}</h2>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p>
             {data.trend.change >= 0 ? "+" : ""}
-            {data.trend.change} applications versus the preceding equal-length
-            period.
+            {data.trend.change}{" "}
+            {t("applications versus the preceding equal-length period.")}
           </p>
           <p className="mt-2 text-sm text-slate-600">
             {data.trend.changePercent === null
-              ? "No previous applications for a percentage comparison."
-              : `${data.trend.changePercent}% change`}{" "}
-            Previous period: {data.trend.previousApplications} applications.
+              ? t("No previous applications for a percentage comparison.")
+              : t("{0}% change", [data.trend.changePercent])}{" "}
+            {t("Previous period:")} {data.trend.previousApplications}{" "}
+            {t("applications.")}
           </p>
         </CardContent>
       </Card>
@@ -232,11 +238,12 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
           className="rounded-xl border bg-white p-8 text-center"
         >
           <h2 className="text-xl font-semibold">
-            No membership activity in this range
+            {t("No membership activity in this range")}
           </h2>
           <p className="mt-2 text-slate-600">
-            Choose another date range after applications or approvals are
-            recorded.
+            {t(
+              "Choose another date range after applications or approvals are recorded.",
+            )}
           </p>
         </div>
       ) : (
@@ -244,12 +251,12 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
           <Card className="min-w-0">
             <CardHeader>
               <CardTitle>
-                <h2>Monthly membership growth</h2>
+                <h2>{t("Monthly membership growth")}</h2>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div
-                aria-label="Monthly membership growth chart"
+                aria-label={t("Monthly membership growth chart")}
                 role="img"
                 className="min-w-0"
               >
@@ -263,7 +270,7 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
                     <Line
                       type="monotone"
                       dataKey="applications"
-                      name="Applications"
+                      name={t("Applications")}
                       stroke="#1d4ed8"
                       strokeWidth={2}
                       isAnimationActive={false}
@@ -284,16 +291,16 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
           <Card className="min-w-0">
             <CardHeader>
               <CardTitle>
-                <h2>Department membership distribution</h2>
+                <h2>{t("Department membership distribution")}</h2>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {data.departments.length === 0 ? (
-                <p>No approved members in this date range.</p>
+                <p>{t("No approved members in this date range.")}</p>
               ) : (
                 <div
                   role="img"
-                  aria-label="Department membership distribution chart"
+                  aria-label={t("Department membership distribution chart")}
                   className="min-w-0"
                 >
                   <ResponsiveContainer width="100%" height={300} minWidth={0}>
@@ -319,16 +326,18 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
       )}
       <details className="rounded-xl border bg-white p-5">
         <summary className="cursor-pointer font-medium">
-          View chart data
+          {t("View chart data")}
         </summary>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <caption className="mb-3 text-left">Monthly activity (UTC)</caption>
+            <caption className="mb-3 text-left">
+              {t("Monthly activity (UTC)")}
+            </caption>
             <thead>
               <tr>
-                <th className="p-2">Month</th>
-                <th className="p-2">Applications</th>
-                <th className="p-2">New approved members</th>
+                <th className="p-2">{t("Month")}</th>
+                <th className="p-2">{t("Applications")}</th>
+                <th className="p-2">{t("New approved members")}</th>
               </tr>
             </thead>
             <tbody>
@@ -343,12 +352,12 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
           </table>
           <table className="mt-5 w-full text-left text-sm">
             <caption className="mb-3 text-left">
-              Approved members by department
+              {t("Approved members by department")}
             </caption>
             <thead>
               <tr>
-                <th className="p-2">Department</th>
-                <th className="p-2">Members</th>
+                <th className="p-2">{t("Department")}</th>
+                <th className="p-2">{t("Members")}</th>
               </tr>
             </thead>
             <tbody>
@@ -365,15 +374,17 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
       <Card>
         <CardHeader>
           <CardTitle>
-            <h2>Recent applications</h2>
+            <h2>{t("Recent applications")}</h2>
           </CardTitle>
           <p className="text-sm text-slate-600">
-            Anonymous activity summaries; no student details are included.
+            {t(
+              "Anonymous activity summaries; no student details are included.",
+            )}
           </p>
         </CardHeader>
         <CardContent>
           {data.recent.length === 0 ? (
-            <p>No recent applications in this range.</p>
+            <p>{t("No recent applications in this range.")}</p>
           ) : (
             <ul className="divide-y">
               {data.recent.map((item, index) => (
@@ -381,12 +392,12 @@ function AnalyticsContent({ data }: { data: MembershipAnalytics }) {
                   key={index}
                   className="flex flex-wrap justify-between gap-3 py-3 text-sm"
                 >
-                  <span className="capitalize">{item.status}</span>
+                  <span className="capitalize">{t(item.status)}</span>
                   <time dateTime={item.submittedAt}>
                     {new Date(item.submittedAt).toLocaleString("en-GB", {
                       timeZone: "UTC",
                     })}{" "}
-                    UTC
+                    {t("UTC")}
                   </time>
                 </li>
               ))}

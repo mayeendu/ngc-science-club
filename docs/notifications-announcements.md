@@ -1,0 +1,34 @@
+Current checkpoint: see [development roadmap](development-roadmap.md). Continuation instructions below are historical and superseded by the latest Milestone 13 checkpoint.
+
+# Milestone 10 — Notifications and announcements
+
+Teachers create/edit/archive their own announcements; admins manage all. Announcement content is bounded plain text, draft or published, protected by fresh roles, trusted mutation Origin and optimistic versions. Public `/announcements`, `/announcements/[id]` and `GET /api/announcements` (list/detail) show only published/unarchived entries. Notification links point directly to the detail page so older announcements remain reachable regardless of pagination. Staff manage at `/dashboard/teacher/announcements` with `/api/manage/announcements`. Archiving needs confirmation. No emails, external messages or push services are used.
+
+The authenticated `/dashboard/notifications` inbox and notification bell use `GET /api/notifications?page=1` and `PATCH /api/notifications/:id` with `{read:boolean}`. Bell counts refresh on the notification-update event, when the tab becomes visible, or every 60 seconds while visible. Both bell/page requests are credentialed/no-store with bounded timeouts. Backend authorization is independent of the UI. All account roles may access their own inbox.
+
+Inbox items are derived by a read-only MongoDB aggregation, rather than writing duplicate domain events:
+
+- Published/unarchived announcements are visible to authenticated accounts.
+- Membership decisions match only the session account's application and include no rejection details in the notice.
+- Approved students receive currently available quiz notices and their own released-result notices. Closed unreleased quizzes and another student's results are excluded; score/answers/keys never enter a notification response.
+- Events match only the session account's registrations, then published/cancelled, unarchived event records. Cancellation and registration/attendance updates link to own event history. Registration never authorizes participant access.
+
+Each source projects a bounded generic message, internal link, kind, natural source ID and authoritative date/revision. `$unionWith` combines authorized sources; a per-account read-state join determines unread flags. A facet provides 20-row pagination and the full authorized unread count. All aggregation reads use primary and a 10-second execution limit. This is a current-state inbox: archived/unpublished sources disappear, and multiple updates to one source collapse into its latest state. It is not a durable audit/event stream.
+
+`notificationReadStates` uses `_id = sessionAccountId + ':' + sourceNotificationId`, storing read boolean, source revision and server update date. Marking first re-runs the source authorization pipeline; nonexistent/unauthorized notices return 404. Read state never accepts a user ID or revision from the client. Repeated marks reuse the natural key. A newer source revision becomes unread automatically. If a source changes concurrently with a mark, the old revision remains harmlessly unread. No role/permission changes arise from marking.
+
+Data: `announcements` holds title, body, published state, private createdBy, version, server timestamps and optional deletedAt. `notificationReadStates` is the only new per-user inbox persistence. No collection/index migration is executed. Proposed future indexes: announcements published/updatedAt and createdBy/updatedAt, existing source owner/status keys; the natural `_id` index handles read-state uniqueness. Validate query plans against an approved staging dataset before production use. Large clubs may eventually need a transactional outbox; that is outside this milestone.
+
+Files: `server/src/modules/communication/`, app registration, client communication API/components, three pages, navbar/dashboard links, backend memory aggregation tests and intercepted desktop/mobile browser tests.
+
+Checks: both apps typecheck/lint/build; server `npm.cmd run test:communication`; client `$env:PLAYWRIGHT_CHANNEL='msedge'; npm.cmd run test:communication`. Fixtures exercise actual source pipelines, own-only read state, revision invalidation, no private result leakage, roles/Origin and versioned announcements. No real notifications, profiles, attempts or roles are written. Manual path: publish a fictional announcement as teacher, view it publicly and in a fictional student's inbox, mark read/unread and observe the count; verify a second account's count stays separate. Review held/released quiz and registered cancelled-event notices using isolated fixtures only.
+
+Verified: both apps passed typecheck/lint/build; 4 new communication backend tests passed. The combined isolated auth/security/RBAC/quiz/assessment/event/performance/faculty/feedback/communication run passed all 105 tests. The final combined desktop/mobile faculty/feedback/communication browser suite passed all 16 tests. An ambiguous mobile navigation selector was narrowed to visible content after checking the target URL. No pre-existing failures remain in the checks run. Real MongoDB aggregation execution/query plans remain untested; all data was fictional memory/browser fixtures.
+
+## Verified continuation checkpoint
+
+Milestones 01–10 are implemented and verified as described in their guides. Milestones 11–18 remain unimplemented. Preserve all uncommitted Milestone 08–10 work; GitHub currently contains work through Milestone 07. The user's approval to continue sequentially remains in effect; no new implementation approval is required. Deployment, production infrastructure changes and launch still require explicit approval.
+
+Next: Milestone 11 complete Bangla/English coverage, default Bangla, persistent preference and Bengali typography. Inspect the existing foundation translation text in `client/src/`, inventory all user-facing strings including new faculty/feedback/communication screens and errors, and use a maintainable dictionary with coverage checks. Do not translate user-generated names/messages or scientific content automatically. After verified Milestone 11, continue resources/storage (12), achievements/gallery/certificates (13), unified admin reporting (14), UI/accessibility (15), security/performance/testing (16), deployment preparation (17), final testing/documentation (18). Ask only for missing essential external configuration or approval-required live actions, and keep useful local work moving.
+
+Continuation prompt: **Continue Milestone 11 from docs/notifications-announcements.md and docs/development-roadmap.md. Milestones 08–10 pass both builds/typechecks/lints, 105 backend tests and 16 browser checks. Preserve the uncommitted work, implement and verify sequentially through Milestone 18, and do not deploy or launch without explicit approval.**

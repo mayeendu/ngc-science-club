@@ -1,0 +1,6 @@
+import { defineConfig } from "@playwright/test";
+import foundation from "./playwright.rbac.config";
+export default defineConfig({
+  ...foundation,
+  testMatch: ["faculty.spec.ts", "feedback.spec.ts", "communication.spec.ts"],
+});

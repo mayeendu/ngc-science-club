@@ -1,4 +1,57 @@
 import express from "express";
+import { getDB } from "./config/db.js";
+import { createApiRateLimit } from "./middleware/api-rate-limit.js";
+import {
+  createReportRepository,
+  type ReportRepository,
+} from "./modules/reports/report.repository.js";
+import { createReportRouter } from "./modules/reports/report.routes.js";
+import {
+  createShowcaseRepository,
+  type ShowcaseRepository,
+} from "./modules/showcase/showcase.repository.js";
+import {
+  createCertificateRepository,
+  type CertificateRepository,
+} from "./modules/certificates/certificate.repository.js";
+import {
+  createPublicShowcaseRouter,
+  createManageShowcaseRouter,
+  createPublicCertificateRouter,
+  createCertificateRouter,
+} from "./modules/showcase/showcase.routes.js";
+import {
+  createResourceRepository,
+  type ResourceRepository,
+} from "./modules/resources/resource.repository.js";
+import { createResourceRouter } from "./modules/resources/resource.routes.js";
+import {
+  createAnnouncementRepository,
+  type AnnouncementRepository,
+} from "./modules/communication/announcement.repository.js";
+import {
+  createNotificationRepository,
+  type NotificationRepository,
+} from "./modules/communication/notification.repository.js";
+import {
+  createPublicAnnouncementRouter,
+  createManageAnnouncementRouter,
+  createNotificationRouter,
+} from "./modules/communication/communication.routes.js";
+import {
+  createFeedbackRepository,
+  type FeedbackRepository,
+} from "./modules/feedback/feedback.repository.js";
+import { createFeedbackRouter } from "./modules/feedback/feedback.routes.js";
+import {
+  createFacultyRepository,
+  type FacultyRepository,
+} from "./modules/faculty/faculty.repository.js";
+import {
+  createPublicFacultyRouter,
+  createAdminFacultyRouter,
+  createTeacherActivityRouter,
+} from "./modules/faculty/faculty.routes.js";
 import {
   createPerformanceRepository,
   type PerformanceRepository,
@@ -66,6 +119,15 @@ export function createApp(
     assessmentRepository?: AssessmentRepository;
     eventRepository?: EventRepository;
     performanceRepository?: PerformanceRepository;
+    facultyRepository?: FacultyRepository;
+    feedbackRepository?: FeedbackRepository;
+    announcementRepository?: AnnouncementRepository;
+    notificationRepository?: NotificationRepository;
+    resourceRepository?: ResourceRepository;
+    showcaseRepository?: ShowcaseRepository;
+    certificateRepository?: CertificateRepository;
+    reportRepository?: ReportRepository;
+    readiness?: () => Promise<void>;
   } = {},
 ) {
   const app = express();
@@ -98,9 +160,24 @@ export function createApp(
     cors({
       origin: env.CLIENT_URL,
       credentials: true,
-      exposedHeaders: ["X-Retry-After"],
+      exposedHeaders: ["X-Retry-After", "Retry-After", "Content-Disposition"],
     }),
   );
+  app.use("/api", createApiRateLimit());
+  // CORS controls browser response access, not whether a mutation executes.
+  // Enforce exact trusted origins even for first signup without a session cookie.
+  app.use("/api/auth", (req, res, next) => {
+    if (
+      !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
+      req.get("Origin") !== env.CLIENT_URL
+    ) {
+      res
+        .status(403)
+        .json({ success: false, message: "Untrusted request origin" });
+      return;
+    }
+    next();
+  });
 
   // Enforce the app's single, current admin role before existing plugin admin APIs.
   // Better Auth still performs its own session and administrative permission checks.
@@ -118,6 +195,114 @@ export function createApp(
     ),
   );
   app.use(express.json());
+  app.use(
+    "/api/admin/reports",
+    createReportRouter(
+      authenticate,
+      requireRole("admin"),
+      options.reportRepository ?? createReportRepository(),
+    ),
+  );
+  const showcase = options.showcaseRepository ?? createShowcaseRepository();
+  app.use("/api/showcase", createPublicShowcaseRouter(showcase));
+  app.use(
+    "/api/manage/showcase",
+    createManageShowcaseRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      showcase,
+    ),
+  );
+  const certificates =
+    options.certificateRepository ?? createCertificateRepository();
+  app.use("/api/certificates", createPublicCertificateRouter(certificates));
+  app.use(
+    "/api/own/certificates",
+    createCertificateRouter(
+      authenticate,
+      requireRole("student", "teacher", "admin"),
+      certificates,
+    ),
+  );
+  app.use(
+    "/api/manage/certificates",
+    createCertificateRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      certificates,
+      true,
+    ),
+  );
+  const resources = options.resourceRepository ?? createResourceRepository();
+  app.use(
+    "/api/resources",
+    createResourceRouter(
+      authenticate,
+      requireRole("student", "teacher", "admin"),
+      resources,
+    ),
+  );
+  app.use(
+    "/api/manage/resources",
+    createResourceRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      resources,
+      true,
+    ),
+  );
+  const announcements =
+    options.announcementRepository ?? createAnnouncementRepository();
+  app.use("/api/announcements", createPublicAnnouncementRouter(announcements));
+  app.use(
+    "/api/manage/announcements",
+    createManageAnnouncementRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      announcements,
+    ),
+  );
+  app.use(
+    "/api/notifications",
+    createNotificationRouter(
+      authenticate,
+      requireRole("student", "teacher", "admin"),
+      options.notificationRepository ?? createNotificationRepository(),
+    ),
+  );
+  const feedback = options.feedbackRepository ?? createFeedbackRepository();
+  app.use(
+    "/api/feedback",
+    createFeedbackRouter(
+      authenticate,
+      requireRole("student", "teacher", "admin"),
+      feedback,
+    ),
+  );
+  app.use(
+    "/api/manage/feedback",
+    createFeedbackRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      feedback,
+      true,
+      requireRole("admin"),
+    ),
+  );
+  const faculty = options.facultyRepository ?? createFacultyRepository();
+  app.use("/api/faculty", createPublicFacultyRouter(faculty));
+  app.use(
+    "/api/admin/faculty",
+    createAdminFacultyRouter(authenticate, requireRole("admin"), faculty),
+  );
+  app.use(
+    "/api/teacher/activities",
+    createTeacherActivityRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      faculty,
+    ),
+  );
   const performance =
     options.performanceRepository ?? createPerformanceRepository();
   app.use(
@@ -203,6 +388,19 @@ export function createApp(
       message: "NGC Science Club API is running!",
       timestamp: new Date().toISOString(),
     });
+  });
+  app.get("/api/ready", async (_req, res) => {
+    try {
+      await (
+        options.readiness ??
+        (async () => {
+          await getDB().command({ ping: 1 }, { timeoutMS: 2500 });
+        })
+      )();
+      res.status(200).json({ success: true, status: "ready" });
+    } catch {
+      res.status(503).json({ success: false, status: "unavailable" });
+    }
   });
 
   app.use("/api/members", createMemberRouter(options.memberRepository));

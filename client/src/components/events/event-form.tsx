@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,7 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import toast from "react-hot-toast";
+import toast from "@/lib/i18n/toast";
 const formSchema = eventContentSchema.omit({ startsAt: true }).extend({
   date: z
     .string()
@@ -41,6 +43,7 @@ export function EventForm({
   onSaved: () => void;
   onCancel: () => void;
 }) {
+  const t = useT();
   const local = event
     ? new Date(Date.parse(event.startsAt) + 6 * 3600000).toISOString()
     : "";
@@ -89,7 +92,7 @@ export function EventForm({
   return (
     <section className="rounded-xl border bg-white p-5">
       <h2 className="mb-5 text-2xl font-bold">
-        {event ? "Edit event draft" : "Create event or activity"}
+        {event ? t("Edit event draft") : t("Create event or activity")}
       </h2>
       <Form {...form}>
         <form className="space-y-5" onSubmit={form.handleSubmit(submit)}>
@@ -97,13 +100,13 @@ export function EventForm({
             disabled={form.formState.isSubmitting}
             className="space-y-5"
           >
-            <legend className="sr-only">Event details</legend>
+            <legend className="sr-only">{t("Event details")}</legend>
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>{t("Title")}</FormLabel>
                   <FormControl>
                     <Input {...field} maxLength={150} />
                   </FormControl>
@@ -116,7 +119,7 @@ export function EventForm({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t("Description")}</FormLabel>
                   <FormControl>
                     <textarea
                       {...field}
@@ -134,12 +137,12 @@ export function EventForm({
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>{t("Category")}</FormLabel>
                   <FormControl>
                     <select {...field} className="w-full rounded-md border p-3">
                       {eventCategories.map((value) => (
                         <option key={value} value={value}>
-                          {value}
+                          {t(value)}
                         </option>
                       ))}
                     </select>
@@ -154,7 +157,7 @@ export function EventForm({
                 name="date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date (Dhaka)</FormLabel>
+                    <FormLabel>{t("Date (Dhaka)")}</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -167,7 +170,7 @@ export function EventForm({
                 name="time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Time (Dhaka)</FormLabel>
+                    <FormLabel>{t("Time (Dhaka)")}</FormLabel>
                     <FormControl>
                       <Input type="time" {...field} />
                     </FormControl>
@@ -181,7 +184,7 @@ export function EventForm({
               name="venue"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Venue</FormLabel>
+                  <FormLabel>{t("Venue")}</FormLabel>
                   <FormControl>
                     <Input {...field} maxLength={200} />
                   </FormControl>
@@ -194,7 +197,7 @@ export function EventForm({
               name="capacity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Capacity (1–1000)</FormLabel>
+                  <FormLabel>{t("Capacity (1\u20131000)")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -213,7 +216,7 @@ export function EventForm({
               name="image"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Image URL (optional HTTPS)</FormLabel>
+                  <FormLabel>{t("Image URL (optional HTTPS)")}</FormLabel>
                   <FormControl>
                     <Input {...field} type="url" maxLength={2048} />
                   </FormControl>
@@ -222,14 +225,14 @@ export function EventForm({
               )}
             />
             <p className="text-sm text-slate-600">
-              All times use Asia/Dhaka (UTC+06:00). Achievements can be dated in
-              the past and do not accept registrations. Other event dates must
-              be in the future.
+              {t(
+                "All times use Asia/Dhaka (UTC+06:00). Achievements can be dated in the past and do not accept registrations. Other event dates must be in the future.",
+              )}
             </p>
           </fieldset>
           <div className="flex flex-wrap gap-3">
             <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Saving..." : "Save draft"}
+              {form.formState.isSubmitting ? t("Saving...") : t("Save draft")}
             </Button>
             <Button
               variant="outline"
@@ -237,7 +240,7 @@ export function EventForm({
               disabled={form.formState.isSubmitting}
               onClick={onCancel}
             >
-              Cancel editing
+              {t("Cancel editing")}
             </Button>
           </div>
         </form>

@@ -19,6 +19,7 @@ export const eventContentSchema = z.object({
       .url()
       .max(2048)
       .refine((value) => {
+        if (!URL.canParse(value)) return false;
         const url = new URL(value);
         return url.protocol === "https:" && !url.username && !url.password;
       }, "Use an HTTPS image URL without credentials."),

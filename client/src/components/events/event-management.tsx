@@ -1,8 +1,10 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import toast from "@/lib/i18n/toast";
 import {
   manageEvents,
   eventStats,
@@ -19,6 +21,7 @@ import { AccessDenied } from "@/components/auth/access-state";
 import { EventForm } from "./event-form";
 import { EventSkeletons, EventConfirmation } from "./event-shared";
 export function EventManagement() {
+  const t = useT();
   const [data, setData] = useState<{
       events: ClubEvent[];
       hasNext: boolean;
@@ -92,22 +95,25 @@ export function EventManagement() {
   if (denied) return <AccessDenied />;
   return (
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-10">
-      <h1 className="text-3xl font-bold">Event management and statistics</h1>
+      <h1 className="text-3xl font-bold">
+        {t("Event management and statistics")}
+      </h1>
       <p className="text-slate-600">
-        Teachers manage their own events. Administrators manage all events.
-        Participant details remain private.
+        {t(
+          "Teachers manage their own events. Administrators manage all events. Participant details remain private.",
+        )}
       </p>
       <div className="flex flex-wrap gap-4">
         <Button onClick={() => setEditing("new")} disabled={busy}>
-          Create event
+          {t("Create event")}
         </Button>
         <Button variant="outline" onClick={refresh} disabled={busy}>
-          Refresh management
+          {t("Refresh management")}
         </Button>
         <label>
-          Status
+          {t("Status")}
           <select
-            aria-label="Management event status"
+            aria-label={t("Management event status")}
             value={status}
             className="ml-2 rounded-md border p-2"
             onChange={(e) => {
@@ -116,10 +122,10 @@ export function EventManagement() {
               setData(null);
             }}
           >
-            <option value="">All statuses</option>
+            <option value="">{t("All statuses")}</option>
             {["draft", "published", "cancelled"].map((value) => (
               <option key={value} value={value}>
-                {value}
+                {t(value)}
               </option>
             ))}
           </select>
@@ -137,14 +143,14 @@ export function EventManagement() {
         />
       )}
       {error ? (
-        <p role="alert">{error}</p>
+        <p role="alert">{t(error, undefined, true)}</p>
       ) : !data || !stats ? (
         <EventSkeletons />
       ) : (
         <>
           <section
             className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
-            aria-label="Event statistics"
+            aria-label={t("Event statistics")}
           >
             {[
               ["Total events", stats.total],
@@ -164,7 +170,7 @@ export function EventManagement() {
               <Card key={label}>
                 <CardHeader>
                   <CardTitle>
-                    <h2>{label}</h2>
+                    <h2>{t(label)}</h2>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -174,41 +180,42 @@ export function EventManagement() {
             ))}
           </section>
           <p className="text-sm text-slate-600">
-            Registrations include retained records for cancelled events.
-            Attendance rate is present ÷ marked (present + absent).
+            {t(
+              "Registrations include retained records for cancelled events. Attendance rate is present \u00F7 marked (present + absent).",
+            )}
           </p>
           <div
             className="flex flex-wrap gap-3"
-            aria-label="Activity distribution"
+            aria-label={t("Activity distribution")}
           >
             {stats.categories.map((row) => (
               <span
                 key={row.category}
                 className="rounded-full bg-teal-50 px-3 py-1 text-sm"
               >
-                {row.category}: {row.count}
+                {t(row.category)}: {row.count}
               </span>
             ))}
           </div>
           {data.events.length === 0 ? (
-            <p role="status">No events match this status.</p>
+            <p role="status">{t("No events match this status.")}</p>
           ) : (
             <div className="overflow-x-auto rounded-xl border">
               <table className="w-full min-w-[780px] text-left text-sm">
                 <caption className="sr-only">
-                  Managed events and activities
+                  {t("Managed events and activities")}
                 </caption>
                 <thead className="bg-slate-50">
                   <tr>
                     {[
-                      "Event",
-                      "Start (Dhaka)",
-                      "Status",
-                      "Registrations",
-                      "Actions",
+                      t("Event"),
+                      t("Start (Dhaka)"),
+                      t("Status"),
+                      t("Registrations"),
+                      t("Actions"),
                     ].map((label) => (
                       <th key={label} className="p-3">
-                        {label}
+                        {t(label)}
                       </th>
                     ))}
                   </tr>
@@ -218,10 +225,10 @@ export function EventManagement() {
                     <tr key={event.id} className="border-t">
                       <td className="max-w-64 break-words p-3">
                         <p className="font-semibold">{event.title}</p>
-                        <p>{event.category}</p>
+                        <p>{t(event.category)}</p>
                       </td>
                       <td className="p-3">{eventDate(event.startsAt)}</td>
-                      <td className="p-3">{event.status}</td>
+                      <td className="p-3">{t(event.status)}</td>
                       <td className="p-3">
                         {event.registeredCount} / {event.capacity}
                       </td>
@@ -233,7 +240,7 @@ export function EventManagement() {
                             disabled={busy || event.status !== "draft"}
                             onClick={() => setEditing(event)}
                           >
-                            Edit
+                            {t("Edit")}
                           </Button>
                           <Button
                             variant="outline"
@@ -253,7 +260,9 @@ export function EventManagement() {
                               })
                             }
                           >
-                            {event.status === "draft" ? "Publish" : "Unpublish"}
+                            {event.status === "draft"
+                              ? t("Publish")
+                              : t("Unpublish")}
                           </Button>
                           <Button
                             variant="outline"
@@ -263,7 +272,7 @@ export function EventManagement() {
                               setAction({ event, type: "cancelled" })
                             }
                           >
-                            Cancel event
+                            {t("Cancel event")}
                           </Button>
                           <Button
                             variant="outline"
@@ -271,13 +280,13 @@ export function EventManagement() {
                             disabled={busy || event.status !== "draft"}
                             onClick={() => setAction({ event, type: "delete" })}
                           >
-                            Delete
+                            {t("Delete")}
                           </Button>
                           <Link
                             href={`/dashboard/teacher/events/${event.id}`}
                             className="self-center text-blue-700 underline"
                           >
-                            Participants and attendance
+                            {t("Participants and attendance")}
                           </Link>
                         </div>
                       </td>
@@ -288,7 +297,7 @@ export function EventManagement() {
             </div>
           )}
           <nav
-            aria-label="Managed event pages"
+            aria-label={t("Managed event pages")}
             className="flex items-center gap-4"
           >
             <Button
@@ -299,9 +308,11 @@ export function EventManagement() {
                 setPage((v) => v - 1);
               }}
             >
-              Previous page
+              {t("Previous page")}
             </Button>
-            <span>Page {page}</span>
+            <span>
+              {t("Page")} {page}
+            </span>
             <Button
               variant="outline"
               disabled={!data.hasNext}
@@ -310,14 +321,20 @@ export function EventManagement() {
                 setPage((v) => v + 1);
               }}
             >
-              Next page
+              {t("Next page")}
             </Button>
           </nav>
         </>
       )}
       {action && (
         <EventConfirmation
-          title={`${action.type === "delete" ? "Archive" : action.type === "cancelled" ? "Cancel" : "Change status of"} this event?`}
+          title={t("{0} this event?", [
+            action.type === "delete"
+              ? "Archive"
+              : action.type === "cancelled"
+                ? "Cancel"
+                : "Change status of",
+          ])}
           busy={busy}
           onCancel={() => setAction(null)}
           onConfirm={() => void confirm()}
@@ -325,10 +342,14 @@ export function EventManagement() {
           <p>{action.event.title}</p>
           <p className="mt-2">
             {action.type === "cancelled"
-              ? "Cancellation is permanent. Members will see this event as cancelled and attendance will be disabled."
+              ? t(
+                  "Cancellation is permanent. Members will see this event as cancelled and attendance will be disabled.",
+                )
               : action.type === "delete"
-                ? "The empty draft will be archived and removed from event lists."
-                : `The event status will become ${action.type}.`}
+                ? t(
+                    "The empty draft will be archived and removed from event lists.",
+                  )
+                : t("The event status will become {0}.", [action.type])}
           </p>
         </EventConfirmation>
       )}

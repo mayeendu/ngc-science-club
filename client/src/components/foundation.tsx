@@ -1,16 +1,16 @@
 "use client";
 
+import { useT } from "@/components/i18n/language";
+import { useLanguage } from "@/components/i18n/language";
+import { setLanguage } from "@/lib/i18n/language";
 import { useEffect, useState } from "react";
 import { checkHealth } from "@/lib/api";
 import { messages, type Locale } from "@/lib/messages";
-
 type ConnectionState = "checking" | "connected" | "failed";
-
 function ConnectionStatus({ locale }: { locale: Locale }) {
   const [status, setStatus] = useState<ConnectionState>("checking");
   const [attempt, setAttempt] = useState(0);
   const text = messages[locale];
-
   useEffect(() => {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 5000);
@@ -29,7 +29,6 @@ function ConnectionStatus({ locale }: { locale: Locale }) {
       window.clearTimeout(timeout);
     };
   }, [attempt]);
-
   return (
     <section
       aria-labelledby="connection-heading"
@@ -59,9 +58,10 @@ function ConnectionStatus({ locale }: { locale: Locale }) {
     </section>
   );
 }
-
 export function Foundation() {
-  const [locale, setLocale] = useState<Locale>("en");
+  const t = useT();
+  const locale = useLanguage();
+  const setLocale = setLanguage;
   const text = messages[locale];
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -76,7 +76,11 @@ export function Foundation() {
           <p className="font-bold tracking-tight text-blue-900">{text.title}</p>
           <p className="mt-1 text-sm text-slate-600">{text.college}</p>
         </div>
-        <div role="group" aria-label="Language / ভাষা" className="flex gap-2">
+        <div
+          role="group"
+          aria-label={t("Language / \u09AD\u09BE\u09B7\u09BE")}
+          className="flex gap-2"
+        >
           {(["en", "bn"] as const).map((language) => (
             <button
               key={language}
@@ -86,7 +90,7 @@ export function Foundation() {
               onClick={() => setLocale(language)}
               className={`rounded-lg border px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700 ${locale === language ? "border-blue-700 bg-blue-700 text-white" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"}`}
             >
-              {language === "en" ? "English" : "বাংলা"}
+              {language === "en" ? t("English") : "বাংলা"}
             </button>
           ))}
         </div>

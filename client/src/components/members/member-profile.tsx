@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -11,8 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { MemberSkeletons } from "./member-directory";
-
 export function MemberProfile({ id }: { id: string }) {
+  const t = useT();
   const [member, setMember] = useState<PublicMember | null>(null);
   const [error, setError] = useState<"missing" | "unavailable" | null>(null);
   const [revision, setRevision] = useState(0);
@@ -44,7 +45,7 @@ export function MemberProfile({ id }: { id: string }) {
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-12">
       <Link href="/members" className="text-blue-700 underline">
-        Back to members
+        {t("Back to members")}
       </Link>
       {error ? (
         <Card>
@@ -52,16 +53,18 @@ export function MemberProfile({ id }: { id: string }) {
             <CardTitle>
               <h1 className="text-2xl">
                 {error === "missing"
-                  ? "Member not found"
-                  : "Unable to load profile"}
+                  ? t("Member not found")
+                  : t("Unable to load profile")}
               </h1>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p role="alert">
               {error === "missing"
-                ? "This profile is not available in the approved member directory."
-                : "Please try again."}
+                ? t(
+                    "This profile is not available in the approved member directory.",
+                  )
+                : t("Please try again.")}
             </p>
             <Button
               variant="outline"
@@ -72,7 +75,7 @@ export function MemberProfile({ id }: { id: string }) {
                 setRevision((value) => value + 1);
               }}
             >
-              Refresh profile
+              {t("Refresh profile")}
             </Button>
           </CardContent>
         </Card>
@@ -82,7 +85,7 @@ export function MemberProfile({ id }: { id: string }) {
         <Card className="border-t-4 border-blue-600">
           <CardHeader>
             <p className="text-sm font-semibold text-teal-700">
-              NGC Science Club member
+              {t("NGC Science Club member")}
             </p>
             <CardTitle>
               <h1 className="break-words text-3xl font-bold">{member.name}</h1>
@@ -96,7 +99,7 @@ export function MemberProfile({ id }: { id: string }) {
                 ["Member since", membershipDate(member.membershipDate)],
               ].map(([label, value]) => (
                 <div key={label}>
-                  <dt className="font-medium text-slate-500">{label}</dt>
+                  <dt className="font-medium text-slate-500">{t(label)}</dt>
                   <dd className="mt-1 break-words text-lg">{value}</dd>
                 </div>
               ))}

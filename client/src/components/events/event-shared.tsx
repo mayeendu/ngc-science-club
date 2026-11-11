@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { eventDate, type ClubEvent } from "@/lib/event-api";
 export function EventSkeletons() {
+  const t = useT();
   return (
-    <div role="status" aria-label="Loading events">
-      <span className="sr-only">Loading events...</span>
+    <div role="status" aria-label={t("Loading events")}>
+      <span className="sr-only">{t("Loading events...")}</span>
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {[0, 1, 2].map((i) => (
           <div
@@ -41,30 +44,37 @@ export function EventCard({
   event: ClubEvent;
   children?: ReactNode;
 }) {
+  const t = useT();
   return (
     <Card className="min-w-0 overflow-hidden">
       <CardHeader>
         <EventImage event={event} />
         <p className="text-sm capitalize text-teal-800">
-          {event.category} · {event.status}
+          {t(event.category)} · {t(event.status)}
         </p>
         <CardTitle>
           <h2 className="break-words text-xl">{event.title}</h2>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p>{eventDate(event.startsAt)} (Dhaka)</p>
+        <p>
+          {eventDate(event.startsAt)}
+          {t("(Dhaka)")}
+        </p>
         <p className="break-words">{event.venue}</p>
         <p>
           {event.category === "achievement"
-            ? "Club achievement"
-            : `${Math.max(0, event.capacity - event.registeredCount)} / ${event.capacity} places available`}
+            ? t("Club achievement")
+            : t("{0} / {1} places available", [
+                Math.max(0, event.capacity - event.registeredCount),
+                event.capacity,
+              ])}
         </p>
         <Link
           href={`/events/${event.id}`}
           className="inline-block text-blue-700 underline"
         >
-          View event
+          {t("View event")}
         </Link>
         {children}
       </CardContent>
@@ -84,6 +94,7 @@ export function EventConfirmation({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const t = useT();
   const dialog = useRef<HTMLDialogElement>(null),
     heading = useId();
   useEffect(() => {
@@ -119,10 +130,10 @@ export function EventConfirmation({
             disabled={busy}
             onClick={onCancel}
           >
-            Keep unchanged
+            {t("Keep unchanged")}
           </Button>
           <Button type="submit" disabled={busy}>
-            {busy ? "Saving..." : "Confirm"}
+            {busy ? t("Saving...") : t("Confirm")}
           </Button>
         </div>
       </form>

@@ -1,11 +1,12 @@
 "use client";
 
+import { useT } from "@/components/i18n/language";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
+import toast from "@/lib/i18n/toast";
 import { useSession } from "@/lib/auth-client";
 import { parseRole } from "@/lib/roles";
 import {
@@ -29,7 +30,6 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-
 export function MembershipApplication({
   showForm = false,
 }: {
@@ -47,11 +47,18 @@ export function MembershipApplication({
     />
   );
 }
-
 type State =
-  | { kind: "loading" }
-  | { kind: "error"; message: string }
-  | { kind: "loaded"; application: MembershipSummary };
+  | {
+      kind: "loading";
+    }
+  | {
+      kind: "error";
+      message: string;
+    }
+  | {
+      kind: "loaded";
+      application: MembershipSummary;
+    };
 const fields = [
   {
     name: "fullName",
@@ -85,7 +92,6 @@ const fields = [
     max: 1000,
   },
 ] as const;
-
 function ApplicationContent({
   showForm,
   name,
@@ -93,6 +99,7 @@ function ApplicationContent({
   showForm: boolean;
   name: string;
 }) {
+  const t = useT();
   const [state, setState] = useState<State>({ kind: "loading" });
   const router = useRouter();
   const form = useForm<MembershipValues>({
@@ -131,7 +138,6 @@ function ApplicationContent({
     void load(controller.signal);
     return () => controller.abort();
   }, [load]);
-
   async function submit(values: MembershipValues) {
     try {
       const application = await membershipRequest(values);
@@ -149,17 +155,16 @@ function ApplicationContent({
       }
     }
   }
-
   return (
     <Card className="bg-white">
       <CardHeader>
         <CardTitle>
-          <h2>Club membership</h2>
+          <h2>{t("Club membership")}</h2>
         </CardTitle>
       </CardHeader>
       <CardContent>
         {state.kind === "loading" ? (
-          <p role="status">Loading application status…</p>
+          <p role="status">{t("Loading application status\u2026")}</p>
         ) : state.kind === "error" ? (
           <div>
             <p role="alert" className="mb-3 text-red-700">
@@ -172,33 +177,33 @@ function ApplicationContent({
                 void load();
               }}
             >
-              Retry membership status
+              {t("Retry membership status")}
             </Button>
           </div>
         ) : state.application ? (
           <div className="space-y-3">
             <p role="status" className="font-medium capitalize">
-              Application status: {state.application.status}
+              {t("Application status:")} {t(state.application.status)}
             </p>
             <p className="text-slate-600">
               {state.application.status === "pending"
-                ? "Your application is awaiting admin approval."
-                : "Your application has been reviewed."}
+                ? t("Your application is awaiting admin approval.")
+                : t("Your application has been reviewed.")}
             </p>
             <p className="text-sm text-slate-500">
-              Submitted:{" "}
+              {t("Submitted:")}{" "}
               {new Date(state.application.submittedAt).toLocaleDateString(
                 "en-GB",
               )}
             </p>
             {state.application.rejectionReason && (
               <p className="whitespace-pre-wrap break-words text-red-700">
-                Rejection reason: {state.application.rejectionReason}
+                {t("Rejection reason:")} {state.application.rejectionReason}
               </p>
             )}
             {state.application.reviewedAt && (
               <p className="text-sm text-slate-500">
-                Reviewed:{" "}
+                {t("Reviewed:")}{" "}
                 {new Date(state.application.reviewedAt).toLocaleDateString(
                   "en-GB",
                 )}
@@ -211,14 +216,14 @@ function ApplicationContent({
                 void load();
               }}
             >
-              Refresh membership status
+              {t("Refresh membership status")}
             </Button>
             {state.application.status === "approved" && (
               <Link
                 href="/dashboard/student/profile"
                 className="block font-medium text-blue-700 underline"
               >
-                Manage member profile
+                {t("Manage member profile")}
               </Link>
             )}
           </div>
@@ -230,15 +235,16 @@ function ApplicationContent({
               noValidate
             >
               <p className="text-slate-600">
-                Submit your student details for admin review. Applying does not
-                automatically approve your membership.
+                {t(
+                  "Submit your student details for admin review. Applying does not automatically approve your membership.",
+                )}
               </p>
               <fieldset
                 disabled={form.formState.isSubmitting}
                 className="space-y-5"
               >
                 <legend className="sr-only">
-                  Membership application details
+                  {t("Membership application details")}
                 </legend>
                 {fields.map((item) => (
                   <FormField
@@ -280,20 +286,20 @@ function ApplicationContent({
                 ))}
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting
-                    ? "Submitting…"
-                    : "Submit application"}
+                    ? t("Submitting\u2026")
+                    : t("Submit application")}
                 </Button>
               </fieldset>
             </form>
           </Form>
         ) : (
           <div className="space-y-3">
-            <p>You have not applied for club membership yet.</p>
+            <p>{t("You have not applied for club membership yet.")}</p>
             <Link
               className="font-medium text-blue-700 underline"
               href="/membership/apply"
             >
-              Apply for membership
+              {t("Apply for membership")}
             </Link>
           </div>
         )}
@@ -302,7 +308,7 @@ function ApplicationContent({
             href="/dashboard/student"
             className="mt-6 inline-block text-sm text-blue-700 underline"
           >
-            Back to student dashboard
+            {t("Back to student dashboard")}
           </Link>
         )}
       </CardContent>

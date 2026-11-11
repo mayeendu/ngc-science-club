@@ -1,0 +1,19 @@
+# Milestone 09 — Feedback and private communication
+
+Authenticated club accounts can submit a suggestion or feedback in suggestion/event/quiz/technical/general categories, track status and reply in their own private threads. No approved-membership restriction is added: authenticated students may report membership or technical issues before approval.
+
+Admins manage all threads and may assign/unassign an existing active teacher. Teachers may list/reply only to explicitly assigned threads. Teachers never see the unassigned queue or another teacher's threads. Thread assignment does not change any account role. Students can never supply owner IDs, reply authors or status. Own-thread replies reopen a resolved thread; staff replies may set open/in_review/resolved. Status changes require a reply so the member receives an explanation.
+
+Every change requires the current version; a concurrent stale reply or assignment gets 409. Threads contain at most 50 messages, each at most 3,000 characters. Full conversations are bounded and paginated 10 threads at a time. There is no thread deletion or public feedback API. A new thread can be submitted after the message limit. Messages render as plain React text without HTML injection. Server timestamps and identity come from the session; trusted Origin checks protect all mutations. Cache-control remains private/no-store.
+
+New collection `feedbackThreads`: `_id`, private `userId`, private name snapshot, category/subject, status, messages (author member/staff, plain message, server sentAt), private assignedTeacherId, version and server timestamps. All responses use allowlists. Only admin queue responses include member name and teacher assignment; personal email, phone, student IDs, reviewer data and account IDs of members are excluded. No notifications, email, attachments or external messaging are sent in this milestone.
+
+Routes: `GET/POST /api/feedback`, `POST /api/feedback/:id/replies` (own); `GET /api/manage/feedback`, `POST /api/manage/feedback/:id/replies` (admin/all or assigned teacher); `PUT /api/manage/feedback/:id/assignment` (admin only). List filters: bounded page, status, category. No arbitrary owner filters. Client pages: `/dashboard/student/feedback` for own submissions/history (all account roles), `/dashboard/teacher/feedback` for management (teacher/admin).
+
+Important code: the repository builds a scope of `{userId: session.id}` for own routes, `{assignedTeacherId: session.id}` for teachers, or an empty filter only for the freshly verified admin. That same scope appears in both reads and versioned atomic reply updates. A form or a URL cannot widen it.
+
+Files: server feedback schema/repository/routes and app registration; client feedback API/component and guarded pages; dashboard links; isolated backend/browser tests. No packages, migrations, live writes, roles or infrastructure changes. Suggested future indexes: `{userId:1,updatedAt:-1}`, `{assignedTeacherId:1,updatedAt:-1}` and `{status:1,updatedAt:-1}`; no automatic index creation.
+
+Checks: both apps' typecheck/lint/build; backend `npm.cmd run test:feedback`; client `$env:PLAYWRIGHT_CHANNEL='msedge'; npm.cmd run test:feedback`. Memory fixtures test owner privacy, admin assignment, teacher scope, version conflicts, message bounds, roles, Origin and validation. Browser responses are fictional. Manual path: submit fictional feedback, assign to a fictional existing teacher as admin, reply/resolve as that teacher, inspect the reply as its author, reply again to reopen; verify a second student and unassigned teacher cannot access it.
+
+Verified: both apps passed typecheck/lint/build, 4 backend tests and 4 desktop/mobile browser tests passed. A server TypeScript union narrowing issue was fixed before final verification. No live database writes or account-role changes. Proceeding to Milestone 10.

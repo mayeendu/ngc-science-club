@@ -49,11 +49,181 @@
 
 body {
   margin: 0;
-  font-family: Arial, "Nirmala UI", sans-serif;
+  font-family: "Noto Sans Bengali", "Nirmala UI", Vrinda, Arial, sans-serif;
+  line-height: 1.65;
+}
+
+html[lang="bn"] {
+  font-size: 16px;
+}
+html[lang="bn"] :is(h1, h2, h3, label, button) {
+  letter-spacing: normal;
+  line-height: 1.65;
 }
 
 button {
   cursor: pointer;
+}
+
+html {
+  scroll-padding-top: 1rem;
+}
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+* {
+  overflow-wrap: anywhere;
+}
+:is(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+:is(input, select, textarea) {
+  max-width: 100%;
+  color: inherit;
+  background-color: var(--background);
+}
+:is(button, a, input, select, summary) {
+  touch-action: manipulation;
+}
+:is(input:not([type="checkbox"]):not([type="radio"]), select, button) {
+  min-height: 2.5rem;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+table {
+  border-collapse: collapse;
+}
+:is(th, td) {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  font-weight: 600;
+}
+caption {
+  text-align: left;
+}
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: -10rem;
+  z-index: 100;
+  background: var(--background);
+  color: var(--foreground);
+  border: 2px solid #2563eb;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+.dark :is(.bg-white, .bg-slate-50, .bg-gray-50) {
+  background-color: #111827;
+}
+.dark :is(.bg-slate-100, .bg-slate-200, .bg-gray-100) {
+  background-color: #273449;
+}
+.dark
+  :is(
+    .text-slate-700,
+    .text-slate-600,
+    .text-gray-600,
+    .text-slate-500,
+    .text-gray-500
+  ) {
+  color: #cbd5e1;
+}
+.dark :is(.text-slate-900, .text-gray-900, .text-slate-800) {
+  color: #f1f5f9;
+}
+.dark
+  :is(
+    .text-blue-950,
+    .text-blue-900,
+    .text-blue-800,
+    .text-blue-700,
+    .text-blue-600
+  ) {
+  color: #93c5fd;
+}
+.dark :is(.text-teal-700, .text-teal-800, .text-green-700) {
+  color: #5eead4;
+}
+.dark :is(.text-red-600, .text-red-700, .text-red-800) {
+  color: #fca5a5;
+}
+.dark :is(.bg-teal-50, .bg-green-50, .bg-blue-50, .bg-blue-100) {
+  background-color: #12313a;
+}
+.dark :is(.bg-red-50, .bg-red-100) {
+  background-color: #451a1a;
+}
+.dark :is(.bg-amber-50, .bg-amber-100, .bg-yellow-50, .bg-yellow-100) {
+  background-color: #422d10;
+}
+.dark :is(.text-amber-700, .text-amber-800, .text-yellow-800) {
+  color: #fde68a;
+}
+.dark :is(.border-slate-200, .border-gray-200) {
+  border-color: #475569;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media print {
+  body:has(.report-page) :is(header, .skip-link, .no-print) {
+    display: none !important;
+  }
+  body:has(.report-page) {
+    background: white !important;
+    color: black !important;
+  }
+  .report-page section {
+    break-inside: avoid;
+  }
+  .report-page table {
+    font-size: 10pt;
+  }
+  .report-page :is(th, td) {
+    color: black !important;
+  }
+}
+
+@media print {
+  body:has(> .certificate-print-root[open]) > * {
+    display: none !important;
+  }
+  body:has(> .certificate-print-root[open]) > .certificate-print-root {
+    display: block !important;
+    page: certificate;
+    position: static;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    color: #000;
+    background: #fff;
+  }
+  .certificate-print-root .no-print {
+    display: none !important;
+  }
+  .certificate-print-root::backdrop {
+    display: none;
+  }
+  @page certificate {
+    size: A4 landscape;
+    margin: 12mm;
+  }
 }
 button:disabled {
   cursor: wait;

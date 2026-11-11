@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/components/i18n/language";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -30,6 +31,7 @@ export function QuizEditor({
   cancel: () => void;
   failed: (cause: unknown) => void;
 }) {
+  const t = useT();
   const form = useForm<QuizValues>({
     resolver: zodResolver(quizFormSchema),
     defaultValues: quiz
@@ -68,12 +70,13 @@ export function QuizEditor({
       <CardHeader>
         <CardTitle>
           <h2 className="text-xl">
-            {quiz ? "Edit draft quiz" : "Create science quiz"}
+            {quiz ? t("Edit draft quiz") : t("Create science quiz")}
           </h2>
         </CardTitle>
         <p className="text-sm text-slate-600">
-          Save as a draft, then publish from the quiz list. Total marks are
-          calculated from the questions.
+          {t(
+            "Save as a draft, then publish from the quiz list. Total marks are calculated from the questions.",
+          )}
         </p>
       </CardHeader>
       <CardContent>
@@ -87,13 +90,13 @@ export function QuizEditor({
               disabled={form.formState.isSubmitting}
               className="space-y-5"
             >
-              <legend className="sr-only">Quiz content</legend>
+              <legend className="sr-only">{t("Quiz content")}</legend>
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Quiz title</FormLabel>
+                    <FormLabel>{t("Quiz title")}</FormLabel>
                     <FormControl>
                       <Input {...field} maxLength={150} />
                     </FormControl>
@@ -106,7 +109,7 @@ export function QuizEditor({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>{t("Description")}</FormLabel>
                     <FormControl>
                       <textarea
                         {...field}
@@ -125,7 +128,7 @@ export function QuizEditor({
                   name="subject"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Subject</FormLabel>
+                      <FormLabel>{t("Subject")}</FormLabel>
                       <FormControl>
                         <Input {...field} maxLength={100} />
                       </FormControl>
@@ -138,7 +141,7 @@ export function QuizEditor({
                   name="durationMinutes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Duration (minutes)</FormLabel>
+                      <FormLabel>{t("Duration (minutes)")}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -159,7 +162,7 @@ export function QuizEditor({
                     htmlFor="quiz-total"
                     className="mb-2 block text-sm font-medium"
                   >
-                    Total marks (calculated)
+                    {t("Total marks (calculated)")}
                   </label>
                   <Input id="quiz-total" value={totalMarks} readOnly />
                 </div>
@@ -171,14 +174,16 @@ export function QuizEditor({
                     className="space-y-4 rounded-xl border p-4"
                   >
                     <legend className="px-2 font-semibold">
-                      Question {index + 1}
+                      {t("Question {0}", [index + 1])}
                     </legend>
                     <FormField
                       control={form.control}
                       name={`questions.${index}.text`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Question {index + 1} text</FormLabel>
+                          <FormLabel>
+                            {t("Question {0} text", [index + 1])}
+                          </FormLabel>
                           <FormControl>
                             <textarea
                               {...field}
@@ -200,7 +205,10 @@ export function QuizEditor({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                Question {index + 1} option {option + 1}
+                                {t("Question {0} option {1}", [
+                                  index + 1,
+                                  option + 1,
+                                ])}
                               </FormLabel>
                               <FormControl>
                                 <Input {...field} maxLength={300} />
@@ -218,7 +226,7 @@ export function QuizEditor({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              Question {index + 1} correct answer
+                              {t("Question {0} correct answer", [index + 1])}
                             </FormLabel>
                             <FormControl>
                               <select
@@ -230,7 +238,7 @@ export function QuizEditor({
                               >
                                 {[0, 1, 2, 3].map((value) => (
                                   <option key={value} value={value}>
-                                    Option {value + 1}
+                                    {t("Option {0}", [value + 1])}
                                   </option>
                                 ))}
                               </select>
@@ -244,7 +252,9 @@ export function QuizEditor({
                         name={`questions.${index}.marks`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Question {index + 1} marks</FormLabel>
+                            <FormLabel>
+                              {t("Question {0} marks", [index + 1])}
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
@@ -267,8 +277,10 @@ export function QuizEditor({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Question {index + 1} explanation (released results
-                            only)
+                            {t(
+                              "Question {0} explanation (released results only)",
+                              [index + 1],
+                            )}
                           </FormLabel>
                           <FormControl>
                             <textarea
@@ -286,10 +298,10 @@ export function QuizEditor({
                     {form.formState.errors.questions?.[index]?.options
                       ?.message && (
                       <p role="alert" className="text-sm text-red-700">
-                        {
+                        {t(
                           form.formState.errors.questions[index]?.options
-                            ?.message
-                        }
+                            ?.message,
+                        )}
                       </p>
                     )}
                     <Button
@@ -297,15 +309,16 @@ export function QuizEditor({
                       variant="outline"
                       onClick={() => array.remove(index)}
                     >
-                      Remove question {index + 1}
+                      {t("Remove question {0}", [index + 1])}
                     </Button>
                   </fieldset>
                 ))}
               </div>
               {array.fields.length === 0 && (
                 <p className="text-sm text-slate-600">
-                  Draft has no questions. Add at least one complete MCQ before
-                  publishing.
+                  {t(
+                    "Draft has no questions. Add at least one complete MCQ before publishing.",
+                  )}
                 </p>
               )}
               <Button
@@ -314,12 +327,14 @@ export function QuizEditor({
                 disabled={array.fields.length >= 50}
                 onClick={() => array.append(blankQuestion())}
               >
-                Add question
+                {t("Add question")}
               </Button>
             </fieldset>
             <div className="flex flex-wrap gap-3">
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Saving quiz…" : "Save draft"}
+                {form.formState.isSubmitting
+                  ? t("Saving quiz\u2026")
+                  : t("Save draft")}
               </Button>
               <Button
                 type="button"
@@ -327,7 +342,7 @@ export function QuizEditor({
                 disabled={form.formState.isSubmitting}
                 onClick={cancel}
               >
-                Cancel editing
+                {t("Cancel editing")}
               </Button>
             </div>
           </form>

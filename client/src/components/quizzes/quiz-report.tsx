@@ -1,8 +1,10 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useEffect, useId, useRef, useState } from "react";
 import type { z } from "zod";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import toast from "@/lib/i18n/toast";
 import {
   ResponsiveContainer,
   BarChart,
@@ -22,6 +24,7 @@ import { AccessDenied } from "@/components/auth/access-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 export function QuizReport({ id }: { id: string }) {
+  const t = useT();
   const [data, setData] = useState<z.infer<typeof reportSchema> | null>(null),
     [error, setError] = useState(""),
     [denied, setDenied] = useState(false);
@@ -97,14 +100,14 @@ export function QuizReport({ id }: { id: string }) {
   if (denied) return <AccessDenied />;
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
-      <h1 className="text-3xl font-bold">Quiz results and analytics</h1>
+      <h1 className="text-3xl font-bold">{t("Quiz results and analytics")}</h1>
       <Button variant="outline" onClick={refresh}>
-        Refresh report
+        {t("Refresh report")}
       </Button>
       {error ? (
-        <p role="alert">{error}</p>
+        <p role="alert">{t(error, undefined, true)}</p>
       ) : !data ? (
-        <p role="status">Loading quiz results…</p>
+        <p role="status">{t("Loading quiz results\u2026")}</p>
       ) : (
         <>
           <h2 className="text-2xl font-semibold">{data.quiz.title}</h2>
@@ -113,20 +116,20 @@ export function QuizReport({ id }: { id: string }) {
               disabled={busy || data.quiz.closed}
               onClick={() => setAction("close")}
             >
-              Close quiz
+              {t("Close quiz")}
             </Button>
             <Button
               disabled={busy || !data.quiz.closed || data.quiz.resultsReleased}
               onClick={() => setAction("release")}
             >
-              Release results
+              {t("Release results")}
             </Button>
             <span className="self-center text-sm">
               {data.quiz.resultsReleased
-                ? "Results released"
+                ? t("Results released")
                 : data.quiz.closed
-                  ? "Closed; results held"
-                  : "Open for attempts"}
+                  ? t("Closed; results held")
+                  : t("Open for attempts")}
             </span>
           </div>
           <section className="grid gap-4 sm:grid-cols-3">
@@ -141,7 +144,7 @@ export function QuizReport({ id }: { id: string }) {
               <Card key={title}>
                 <CardHeader>
                   <CardTitle>
-                    <h3>{title}</h3>
+                    <h3>{t(title)}</h3>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -151,16 +154,16 @@ export function QuizReport({ id }: { id: string }) {
             ))}
           </section>
           {data.submitted === 0 ? (
-            <p role="status">No submitted attempts yet.</p>
+            <p role="status">{t("No submitted attempts yet.")}</p>
           ) : (
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h3>Question accuracy</h3>
+                  <h3>{t("Question accuracy")}</h3>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div role="img" aria-label="Question accuracy chart">
+                <div role="img" aria-label={t("Question accuracy chart")}>
                   <ResponsiveContainer width="100%" height={280} minWidth={0}>
                     <BarChart data={data.questions} accessibilityLayer>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -169,7 +172,7 @@ export function QuizReport({ id }: { id: string }) {
                       <Tooltip />
                       <Bar
                         dataKey="accuracy"
-                        name="Accuracy %"
+                        name={t("Accuracy %")}
                         fill="#0f766e"
                         isAnimationActive={false}
                       />
@@ -180,16 +183,18 @@ export function QuizReport({ id }: { id: string }) {
             </Card>
           )}
           <section>
-            <h3 className="mb-3 text-xl font-semibold">Rankings</h3>
+            <h3 className="mb-3 text-xl font-semibold">{t("Rankings")}</h3>
             <div className="overflow-x-auto rounded-xl border">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr>
-                    {["Rank", "Member", "Score", "Percentage"].map((label) => (
-                      <th key={label} className="p-3">
-                        {label}
-                      </th>
-                    ))}
+                    {[t("Rank"), t("Member"), t("Score"), t("Percentage")].map(
+                      (label) => (
+                        <th key={label} className="p-3">
+                          {t(label)}
+                        </th>
+                      ),
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -204,7 +209,7 @@ export function QuizReport({ id }: { id: string }) {
                 </tbody>
               </table>
             </div>
-            <nav className="mt-4 flex gap-4" aria-label="Ranking pages">
+            <nav className="mt-4 flex gap-4" aria-label={t("Ranking pages")}>
               <Button
                 variant="outline"
                 disabled={page === 1}
@@ -213,9 +218,11 @@ export function QuizReport({ id }: { id: string }) {
                   setPage((value) => value - 1);
                 }}
               >
-                Previous
+                {t("Previous")}
               </Button>
-              <span>Page {page}</span>
+              <span>
+                {t("Page")} {page}
+              </span>
               <Button
                 variant="outline"
                 disabled={!data.hasNext}
@@ -224,27 +231,27 @@ export function QuizReport({ id }: { id: string }) {
                   setPage((value) => value + 1);
                 }}
               >
-                Next
+                {t("Next")}
               </Button>
             </nav>
           </section>
           <section>
             <h3 className="mb-3 text-xl font-semibold">
-              Question-wise statistics
+              {t("Question-wise statistics")}
             </h3>
             <div className="overflow-x-auto rounded-xl border">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr>
                     {[
-                      "Question",
-                      "Correct",
-                      "Incorrect",
-                      "Unanswered",
-                      "Accuracy",
+                      t("Question"),
+                      t("Correct"),
+                      t("Incorrect"),
+                      t("Unanswered"),
+                      t("Accuracy"),
                     ].map((label) => (
                       <th key={label} className="p-3">
-                        {label}
+                        {t(label)}
                       </th>
                     ))}
                   </tr>
@@ -286,13 +293,17 @@ export function QuizReport({ id }: { id: string }) {
           >
             <h2 id={heading} className="text-xl font-bold">
               {action === "close"
-                ? "Close this quiz permanently?"
-                : "Release results and answer explanations?"}
+                ? t("Close this quiz permanently?")
+                : t("Release results and answer explanations?")}
             </h2>
             <p>
               {action === "close"
-                ? "New starts and answer changes will stop. Active attempts are scored from saved answers. The quiz cannot be reopened."
-                : "Students with submitted attempts will see their scores, correct answers and explanations. Release cannot be undone."}
+                ? t(
+                    "New starts and answer changes will stop. Active attempts are scored from saved answers. The quiz cannot be reopened.",
+                  )
+                : t(
+                    "Students with submitted attempts will see their scores, correct answers and explanations. Release cannot be undone.",
+                  )}
             </p>
             <div className="flex justify-end gap-3">
               <Button
@@ -301,10 +312,10 @@ export function QuizReport({ id }: { id: string }) {
                 disabled={busy}
                 onClick={() => setAction(null)}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button type="submit" disabled={busy}>
-                {busy ? "Saving…" : "Confirm"}
+                {busy ? t("Saving\u2026") : t("Confirm")}
               </Button>
             </div>
           </form>

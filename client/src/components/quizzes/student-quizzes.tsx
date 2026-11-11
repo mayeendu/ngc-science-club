@@ -1,4 +1,6 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,6 +12,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 export function StudentQuizzes() {
+  const t = useT();
   const [data, setData] = useState<{
       quizzes: SafeQuiz[];
       hasNext: boolean;
@@ -38,15 +41,17 @@ export function StudentQuizzes() {
   }, [page, revision, router]);
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
-      <h1 className="text-3xl font-bold">Science quizzes</h1>
+      <h1 className="text-3xl font-bold">{t("Science quizzes")}</h1>
       <p className="text-slate-600">
-        Published quizzes for approved club members. One attempt per quiz.
+        {t(
+          "Published quizzes for approved club members. One attempt per quiz.",
+        )}
       </p>
       <Link
         href="/dashboard/student/results"
         className="text-blue-700 underline"
       >
-        My results and performance
+        {t("My results and performance")}
       </Link>
       <Button
         variant="outline"
@@ -57,14 +62,14 @@ export function StudentQuizzes() {
           setRevision((value) => value + 1);
         }}
       >
-        Refresh quizzes
+        {t("Refresh quizzes")}
       </Button>
       {error ? (
-        <p role="alert">{error}</p>
+        <p role="alert">{t(error, undefined, true)}</p>
       ) : !data ? (
-        <p role="status">Loading available quizzes…</p>
+        <p role="status">{t("Loading available quizzes\u2026")}</p>
       ) : data.quizzes.length === 0 ? (
-        <p role="status">No open published quizzes are available.</p>
+        <p role="status">{t("No open published quizzes are available.")}</p>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {data.quizzes.map((quiz) => (
@@ -77,14 +82,15 @@ export function StudentQuizzes() {
               <CardContent className="space-y-3">
                 <p className="text-slate-600">{quiz.subject}</p>
                 <p>
-                  {quiz.questionCount} questions · {quiz.durationMinutes}{" "}
-                  minutes · {quiz.totalMarks} marks
+                  {quiz.questionCount} {t("questions \u00B7")}{" "}
+                  {quiz.durationMinutes} {t("minutes \u00B7")} {quiz.totalMarks}{" "}
+                  {t("marks")}
                 </p>
                 <Link
                   href={`/dashboard/student/quizzes/${quiz.id}`}
                   className="text-blue-700 underline"
                 >
-                  View quiz
+                  {t("View quiz")}
                 </Link>
               </CardContent>
             </Card>
@@ -92,7 +98,7 @@ export function StudentQuizzes() {
         </div>
       )}
       {data && (
-        <nav className="flex items-center gap-4" aria-label="Quiz pages">
+        <nav className="flex items-center gap-4" aria-label={t("Quiz pages")}>
           <Button
             variant="outline"
             disabled={page === 1}
@@ -101,9 +107,11 @@ export function StudentQuizzes() {
               setPage((value) => value - 1);
             }}
           >
-            Previous
+            {t("Previous")}
           </Button>
-          <span>Page {page}</span>
+          <span>
+            {t("Page")} {page}
+          </span>
           <Button
             variant="outline"
             disabled={!data.hasNext}
@@ -112,7 +120,7 @@ export function StudentQuizzes() {
               setPage((value) => value + 1);
             }}
           >
-            Next
+            {t("Next")}
           </Button>
         </nav>
       )}

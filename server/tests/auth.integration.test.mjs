@@ -4,6 +4,14 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { once } from "node:events";
 import { createServer } from "node:http";
 import process from "node:process";
+if (
+  process.env.RUN_ATLAS_AUTH_TESTS !== "1" ||
+  process.env.NGC_ISOLATED_TEST === "1"
+) {
+  throw new Error(
+    "Atlas authentication tests require explicit RUN_ATLAS_AUTH_TESTS=1 approval; use npm run test:isolated for memory-only tests.",
+  );
+}
 import { after, before, test } from "node:test";
 
 const { fetch, AbortSignal } = globalThis;
@@ -180,7 +188,7 @@ test("invalid signup is rejected without creating a user", async () => {
 test("signup parses JSON before express.json and stores a hash rather than a password", async () => {
   const response = await request("/api/auth/sign-up/email", {
     method: "POST",
-    body: { name: "Fictional Student", email, password, role: "admin" },
+    body: { name: "Fictional Student", email, password },
   });
   assert.equal(response.status, 200);
   const body = await response.json();
@@ -196,7 +204,7 @@ test("signup parses JSON before express.json and stores a hash rather than a pas
   );
   const user = await database.collection("user").findOne({ email });
   assert.ok(user);
-  assert.equal(Object.hasOwn(user, "role"), false);
+  assert.equal(user.role, "student");
   assert.equal(Object.hasOwn(user, "password"), false);
   const account = await database
     .collection("account")

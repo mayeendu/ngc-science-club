@@ -1,8 +1,10 @@
 "use client";
+
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import toast from "@/lib/i18n/toast";
 import { useSession } from "@/lib/auth-client";
 import {
   EventApiError,
@@ -22,6 +24,7 @@ export function EventDetail({ id }: { id: string }) {
   );
 }
 function EventDetailContent({ id }: { id: string }) {
+  const t = useT();
   const { data: session, isPending } = useSession(),
     router = useRouter();
   const [event, setEvent] = useState<ClubEvent | null>(null),
@@ -101,7 +104,7 @@ function EventDetailContent({ id }: { id: string }) {
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-10">
       <Link href="/events" className="text-blue-700 underline">
-        Back to events
+        {t("Back to events")}
       </Link>
       <Button
         variant="outline"
@@ -109,53 +112,67 @@ function EventDetailContent({ id }: { id: string }) {
         onClick={refresh}
         disabled={busy}
       >
-        Refresh event
+        {t("Refresh event")}
       </Button>
       {error ? (
-        <p role="alert">{error}</p>
+        <p role="alert">{t(error, undefined, true)}</p>
       ) : !event ? (
         <EventSkeletons />
       ) : (
         <>
           <EventImage event={event} />
           <p className="capitalize text-teal-800">
-            {event.category} · {event.status}
+            {t(event.category)} · {t(event.status)}
           </p>
           <h1 className="break-words text-3xl font-bold">{event.title}</h1>
-          <p>{eventDate(event.startsAt)} (Dhaka)</p>
-          <p className="break-words">Venue: {event.venue}</p>
+          <p>
+            {eventDate(event.startsAt)}
+            {t("(Dhaka)")}
+          </p>
+          <p className="break-words">
+            {t("Venue:")} {event.venue}
+          </p>
           <p className="whitespace-pre-wrap break-words">{event.description}</p>
           <p>
             {event.category === "achievement"
-              ? "Achievements do not accept registrations."
-              : `${event.registeredCount} / ${event.capacity} registrations`}
+              ? t("Achievements do not accept registrations.")
+              : t("{0} / {1} registrations", [
+                  event.registeredCount,
+                  event.capacity,
+                ])}
           </p>
           {event.status === "cancelled" && (
             <p
               role="status"
               className="rounded-md border border-amber-300 bg-amber-50 p-3"
             >
-              This event has been cancelled. Attendance is unavailable.
+              {t("This event has been cancelled. Attendance is unavailable.")}
             </p>
           )}
           {isPending ? (
-            <p role="status">Checking account...</p>
+            <p role="status">{t("Checking account...")}</p>
           ) : !session ? (
             <Link href="/login" className="text-blue-700 underline">
-              Sign in to register
+              {t("Sign in to register")}
             </Link>
           ) : session.user.role !== "student" ? (
-            <p>Use your staff dashboard to manage events.</p>
+            <p>{t("Use your staff dashboard to manage events.")}</p>
           ) : membershipError ? (
             <p role="alert">{membershipError}</p>
           ) : !verified ? (
-            <p role="status">Checking membership and registration...</p>
+            <p role="status">{t("Checking membership and registration...")}</p>
           ) : (
             <section className="space-y-4 rounded-xl border p-5">
-              <h2 className="text-xl font-semibold">Your participation</h2>
-              <p>Registration: {own?.status ?? "Not registered"}</p>
+              <h2 className="text-xl font-semibold">
+                {t("Your participation")}
+              </h2>
+              <p>
+                {t("Registration:")} {own?.status ?? "Not registered"}
+              </p>
               {own?.status === "registered" && (
-                <p>Attendance: {own.attendance}</p>
+                <p>
+                  {t("Attendance:")} {t(own.attendance)}
+                </p>
               )}
               {own?.status === "registered" ? (
                 <Button
@@ -163,7 +180,7 @@ function EventDetailContent({ id }: { id: string }) {
                   disabled={busy}
                   onClick={() => setConfirm(true)}
                 >
-                  Cancel registration
+                  {t("Cancel registration")}
                 </Button>
               ) : (
                 <Button
@@ -175,29 +192,32 @@ function EventDetailContent({ id }: { id: string }) {
                   }
                   onClick={() => void act()}
                 >
-                  Register for event
+                  {t("Register for event")}
                 </Button>
               )}
               <p className="text-sm text-slate-600">
-                Registration and cancellation close at the event start time. The
-                server validates availability.
+                {t(
+                  "Registration and cancellation close at the event start time. The server validates availability.",
+                )}
               </p>
               <Link
                 href="/dashboard/student/events"
                 className="inline-block text-blue-700 underline"
               >
-                My events
+                {t("My events")}
               </Link>
             </section>
           )}
           {confirm && (
             <EventConfirmation
-              title="Cancel your registration?"
+              title={t("Cancel your registration?")}
               busy={busy}
               onCancel={() => setConfirm(false)}
               onConfirm={() => void act(true)}
             >
-              Your reserved place will become available to another member.
+              {t(
+                "Your reserved place will become available to another member.",
+              )}
             </EventConfirmation>
           )}
         </>

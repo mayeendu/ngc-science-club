@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useT } from "@/components/i18n/language";
 import {
   Controller,
   FormProvider,
@@ -87,8 +88,11 @@ function FormMessage({
   children,
   ...props
 }: React.ComponentProps<"p">) {
+  const t = useT();
   const { error, messageId } = useFormField();
-  const message = error?.message ? String(error.message) : children;
+  const message = error?.message
+    ? t(String(error.message), undefined, true)
+    : children;
   if (!message) return null;
   return (
     <p

@@ -1,12 +1,14 @@
 "use client";
 
+import { useT } from "@/components/i18n/language";
+import { Appearance } from "@/components/layout/appearance";
+import { LanguageSettings } from "@/components/i18n/language";
+import { NotificationBell } from "@/components/communication/notifications";
 import { useState } from "react";
-
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, LogOut, UserRound } from "lucide-react";
-import toast from "react-hot-toast";
-
+import toast from "@/lib/i18n/toast";
 import { signOut, useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,27 +18,21 @@ import {
   parseRole,
   roleLabels,
 } from "@/lib/roles";
-
 export function Navbar() {
+  const t = useT();
   const [isSigningOut, setIsSigningOut] = useState(false);
-
   const router = useRouter();
   const { data: session, isPending, error } = useSession();
   const role = parseRole(session?.user.role);
-
   async function handleSignOut() {
     if (isSigningOut) return;
-
     setIsSigningOut(true);
-
     try {
       const { error } = await signOut();
-
       if (error) {
         toast.error(error.message || "Sign out failed");
         return;
       }
-
       toast.success("Signed out successfully");
       router.replace("/login");
       router.refresh();
@@ -49,36 +45,56 @@ export function Navbar() {
   return (
     <header className="border-b bg-white">
       <nav
-        aria-label="Main navigation"
+        aria-label={t("Main navigation")}
         className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4"
       >
         <Link href="/" className="text-lg font-bold text-blue-700">
-          NGC Science Club
+          {t("NGC Science Club")}
         </Link>
 
+        <LanguageSettings />
+        <Appearance />
         <div className="flex flex-wrap items-center gap-3">
           <Link href="/" className="text-sm">
-            Home
+            {t("Home")}
           </Link>
 
           <Link href="/members" className="text-sm">
-            Members
+            {t("Members")}
           </Link>
           <Link href="/events" className="text-sm">
-            Events
+            {t("Events")}
+          </Link>
+          <Link href="/achievements" className="text-sm">
+            {t("Club achievements")}
+          </Link>
+          <Link href="/gallery" className="text-sm">
+            {t("Photo gallery")}
+          </Link>
+          <Link href="/certificates/verify" className="text-sm">
+            {t("Verify certificate")}
+          </Link>
+          <Link href="/faculty" className="text-sm">
+            {t("Faculty mentors")}
+          </Link>
+          <Link href="/announcements" className="text-sm">
+            {t("Announcements")}
           </Link>
 
           {isPending ? (
             <span role="status">
               <Loader2
                 className="size-5 animate-spin"
-                aria-label="Checking session"
+                aria-label={t("Checking session")}
               />
             </span>
           ) : error ? (
-            <span className="text-sm text-slate-600">Session unavailable</span>
+            <span className="text-sm text-slate-600">
+              {t("Session unavailable")}
+            </span>
           ) : session ? (
             <>
+              {role && <NotificationBell key={`${session.user.id}:${role}`} />}
               {role ? (
                 appRoles
                   .filter((dashboard) =>
@@ -90,12 +106,12 @@ export function Navbar() {
                       href={dashboardPath(dashboard)}
                       className="text-sm font-medium text-blue-700 hover:underline"
                     >
-                      {roleLabels[dashboard]} Dashboard
+                      {t(roleLabels[dashboard])} {t("Dashboard")}
                     </Link>
                   ))
               ) : (
                 <Link href="/dashboard" className="text-sm font-medium">
-                  Dashboard
+                  {t("Dashboard")}
                 </Link>
               )}
 
@@ -115,7 +131,7 @@ export function Navbar() {
                 ) : (
                   <LogOut className="size-4" />
                 )}
-                Sign out
+                {t("Sign out")}
               </Button>
             </>
           ) : (
@@ -126,7 +142,7 @@ export function Navbar() {
                 render={<Link href="/login" />}
                 nativeButton={false}
               >
-                Login
+                {t("Login")}
               </Button>
 
               <Button
@@ -134,7 +150,7 @@ export function Navbar() {
                 render={<Link href="/signup" />}
                 nativeButton={false}
               >
-                Sign up
+                {t("Sign up")}
               </Button>
             </>
           )}

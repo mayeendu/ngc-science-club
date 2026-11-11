@@ -1,11 +1,12 @@
 "use client";
 
+import { useT } from "@/components/i18n/language";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import toast from "react-hot-toast";
+import toast from "@/lib/i18n/toast";
 import { useSession } from "@/lib/auth-client";
 import {
   memberProfileSchema,
@@ -26,7 +27,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 export function MemberProfileEditor() {
   const { data } = useSession();
   return data ? (
@@ -34,6 +34,7 @@ export function MemberProfileEditor() {
   ) : null;
 }
 function ProfileLoader({ userId }: { userId: string }) {
+  const t = useT();
   const [profile, setProfile] = useState<OwnMemberProfile | null>(null);
   const [error, setError] = useState<number | null>(null);
   const [revision, setRevision] = useState(0);
@@ -54,19 +55,19 @@ function ProfileLoader({ userId }: { userId: string }) {
   }, [revision, router]);
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-10">
-      <h1 className="text-3xl font-bold">My member profile</h1>
+      <h1 className="text-3xl font-bold">{t("My member profile")}</h1>
       <Link
         href="/dashboard/student"
         className="inline-block text-blue-700 underline"
       >
-        Back to student dashboard
+        {t("Back to student dashboard")}
       </Link>
       {profile && !error && (
         <Link
           href={`/members/${userId}`}
           className="ml-4 inline-block text-blue-700 underline"
         >
-          View public profile
+          {t("View public profile")}
         </Link>
       )}
       {error ? (
@@ -74,8 +75,10 @@ function ProfileLoader({ userId }: { userId: string }) {
           <CardContent className="space-y-4 pt-5">
             <p role="alert">
               {error === 403
-                ? "An approved student membership is required to manage a profile."
-                : "Unable to load your member profile. Please try again."}
+                ? t(
+                    "An approved student membership is required to manage a profile.",
+                  )
+                : t("Unable to load your member profile. Please try again.")}
             </p>
             <Button
               variant="outline"
@@ -85,12 +88,12 @@ function ProfileLoader({ userId }: { userId: string }) {
                 setRevision((value) => value + 1);
               }}
             >
-              Retry profile
+              {t("Retry profile")}
             </Button>
           </CardContent>
         </Card>
       ) : !profile ? (
-        <p role="status">Loading member profile…</p>
+        <p role="status">{t("Loading member profile\u2026")}</p>
       ) : (
         <ProfileForm
           profile={profile}
@@ -119,6 +122,7 @@ function ProfileForm({
   onSave: (profile: OwnMemberProfile) => void;
   onDenied: (status: number) => void;
 }) {
+  const t = useT();
   const router = useRouter();
   const form = useForm<MemberProfileValues>({
     resolver: zodResolver(memberProfileSchema),
@@ -159,25 +163,28 @@ function ProfileForm({
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2 className="text-xl">Member details</h2>
+          <h2 className="text-xl">{t("Member details")}</h2>
         </CardTitle>
         <p className="text-sm text-slate-600">
-          Your name, department and academic year appear in the public
-          directory. Your phone stays private.
+          {t(
+            "Your name, department and academic year appear in the public directory. Your phone stays private.",
+          )}
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
         <dl className="grid gap-4 sm:grid-cols-3">
           <div>
-            <dt className="text-sm text-slate-600">Membership status</dt>
-            <dd className="font-medium capitalize">{profile.status}</dd>
+            <dt className="text-sm text-slate-600">{t("Membership status")}</dt>
+            <dd className="font-medium capitalize">{t(profile.status)}</dd>
           </div>
           <div>
-            <dt className="text-sm text-slate-600">Joining date</dt>
+            <dt className="text-sm text-slate-600">{t("Joining date")}</dt>
             <dd>{membershipDate(profile.membershipDate)}</dd>
           </div>
           <div>
-            <dt className="text-sm text-slate-600">Student ID (read only)</dt>
+            <dt className="text-sm text-slate-600">
+              {t("Student ID (read only)")}
+            </dt>
             <dd className="break-words">
               {profile.studentId || "Not recorded"}
             </dd>
@@ -188,7 +195,7 @@ function ProfileForm({
             htmlFor="profile-completion"
             className="mb-2 block text-sm font-medium"
           >
-            Profile completion: {profile.completion}%
+            {t("Profile completion:")} {profile.completion}%
           </label>
           <progress
             id="profile-completion"
@@ -197,7 +204,7 @@ function ProfileForm({
             className="h-3 w-full accent-teal-600"
           />
           <p className="mt-1 text-xs text-slate-500">
-            Based on the four editable fields in your saved profile.
+            {t("Based on the four editable fields in your saved profile.")}
           </p>
         </div>
         <Form {...form}>
@@ -210,7 +217,7 @@ function ProfileForm({
               disabled={form.formState.isSubmitting}
               className="grid gap-5 sm:grid-cols-2"
             >
-              <legend className="sr-only">Edit member profile</legend>
+              <legend className="sr-only">{t("Edit member profile")}</legend>
               {fields.map((item) => (
                 <FormField
                   key={item.name}
@@ -240,7 +247,9 @@ function ProfileForm({
               ))}
             </fieldset>
             <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Saving profile…" : "Save profile"}
+              {form.formState.isSubmitting
+                ? t("Saving profile\u2026")
+                : t("Save profile")}
             </Button>
           </form>
         </Form>

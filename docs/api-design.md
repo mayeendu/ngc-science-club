@@ -1,5 +1,21 @@
 # REST API proposal
 
+Milestone 17 adds public GET /api/ready: 200 {success:true,status:ready} after a bounded database ping, or 503 {success:false,status:unavailable} without error details. GET /api/health remains liveness. No schema/index writes occur at startup.
+
+Milestone 14: GET /api/admin/reports and GET /api/admin/reports/export.csv require a fresh admin role and the existing bounded from/to UTC range. Milestone 16: auth mutations require exact CLIENT_URL Origin; business API limits return 429 with Retry-After. Private APIs remain no-store. See admin-reporting.md and security-performance-testing.md.
+
+Milestone 13 adds public `/api/showcase` and minimal `/api/certificates/verify/:token`, scoped staff `/api/manage/showcase` and `/api/manage/certificates`, and session-only `/api/own/certificates`. Server-owned attendance/names/timestamps govern issuance; mutation Origin and optimistic versions apply. See [Milestone 13 endpoints](achievements-gallery-certificates.md).
+
+Milestone 12: protected `/api/resources` browse/download and owner/admin `/api/manage/resources` CRUD, versioned status and bounded binary upload. Fresh approved-membership checks protect student downloads; no raw GridFS ID routes. See [resource endpoints](learning-resources.md). Milestone 11 localizes the client without changing existing business API contracts.
+
+Milestone 10: public `/api/announcements`, staff-owned `/api/manage/announcements` CRUD and authenticated own `/api/notifications` GET/PATCH with strict pagination and Origin. Read-state writes re-check source visibility and accept only `read`. See [communication APIs](notifications-announcements.md).
+
+Milestone 09: own `/api/feedback` list/create/reply, scoped `/api/manage/feedback` list/reply and admin-only assignment, with page/status/category allowlists, fresh roles, trusted mutation Origin and versions. See [feedback endpoints](feedback-communication.md).
+
+## Milestone 08 faculty APIs
+
+Public `/api/faculty` list/detail; fresh admin-only `/api/admin/faculty` CRUD; teacher/admin `/api/teacher/activities` scoped by session account. Strict allowlists, pagination and version checks; mutation Origin required. See [faculty API details](faculty-management.md).
+
 ## Milestone 07 analytics APIs
 
 `GET /api/student/performance` (approved student, own records) and `GET /api/manage/performance` (teacher-owned quizzes/admin all) accept paired UTC `from`/`to`, exact `subject`, and bounded `page`. Return released-attempt count, average/best percentages, monthly progress, paginated quiz comparisons, own score history or staff rankings, and separate pagination flags. Strict query allowlist, fresh roles and no-store responses are required. See [complete semantics](performance-analytics.md).
