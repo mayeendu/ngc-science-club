@@ -49,6 +49,7 @@ import {
 } from "./modules/faculty/faculty.repository.js";
 import {
   createPublicFacultyRouter,
+  createTeacherEntryRouter,
   createAdminFacultyRouter,
   createTeacherActivityRouter,
 } from "./modules/faculty/faculty.routes.js";
@@ -291,6 +292,14 @@ export function createApp(
   );
   const faculty = options.facultyRepository ?? createFacultyRepository();
   app.use("/api/faculty", createPublicFacultyRouter(faculty));
+  app.use(
+    "/api/manage/teachers",
+    createTeacherEntryRouter(
+      authenticate,
+      requireRole("teacher", "admin"),
+      faculty,
+    ),
+  );
   app.use(
     "/api/admin/faculty",
     createAdminFacultyRouter(authenticate, requireRole("admin"), faculty),

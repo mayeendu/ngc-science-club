@@ -49,10 +49,9 @@ test("empty fields show accessible validation errors without an auth request", a
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true);
-  await expect(page.getByRole("link", { name: "Sign in" })).toHaveAttribute(
-    "href",
-    "/login",
-  );
+  await expect(
+    page.getByRole("main").getByRole("link", { name: "Sign in" }),
+  ).toHaveAttribute("href", "/login");
 });
 
 test("password visibility and confirmation validation work", async ({
@@ -77,6 +76,43 @@ test("password visibility and confirmation validation work", async ({
   await expect(
     page.getByLabel("Confirm password", { exact: true }),
   ).toHaveAttribute("aria-invalid", "true");
+});
+
+test("role dropdown defaults to student and cannot grant public staff access", async ({
+  page,
+}) => {
+  let submissions = 0;
+  await page.route("**/api/auth/sign-up/email", (route) => {
+    submissions++;
+    return route.abort();
+  });
+  await page.goto("/signup");
+  await fillSignup(page);
+  const role = page.getByRole("combobox", { name: "Role", exact: true });
+  await expect(role).toHaveValue("student");
+  await expect(role.locator("option")).toHaveText([
+    "Student",
+    "Teacher",
+    "Admin",
+  ]);
+  for (const value of ["teacher", "admin"]) {
+    await role.selectOption(value);
+    await expect(
+      page.getByText(
+        "Teacher and admin access requires authorized provisioning.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Create account", exact: true }),
+    ).toBeDisabled();
+    await page.getByLabel("Password", { exact: true }).press("Enter");
+    expect(submissions).toBe(0);
+  }
+  await role.selectOption("student");
+  await expect(
+    page.getByRole("button", { name: "Create account", exact: true }),
+  ).toBeEnabled();
 });
 
 test("signup sends only account fields, disables submit while pending and redirects", async ({

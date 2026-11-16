@@ -18,6 +18,9 @@ export function dashboardLinks(role: AppRole) {
   const staff = role !== "student";
   return [
     { href: `/dashboard/${role}`, label: "Dashboard", icon: LayoutDashboard },
+    ...(staff
+      ? [{ href: "/faculty/add", label: "Add teacher", icon: UserRound }]
+      : []),
     ...(role === "admin"
       ? [
           {

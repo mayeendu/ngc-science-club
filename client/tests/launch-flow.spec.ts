@@ -34,21 +34,29 @@ test("connected signup/login, membership, private feedback, role denial and logo
   await page
     .getByRole("link", { name: "Apply for membership", exact: true })
     .click();
+  await page.getByLabel("Full Name", { exact: true }).fill("Fictional Student");
+  await page.getByLabel("Roll No.", { exact: true }).fill("TEST-01");
+  await page.getByLabel("Section", { exact: true }).fill("Science 1");
+  await page.getByLabel("Email", { exact: true }).fill("fictional@example.com");
+  await page.getByLabel("Mobile No.", { exact: true }).fill("01712345678");
+  await page.getByLabel("WhatsApp No.", { exact: true }).fill("01912345678");
   await page
-    .getByLabel("Full name", { exact: true })
-    .fill("Fictional Launch Student");
+    .getByLabel("Guide Teacher Name", { exact: true })
+    .fill("Fictional Teacher");
   await page
-    .getByLabel("Student ID", { exact: true })
-    .fill(`FICTIONAL-${test.info().project.name}`);
-  await page.getByLabel("Department", { exact: true }).fill("Physics");
-  await page.getByLabel("Academic year", { exact: true }).fill("2026-2027");
-  await page.getByLabel("Phone", { exact: true }).fill("01700000000");
+    .getByLabel("Guide Teacher Subject", { exact: true })
+    .fill("Physics");
+  await page.getByLabel("SSC GPA", { exact: true }).fill("4.75");
+  await page.getByLabel("Optional Subject", { exact: true }).fill("Chemistry");
+  await page.getByLabel("Admission Goal", { exact: true }).fill("Engineering");
+  await page.getByLabel("Half Yearly", { exact: true }).fill("");
+  await page.getByLabel("Year Final", { exact: true }).fill("A+");
+  await page.getByLabel("Pre-Test", { exact: true }).fill("");
+  await page.getByLabel("Test", { exact: true }).fill("");
   await page
-    .getByLabel("Reason for joining", { exact: true })
-    .fill("Fictional student wants to explore science in isolated tests.");
-  await page
-    .getByRole("button", { name: "Submit application", exact: true })
-    .click();
+    .getByLabel("Present Address", { exact: true })
+    .fill("Fictional campus address");
+  await page.getByRole("button", { name: "Save member", exact: true }).click();
   await expect(
     page.getByText("Your application is awaiting admin approval.", {
       exact: true,

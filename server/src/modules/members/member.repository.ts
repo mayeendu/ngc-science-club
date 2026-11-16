@@ -13,6 +13,8 @@ type MemberDocument = {
   fullName: string;
   department: string;
   academicYear: string;
+  studentId?: string;
+  section?: string;
   reviewedAt?: Date;
 };
 const projection = {
@@ -51,11 +53,16 @@ export function createMemberRepository(
           $regex: query.search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
           $options: "i",
         };
+      if (query.studentRoll) filter.studentId = query.studentRoll;
+      if (query.section) filter.section = query.section;
       if (query.department) filter.department = query.department;
       if (query.academicYear) filter.academicYear = query.academicYear;
       const [records, total] = await Promise.all([
         collection()
-          .find(filter, { projection, readPreference: "primary" })
+          .find(filter, {
+            projection: { ...projection, studentId: 1 },
+            readPreference: "primary",
+          })
           .sort({ fullName: 1, _id: 1 })
           .skip((query.page - 1) * 12)
           .limit(12)
@@ -63,7 +70,10 @@ export function createMemberRepository(
         collection().countDocuments(filter, { readPreference: "primary" }),
       ]);
       return {
-        members: records.map(publicMember),
+        members: records.map((record) => ({
+          ...publicMember(record),
+          studentRoll: record.studentId ?? null,
+        })),
         pagination: {
           page: query.page,
           pageSize: 12,

@@ -6,6 +6,7 @@ import type { AuthHandler } from "../../types/auth.js";
 import type { FacultyRepository } from "./faculty.repository.js";
 import {
   facultyContentSchema,
+  teacherEntrySchema,
   facultyIdSchema,
   facultyListSchema,
   facultyUpdateSchema,
@@ -27,8 +28,17 @@ export function createPublicFacultyRouter(repository: FacultyRepository) {
     const query = parse(facultyListSchema, req.query);
     res.json({
       success: true,
-      ...(await repository.list(false, query.page, query.department)),
+      ...(await repository.list(
+        false,
+        query.page,
+        query.department,
+        query.designation,
+      )),
     });
+  });
+  router.get("/filters", async (req, res) => {
+    parse(facultyVersionSchema.pick({}), req.query);
+    res.json({ success: true, ...(await repository.filters()) });
   });
   router.get("/:id", async (req, res) => {
     parse(facultyVersionSchema.pick({}), req.query);
@@ -50,16 +60,19 @@ export function createAdminFacultyRouter(
     const query = parse(facultyListSchema, req.query);
     res.json({
       success: true,
-      ...(await repository.list(true, query.page, query.department)),
+      ...(await repository.list(
+        true,
+        query.page,
+        query.department,
+        query.designation,
+      )),
     });
   });
   router.post("/", trusted, async (req, res) => {
-    res
-      .status(201)
-      .json({
-        success: true,
-        profile: await repository.create(parse(facultyContentSchema, req.body)),
-      });
+    res.status(201).json({
+      success: true,
+      profile: await repository.create(parse(facultyContentSchema, req.body)),
+    });
   });
   router.put("/:id", trusted, async (req, res) => {
     const { version, ...input } = parse(facultyUpdateSchema, req.body);
@@ -96,5 +109,41 @@ export function createTeacherActivityRouter(
     });
   };
   router.get("/", authenticate, teacher, assigned);
+  return router;
+}
+
+export function createTeacherEntryRouter(
+  authenticate: AuthHandler,
+  staff: AuthHandler,
+  repository: FacultyRepository,
+) {
+  const router = Router();
+  router.use(authenticate, staff);
+  router.post("/", trusted, async (req, res) => {
+    const input = parse(teacherEntrySchema, req.body);
+    const profile = await repository.create({
+      ...input,
+      specialization: "",
+      photo: "",
+      bio: "",
+      published: true,
+      teacherAccountId: "",
+      assignedEventIds: [],
+    });
+    // Contact data stays private even in this mutation response.
+    res.status(201).json({
+      success: true,
+      profile: {
+        id: profile.id,
+        name: profile.name,
+        designation: profile.designation,
+        department: profile.department,
+        bcsBatch: profile.bcsBatch,
+        specialization: profile.specialization,
+        photo: profile.photo,
+        bio: profile.bio,
+      },
+    });
+  });
   return router;
 }

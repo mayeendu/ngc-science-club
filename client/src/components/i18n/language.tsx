@@ -29,21 +29,28 @@ export function LanguageSettings() {
     document.documentElement.lang = language;
   }, [language]);
   return (
-    <label className="inline-flex items-center gap-2 text-sm">
-      <span>ভাষা / Language</span>
-      <select
-        aria-label="ভাষা / Language"
-        value={language}
-        onChange={(event) => setLanguage(event.target.value as Language)}
-        className="rounded border bg-white px-2 py-1"
-      >
-        <option value="bn" lang="bn">
-          বাংলা
-        </option>
-        <option value="en" lang="en">
-          English
-        </option>
-      </select>
-    </label>
+    <div
+      role="group"
+      aria-label="ভাষা / Language"
+      className={`relative inline-flex h-7 w-16 shrink-0 items-center justify-between rounded-full border p-0.5 shadow-[0_1px_4px_rgb(0_0_0/30%)] motion-safe:transition-colors ${language === "en" ? "border-zinc-200 bg-white" : "border-[#303434] bg-[#303434]"}`}
+    >
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none absolute left-0.5 top-0.5 size-5.5 rounded-full motion-safe:transition-transform ${language === "en" ? "translate-x-9 bg-black" : "translate-x-0 bg-white"}`}
+      />
+      {(["bn", "en"] as const).map((option) => (
+        <button
+          key={option}
+          type="button"
+          lang={option}
+          aria-label={option === "bn" ? "বাংলা" : "English"}
+          aria-pressed={language === option}
+          onClick={() => setLanguage(option)}
+          className={`relative z-10 inline-flex size-5.5 min-h-0! shrink-0 items-center justify-center rounded-full text-[10px] font-semibold uppercase motion-safe:transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${language === "en" ? (option === "en" ? "text-white" : "text-zinc-700") : option === "bn" ? "text-[#20221e]" : "text-white"}`}
+        >
+          {option === "bn" ? "BN" : "EN"}
+        </button>
+      ))}
+    </div>
   );
 }

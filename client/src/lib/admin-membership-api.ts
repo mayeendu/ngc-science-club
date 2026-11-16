@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { membershipSchema } from "./validations/membership";
 
 export const reviewDecisionSchema = z.discriminatedUnion("decision", [
   z.strictObject({ decision: z.literal("approved") }),
@@ -14,20 +13,57 @@ export const reviewDecisionSchema = z.discriminatedUnion("decision", [
 ]);
 export type ReviewDecision = z.infer<typeof reviewDecisionSchema>;
 export type MembershipStatus = "pending" | "approved" | "rejected";
+// Stored applications may predate the current form. Validate response types,
+// rather than requiring historical data to pass today's submission rules.
+const storedText = z
+  .string()
+  .nullish()
+  .transform((value) => value ?? "");
+const optionalStoredText = z
+  .string()
+  .nullish()
+  .transform((value) => value ?? undefined)
+  .optional();
 const summarySchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]),
   submittedAt: z.iso.datetime(),
-  reviewedAt: z.iso.datetime().optional(),
-  rejectionReason: z.string().optional(),
+  reviewedAt: z.iso
+    .datetime()
+    .nullish()
+    .transform((value) => value ?? undefined)
+    .optional(),
+  rejectionReason: optionalStoredText,
+});
+export const adminApplicationSchema = z.object({
+  id: z.string().min(1),
+  fullName: storedText,
+  studentId: storedText,
+  department: storedText,
+  academicYear: storedText,
+  phone: storedText,
+  reason: storedText,
+  sscGpa: optionalStoredText,
+  sscRegistration: optionalStoredText,
+  section: optionalStoredText,
+  guardianPhone: optionalStoredText,
+  whatsappPhone: optionalStoredText,
+  guideTeacher: optionalStoredText,
+  optionalSubject: optionalStoredText,
+  residence: optionalStoredText,
+  admissionGoal: optionalStoredText,
+  signature: optionalStoredText,
+  email: optionalStoredText,
+  guideTeacherSubject: optionalStoredText,
+  halfYearlyResult: optionalStoredText,
+  yearFinalResult: optionalStoredText,
+  preTestResult: optionalStoredText,
+  testResult: optionalStoredText,
+  presentAddress: optionalStoredText,
+  ...summarySchema.shape,
 });
 const listSchema = z.object({
   success: z.literal(true),
-  applications: z.array(
-    membershipSchema.extend({
-      id: z.string(),
-      ...summarySchema.shape,
-    }),
-  ),
+  applications: z.array(adminApplicationSchema),
   page: z.number().int().positive(),
   hasNext: z.boolean(),
 });

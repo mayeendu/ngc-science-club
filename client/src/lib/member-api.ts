@@ -9,7 +9,11 @@ export const publicMemberSchema = z.strictObject({
 });
 const listSchema = z.object({
   success: z.literal(true),
-  members: z.array(publicMemberSchema),
+  members: z.array(
+    publicMemberSchema.extend({
+      studentRoll: z.string().nullable().optional(),
+    }),
+  ),
   pagination: z.object({
     page: z.number().int(),
     pageSize: z.number().int(),
@@ -56,18 +60,22 @@ async function request(path: string, signal: AbortSignal) {
 }
 export async function listMembers(
   query: {
-    search: string;
-    department: string;
+    search?: string;
+    studentRoll?: string;
+    section?: string;
+    department?: string;
     academicYear: string;
     page: number;
   },
   signal: AbortSignal,
 ) {
   const params = new URLSearchParams({
-    search: query.search,
     page: String(query.page),
   });
+  if (query.search) params.set("search", query.search);
   if (query.department) params.set("department", query.department);
+  if (query.studentRoll) params.set("studentRoll", query.studentRoll);
+  if (query.section) params.set("section", query.section);
   if (query.academicYear) params.set("academicYear", query.academicYear);
   return listSchema.parse(await request(`?${params}`, signal));
 }

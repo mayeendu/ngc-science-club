@@ -18,6 +18,7 @@ const projection = {
   specialization: 1,
   photo: 1,
   bio: 1,
+  bcsBatch: 1,
 };
 function view(row: FacultyDocument, admin: boolean) {
   return {
@@ -28,8 +29,11 @@ function view(row: FacultyDocument, admin: boolean) {
     specialization: row.specialization,
     photo: row.photo,
     bio: row.bio,
+    ...(row.bcsBatch !== undefined ? { bcsBatch: row.bcsBatch } : {}),
     ...(admin
       ? {
+          ...(row.email !== undefined ? { email: row.email } : {}),
+          ...(row.phone !== undefined ? { phone: row.phone } : {}),
           published: row.published,
           teacherAccountId: row.teacherAccountId,
           assignedEventIds: row.assignedEventIds,
@@ -68,13 +72,46 @@ export function createFacultyRepository(database: () => Db = getDB) {
     }
   }
   return {
-    async list(admin: boolean, page: number, department?: string) {
+    async filters() {
+      const values = async (field: "department" | "designation") => {
+        const rows = await collection()
+          .aggregate<{ _id: string }>(
+            [
+              {
+                $match: {
+                  published: true,
+                  deletedAt: { $exists: false },
+                  [field]: { $type: "string", $ne: "" },
+                },
+              },
+              { $group: { _id: "$" + field } },
+              { $sort: { _id: 1 } },
+              { $limit: 200 },
+            ],
+            { maxTimeMS: 10000, readPreference: "primary" },
+          )
+          .toArray();
+        return rows.map((row) => row._id);
+      };
+      const [departments, designations] = await Promise.all([
+        values("department"),
+        values("designation"),
+      ]);
+      return { departments, designations };
+    },
+    async list(
+      admin: boolean,
+      page: number,
+      department?: string,
+      designation?: string,
+    ) {
       const rows = await collection()
         .find(
           {
             deletedAt: { $exists: false },
             ...(admin ? {} : { published: true }),
             ...(department ? { department } : {}),
+            ...(designation ? { designation } : {}),
           },
           { ...(admin ? {} : { projection }), readPreference: "primary" },
         )
@@ -210,15 +247,13 @@ export function createFacultyRepository(database: () => Db = getDB) {
         )
         .toArray();
       return {
-        items: (data?.items ?? [])
-          .slice(0, 20)
-          .map((row) => ({
-            id: row.id,
-            title: row.title,
-            startsAt: row.startsAt.toISOString(),
-            venue: row.venue,
-            status: row.status,
-          })),
+        items: (data?.items ?? []).slice(0, 20).map((row) => ({
+          id: row.id,
+          title: row.title,
+          startsAt: row.startsAt.toISOString(),
+          venue: row.venue,
+          status: row.status,
+        })),
         page,
         hasNext: (data?.items.length ?? 0) > 20,
       };

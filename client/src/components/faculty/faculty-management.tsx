@@ -220,6 +220,21 @@ export function FacultyManagement() {
           {items.map((profile) => (
             <li key={profile.id} className="space-y-3 rounded-xl border p-4">
               <h2 className="text-xl font-semibold">{profile.name}</h2>
+              {profile.bcsBatch && (
+                <p>
+                  {t("BCS Batch")}: {profile.bcsBatch}
+                </p>
+              )}
+              {profile.email && (
+                <p>
+                  {t("Email")}: {profile.email}
+                </p>
+              )}
+              {profile.phone && (
+                <p>
+                  {t("Mobile No.")}: {profile.phone}
+                </p>
+              )}
               <p>
                 {profile.department} ·{" "}
                 {t(profile.published ? "Published" : "Hidden")}·{" "}

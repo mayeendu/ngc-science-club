@@ -129,3 +129,7 @@ Phase 2 starts only after the user approves the plan/setup scope. Package instal
 
 
 Membership reference-form update (2026-11-11): see [membership application](membership-application.md#reference-membership-form-update-2026-11-11) for fields, layout, compatibility and privacy decisions.
+
+Membership reference form revision (2026-11-15): see membership-application.md for the new fields, backward compatibility, private admin projections and unchanged pending approval workflow. No live database migration or deployment performed.
+
+Teacher data entry (2026-11-15): /faculty/add is visible only to teacher/admin accounts. POST /api/manage/teachers checks fresh staff RBAC, trusted origin and six strict fields (name, designation, department, bcsBatch, email, phone). It adds a published facultyProfiles directory record with server-owned IDs/timestamps/version, no linked login account or assigned events. Teachers navbar menu uses /faculty. Public projections include BCS batch; contacts remain private to admin management. Existing faculty CRUD remains admin-only. Additive optional fields preserve legacy records; no live migration, account/role changes or deployment.

@@ -26,5 +26,5 @@ async function FacultyProfileContent({
   }>;
 }) {
   const { id } = await params;
-  return <FacultyDirectory id={id} />;
+  return <FacultyDirectory key={id} id={id} />;
 }

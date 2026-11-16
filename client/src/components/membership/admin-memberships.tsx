@@ -176,7 +176,9 @@ export function AdminMemberships() {
               <Card key={application.id}>
                 <CardHeader>
                   <CardTitle>
-                    <h2 className="text-xl">{application.fullName}</h2>
+                    <h2 className="text-xl">
+                      {application.fullName || t("Unavailable")}
+                    </h2>
                   </CardTitle>
                   <span className="w-fit rounded-full bg-teal-50 px-3 py-1 text-sm font-medium capitalize text-teal-800">
                     {t(application.status)}
@@ -189,6 +191,25 @@ export function AdminMemberships() {
                       ["Department", application.department],
                       ["Session", application.academicYear],
                       ["Mobile No.", application.phone],
+                      ["Email", application.email ?? "Unavailable"],
+                      [
+                        "Guide Teacher Subject",
+                        application.guideTeacherSubject ?? "Unavailable",
+                      ],
+                      [
+                        "Half Yearly",
+                        application.halfYearlyResult ?? "Unavailable",
+                      ],
+                      [
+                        "Year Final",
+                        application.yearFinalResult ?? "Unavailable",
+                      ],
+                      ["Pre-Test", application.preTestResult ?? "Unavailable"],
+                      ["Test", application.testResult ?? "Unavailable"],
+                      [
+                        "Present Address",
+                        application.presentAddress ?? "Unavailable",
+                      ],
                       ["SSC GPA", application.sscGpa ?? "Unavailable"],
                       [
                         "SSC Reg No.",
@@ -231,14 +252,16 @@ export function AdminMemberships() {
                         <dt className="font-medium text-slate-600">
                           {t(label)}
                         </dt>
-                        <dd className="break-words">{value}</dd>
+                        <dd className="break-words">
+                          {value || t("Unavailable")}
+                        </dd>
                       </div>
                     ))}
                   </dl>
                   <div>
                     <h3 className="font-medium">{t("Reason for joining")}</h3>
                     <p className="whitespace-pre-wrap break-words text-slate-600">
-                      {application.reason}
+                      {application.reason || t("Unavailable")}
                     </p>
                   </div>
                   {application.reviewedAt && (

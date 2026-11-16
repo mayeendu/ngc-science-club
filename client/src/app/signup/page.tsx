@@ -12,13 +12,7 @@ import { signUp } from "@/lib/auth-client";
 import { signupSchema, type SignupValues } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -31,11 +25,16 @@ export default function SignupPage() {
   const t = useT();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState<"student" | "teacher" | "admin">("student");
   const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
   async function onSubmit(values: SignupValues) {
+    if (role !== "student") {
+      toast.error("Teacher and admin access requires authorized provisioning.");
+      return;
+    }
     try {
       const { error } = await signUp.email({
         name: values.name,
@@ -54,17 +53,17 @@ export default function SignupPage() {
     }
   }
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">
-            <h1>{t("Join NGC Science Club")}</h1>
-          </CardTitle>
-          <CardDescription>{t("Create your student account")}</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <main className="mx-auto w-full max-w-181 px-4 py-8 sm:px-8">
+      <h1 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
+        {t("Join NGC Science Club")}
+      </h1>
+      <Card className="rounded-2xl border border-border bg-card py-0 shadow-none ring-0">
+        <CardContent className="p-5 sm:p-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-5 [&_label]:text-lg [&_label]:font-semibold [&_input]:h-14 [&_input]:rounded-xl [&_input]:border-neutral-500 [&_input]:px-4 [&_input]:text-lg"
+            >
               <FormField
                 control={form.control}
                 name="name"
@@ -73,7 +72,7 @@ export default function SignupPage() {
                     <FormLabel>{t("Full name")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={t("Your full name")}
+                        placeholder={`[${t("Full name")}]`}
                         autoComplete="name"
                         {...field}
                       />
@@ -91,7 +90,7 @@ export default function SignupPage() {
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder={t("student@example.com")}
+                        placeholder={`[${t("Email")}]`}
                         autoComplete="email"
                         {...field}
                       />
@@ -110,9 +109,9 @@ export default function SignupPage() {
                       <FormControl>
                         <Input
                           type={showPassword ? "text" : "password"}
-                          placeholder={t("At least 8 characters")}
+                          placeholder={`[${t("Password")}]`}
                           autoComplete="new-password"
-                          className="pr-10"
+                          className="pr-12!"
                           {...field}
                         />
                       </FormControl>
@@ -154,10 +153,46 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
+              <div className="space-y-2">
+                <label htmlFor="signup-role">{t("Role")}</label>
+                <select
+                  id="signup-role"
+                  value={role}
+                  disabled={form.formState.isSubmitting}
+                  aria-describedby={
+                    role !== "student" ? "signup-role-help" : undefined
+                  }
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    if (
+                      value === "student" ||
+                      value === "teacher" ||
+                      value === "admin"
+                    )
+                      setRole(value);
+                  }}
+                  className="h-14 w-full rounded-xl border border-neutral-500 bg-background px-4 text-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                  <option value="student">{t("Student")}</option>
+                  <option value="teacher">{t("Teacher")}</option>
+                  <option value="admin">{t("Admin")}</option>
+                </select>
+                {role !== "student" && (
+                  <p
+                    id="signup-role-help"
+                    role="status"
+                    className="text-sm text-muted-foreground"
+                  >
+                    {t(
+                      "Teacher and admin access requires authorized provisioning.",
+                    )}
+                  </p>
+                )}
+              </div>
               <Button
                 type="submit"
-                className="w-full"
-                disabled={form.formState.isSubmitting}
+                className="h-14 rounded-xl bg-teal-700 px-7 text-lg font-semibold text-white hover:bg-teal-800"
+                disabled={form.formState.isSubmitting || role !== "student"}
               >
                 {form.formState.isSubmitting ? (
                   <>

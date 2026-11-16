@@ -45,20 +45,23 @@ test("Bangla default, shared switch, reload persistence and unchanged user conte
   await page.goto("/faculty");
   await expect(page.locator("html")).toHaveAttribute("lang", "bn");
   await expect(
-    page.getByRole("heading", { name: "শিক্ষক পরামর্শক", exact: true }),
+    page.getByRole("heading", { name: "শিক্ষকবৃন্দ", exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Home", exact: true }),
   ).toBeVisible();
-  await page.getByLabel("ভাষা / Language", { exact: true }).selectOption("en");
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Faculty mentors", exact: true }),
+    page.getByRole("button", { name: "English", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.getByRole("heading", { name: "Teachers", exact: true }),
   ).toBeVisible();
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await page.locator('a[href="/login"]').click();
+  await page.getByRole("link", { name: "Sign in", exact: true }).click();
   await expect(page.getByLabel("Email address", { exact: true })).toBeVisible();
-  await page.getByLabel("ভাষা / Language", { exact: true }).selectOption("bn");
+  await page.getByRole("button", { name: "বাংলা", exact: true }).click();
   await expect(page.getByLabel("ইমেইল ঠিকানা", { exact: true })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "bn");
 });
@@ -72,8 +75,7 @@ test("Bangla authentication validation and keyboard language selection", async (
   await expect(
     page.getByText("নামে অন্তত ২টি অক্ষর থাকতে হবে", { exact: true }),
   ).toBeVisible();
-  await page.getByLabel("ভাষা / Language", { exact: true }).focus();
-  await page.keyboard.press("e");
+  await page.getByRole("button", { name: "English", exact: true }).focus();
   await page.keyboard.press("Enter");
   await expect(
     page.getByRole("heading", { name: "Join NGC Science Club" }),
@@ -95,7 +97,7 @@ test("blocked storage retains a working language choice in this tab", async ({
     });
   });
   await page.goto("/login");
-  await page.getByLabel("ভাষা / Language", { exact: true }).selectOption("en");
+  await page.getByRole("button", { name: "English", exact: true }).click();
   await expect(page.getByLabel("Email address", { exact: true })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
 });

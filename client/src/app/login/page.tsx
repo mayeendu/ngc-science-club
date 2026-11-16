@@ -49,6 +49,13 @@ export default function LoginPage() {
         return;
       }
       toast.success("Signed in successfully!");
+      // Only accept the supported internal destination; never redirect to arbitrary URLs.
+      const next = new URLSearchParams(window.location.search).get("next");
+      if (next === "/membership/apply") {
+        // Reload the session after sign-in before mounting the protected form.
+        window.location.assign(next);
+        return;
+      }
       router.push("/");
       router.refresh();
     } catch {

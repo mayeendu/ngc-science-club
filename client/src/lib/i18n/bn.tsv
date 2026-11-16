@@ -793,3 +793,46 @@ Date is recorded automatically when you submit. Type your full name as your sign
 Student details	শিক্ষার্থীর তথ্য
 Contact details	যোগাযোগের তথ্য
 Preferences and signature	পছন্দ ও স্বাক্ষর
+
+Add new member	নতুন সদস্য যোগ করুন
+Academic Information	শিক্ষা সংক্রান্ত তথ্য
+Full Name	পূর্ণ নাম
+Roll No.	রোল নং
+Contact Information	যোগাযোগের তথ্য
+Guide Teacher Information	গাইড শিক্ষকের তথ্য
+Guide Teacher Name	গাইড শিক্ষকের নাম
+Guide Teacher Subject	গাইড শিক্ষকের বিষয়
+Academic Background	শিক্ষাগত পটভূমি
+Exam Result	পরীক্ষার ফলাফল
+Half Yearly	অর্ধবার্ষিক
+Year Final	বার্ষিক
+Pre-Test	প্রাক-নির্বাচনী
+Test	নির্বাচনী
+Address	ঠিকানা
+Present Address	বর্তমান ঠিকানা
+Save member	সদস্য সংরক্ষণ করুন
+Email	ইমেইল
+Apply Membership	সদস্যপদের জন্য আবেদন করুন
+Only student accounts can apply.	শুধুমাত্র শিক্ষার্থী অ্যাকাউন্ট থেকে আবেদন করা যাবে।
+Sign in to apply for membership	সদস্যপদের জন্য আবেদন করতে সাইন ইন করুন
+Teachers	শিক্ষকবৃন্দ
+Add teacher	শিক্ষক যোগ করুন
+Add new teacher	নতুন শিক্ষক যোগ করুন
+Department / Subject Name	বিভাগ / বিষয়ের নাম
+BCS Batch	বিসিএস ব্যাচ
+Teacher details	শিক্ষকের তথ্য
+Save teacher	শিক্ষক সংরক্ষণ করুন
+Teacher saved.	শিক্ষকের তথ্য সংরক্ষণ করা হয়েছে।
+Welcome {0}	স্বাগতম {0}
+Teacher and admin access requires authorized provisioning.	শিক্ষক ও প্রশাসকের অনুমতি অনুমোদিত প্রক্রিয়ায় প্রদান করতে হবে।
+Role	ভূমিকা
+All designations	সকল পদবি
+Search teachers	শিক্ষক খুঁজুন
+Loading teacher search options…	শিক্ষক অনুসন্ধানের বিকল্প লোড হচ্ছে…
+Unable to load teacher search options.	শিক্ষক অনুসন্ধানের বিকল্প লোড করা যায়নি।
+Retry teacher search options	অনুসন্ধানের বিকল্প আবার লোড করুন
+Reset filters	ফিল্টার মুছুন
+Student Roll	শিক্ষার্থীর রোল
+Exact student roll	শিক্ষার্থীর সম্পূর্ণ রোল
+Exact section, e.g. Science 1	সম্পূর্ণ শাখা, যেমন Science 1
+Try another roll, section or academic year, or return after new memberships are approved.	অন্য রোল, শাখা বা শিক্ষাবর্ষ দিয়ে খুঁজুন, অথবা নতুন সদস্যপদ অনুমোদনের পর আবার দেখুন।

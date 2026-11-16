@@ -9,7 +9,12 @@ const members = (): PublicMember[] =>
     academicYear: i % 2 ? "2026-2027" : "2025-2026",
     membershipDate: "2026-11-01T10:00:00.000Z",
   }));
-type Fixture = { members: PublicMember[]; failure?: boolean; slow?: boolean };
+type Fixture = {
+  members: PublicMember[];
+  privateFields?: Record<string, { studentRoll: string; section: string }>;
+  failure?: boolean;
+  slow?: boolean;
+};
 async function mockDirectory(page: Page, fixture: Fixture) {
   const headers = () => ({
     "access-control-allow-origin": new URL(page.url()).origin,
@@ -65,6 +70,11 @@ async function mockDirectory(page: Page, fixture: Fixture) {
     const current = Number(query.get("page") ?? 1);
     const filtered = fixture.members.filter(
       (m) =>
+        (!query.get("studentRoll") ||
+          fixture.privateFields?.[m.id]?.studentRoll ===
+            query.get("studentRoll")) &&
+        (!query.get("section") ||
+          fixture.privateFields?.[m.id]?.section === query.get("section")) &&
         (!query.get("department") ||
           m.department === query.get("department")) &&
         (!query.get("academicYear") ||
@@ -75,7 +85,12 @@ async function mockDirectory(page: Page, fixture: Fixture) {
     );
     return respond(200, {
       success: true,
-      members: filtered.slice((current - 1) * 12, current * 12),
+      members: filtered
+        .slice((current - 1) * 12, current * 12)
+        .map((member) => ({
+          ...member,
+          studentRoll: fixture.privateFields?.[member.id]?.studentRoll ?? null,
+        })),
       pagination: {
         page: current,
         pageSize: 12,
@@ -90,16 +105,14 @@ test("public directory has responsive cards statistics pagination and profile na
   page,
 }) => {
   await mockDirectory(page, { members: members() });
-  await page
-    .context()
-    .addCookies([
-      {
-        name: "fictional-cookie",
-        value: "not-a-real-session",
-        domain: "localhost",
-        path: "/",
-      },
-    ]);
+  await page.context().addCookies([
+    {
+      name: "fictional-cookie",
+      value: "not-a-real-session",
+      domain: "localhost",
+      path: "/",
+    },
+  ]);
   await page.goto("/members");
   await expect(
     page.getByRole("heading", { name: "Meet our members", exact: true }),
@@ -145,7 +158,7 @@ test("public directory has responsive cards statistics pagination and profile na
   await expect(page.getByRole("main")).not.toContainText("Reason for joining");
 });
 
-test("name search combines with department and academic year filters and empty state", async ({
+test("directory offers only roll section and academic year filters", async ({
   page,
 }) => {
   await mockDirectory(page, { members: members() });
@@ -153,31 +166,99 @@ test("name search combines with department and academic year filters and empty s
   await expect(
     page.getByText("16 approved members", { exact: true }),
   ).toBeVisible();
-  await page.getByLabel("Department", { exact: true }).selectOption("Physics");
-  await expect(
-    page.getByText("8 matching members", { exact: true }),
-  ).toBeVisible();
+  await expect(page.getByLabel("Department", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Search by name", { exact: true })).toHaveCount(
+    0,
+  );
+  await expect(page.getByLabel("Student Roll", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Section", { exact: true })).toBeVisible();
   await page
     .getByLabel("Academic year", { exact: true })
     .selectOption("2026-2027");
   await expect(
     page.getByText("8 matching members", { exact: true }),
   ).toBeVisible();
-  await page.getByLabel("Search by name", { exact: true }).fill("Member 02");
-  await page
-    .getByRole("button", { name: "Search members", exact: true })
-    .click();
-  await expect(page.getByRole("link", { name: /View profile of/ })).toHaveCount(
-    1,
-  );
-  await page
-    .getByLabel("Search by name", { exact: true })
-    .fill("Unmatched fictional name");
+  await page.getByLabel("Student Roll", { exact: true }).fill("99999");
   await page
     .getByRole("button", { name: "Search members", exact: true })
     .click();
   await expect(
     page.getByRole("heading", { name: "No members found", exact: true }),
+  ).toBeVisible();
+});
+
+test("roll section and academic year combine, reset pagination and preserve private fields", async ({
+  page,
+}) => {
+  const records = members();
+  await mockDirectory(page, {
+    members: records,
+    privateFields: Object.fromEntries(
+      records.map((member, index) => [
+        member.id,
+        {
+          studentRoll: index < 3 ? "00123" : String(20000 + index),
+          section: index % 2 ? "Science 2" : "Science 1",
+        },
+      ]),
+    ),
+  });
+  await page.goto("/members");
+  await page.getByRole("button", { name: "Next members", exact: true }).click();
+  await expect(page.getByText("Page 2 of 2", { exact: true })).toBeVisible();
+  await page.getByLabel("Student Roll", { exact: true }).fill("00123");
+  await page.getByLabel("Section", { exact: true }).fill("Science 1");
+  await page
+    .getByLabel("Academic year", { exact: true })
+    .selectOption("2025-2026");
+  const requested = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return (
+      url.pathname === "/api/members" &&
+      url.searchParams.get("studentRoll") === "00123" &&
+      url.searchParams.get("section") === "Science 1"
+    );
+  });
+  await page
+    .getByRole("button", { name: "Search members", exact: true })
+    .click();
+  const url = new URL((await requested).url());
+  expect(url.searchParams.get("academicYear")).toBe("2025-2026");
+  expect(url.searchParams.get("page")).toBe("1");
+  expect(url.searchParams.has("search")).toBe(false);
+  expect(url.searchParams.has("department")).toBe(false);
+  await expect(
+    page.getByText("2 matching members", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /View profile of/ })).toHaveCount(
+    2,
+  );
+  const cards = page.locator("[data-slot=card]");
+  await expect(cards).toContainText([
+    "Student Roll: 00123",
+    "Student Roll: 00123",
+  ]);
+  for (const card of await cards.all()) {
+    await expect(card.locator("[data-slot=card-title] + p")).toHaveText(
+      "Student Roll: 00123",
+    );
+    await expect(card).not.toContainText("Science 1");
+  }
+  await page.getByLabel("Section", { exact: true }).fill("Science 2");
+  await page
+    .getByRole("button", { name: "Search members", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "No members found", exact: true }),
+  ).toBeVisible();
+  await page.getByLabel("Student Roll", { exact: true }).fill("");
+  await page.getByLabel("Section", { exact: true }).fill("");
+  await page.getByLabel("Academic year", { exact: true }).selectOption("");
+  await page
+    .getByRole("button", { name: "Search members", exact: true })
+    .click();
+  await expect(
+    page.getByText("16 matching members", { exact: true }),
   ).toBeVisible();
 });
 

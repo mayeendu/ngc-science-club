@@ -2,6 +2,14 @@ import { z } from "zod";
 
 export const memberQuerySchema = z.strictObject({
   search: z.string().trim().max(80).default(""),
+  studentRoll: z
+    .string()
+    .trim()
+    .min(1)
+    .max(40)
+    .regex(/^[\p{L}\p{N}/_-]+$/u)
+    .optional(),
+  section: z.string().trim().min(1).max(60).optional(),
   department: z.string().trim().min(1).max(100).optional(),
   academicYear: z.string().trim().min(1).max(40).optional(),
   page: z.coerce.number().int().min(1).max(1000).default(1),
@@ -16,7 +24,7 @@ export type PublicMember = {
   membershipDate: string | null;
 };
 export type MemberList = {
-  members: PublicMember[];
+  members: (PublicMember & { studentRoll: string | null })[];
   pagination: {
     page: number;
     pageSize: number;

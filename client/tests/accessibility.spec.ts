@@ -10,9 +10,10 @@ test.beforeEach(async ({ page }) => {
     }),
   );
 });
-test("keyboard skip navigation and persisted dark/light/system appearance", async ({
+test("keyboard skip navigation and persisted light/dark switch with system default", async ({
   page,
 }) => {
+  await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/");
   await page.keyboard.press("Tab");
   await expect(
@@ -20,21 +21,38 @@ test("keyboard skip navigation and persisted dark/light/system appearance", asyn
   ).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("#main-content")).toBeFocused();
-  await page
-    .getByRole("combobox", { name: "Appearance", exact: true })
-    .selectOption("dark");
+  const appearance = page.getByRole("switch", {
+    name: "Appearance",
+    exact: true,
+  });
+  await expect(appearance).not.toBeChecked();
+  // Before an explicit choice, the switch follows the operating system.
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(appearance).toBeChecked();
+  await expect(appearance.locator("span")).toHaveCSS(
+    "background-color",
+    "rgb(0, 0, 0)",
+  );
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(appearance).not.toBeChecked();
+  await expect(appearance.locator("span")).toHaveCSS(
+    "background-color",
+    "rgb(255, 255, 255)",
+  );
+  await appearance.focus();
+  await page.keyboard.press("Space");
+  await expect(appearance).toBeChecked();
   await expect(page.locator("html")).toHaveClass(/dark/);
   await page.reload();
   await expect(page.locator("html")).toHaveClass(/dark/);
-  await page
-    .getByRole("combobox", { name: "Appearance", exact: true })
-    .selectOption("light");
+  await appearance.click();
+  await expect(appearance).not.toBeChecked();
   await expect(page.locator("html")).not.toHaveClass(/dark/);
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-  await page
-    .getByRole("combobox", { name: "Appearance", exact: true })
-    .selectOption("system");
-  await expect(page.locator("html")).toHaveClass(/dark/);
+  // Explicit light stays selected even if the operating system becomes dark.
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
+  await page.reload();
+  await expect(appearance).not.toBeChecked();
 });
 test("public pages fit mobile width and Bengali labels retain their font and contrast", async ({
   page,
@@ -49,10 +67,10 @@ test("public pages fit mobile width and Bengali labels retain their font and con
     }),
   );
   await page.goto("/");
-  await page.getByLabel("ভাষা / Language").selectOption("bn");
+  await page.getByRole("button", { name: "বাংলা", exact: true }).click();
   await page
-    .getByRole("combobox", { name: "চেহারা", exact: true })
-    .selectOption("dark");
+    .getByRole("switch", { name: "চেহারা", exact: true })
+    .setChecked(true);
   await expect(page.locator("html")).toHaveAttribute("lang", "bn");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   const dimensions = await page.evaluate(() => ({
@@ -67,8 +85,8 @@ test("public pages fit mobile width and Bengali labels retain their font and con
   expect(dimensions.bg).not.toBe(dimensions.fg);
   for (const theme of ["light", "dark"]) {
     await page
-      .getByRole("combobox", { name: "চেহারা", exact: true })
-      .selectOption(theme);
+      .getByRole("switch", { name: "চেহারা", exact: true })
+      .setChecked(theme === "dark");
     await expect(page.locator("html")).toHaveClass(
       theme === "dark" ? /dark/ : /^(?!.*dark).*$/,
     );

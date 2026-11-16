@@ -1,7 +1,8 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import { once } from "node:events";
 import process from "node:process";
+import { URLSearchParams } from "node:url";
 import { test } from "node:test";
 Object.assign(process.env, {
   NODE_ENV: "test",
@@ -29,7 +30,7 @@ async function fixture(run) {
     reviewedAt: new Date("2026-11-01T10:00:00.000Z"),
     phone: "PRIVATE_PHONE",
     email: "PRIVATE_EMAIL",
-    studentId: "PRIVATE_STUDENT_ID",
+    studentId: `ROLL-${String(index + 1).padStart(5, "0")}`,
     reason: "PRIVATE_APPLICATION_REASON",
     rejectionReason: "PRIVATE_REJECTION",
     reviewerId: "PRIVATE_REVIEWER",
@@ -160,6 +161,7 @@ test("guest list and profile expose approved public fields only", () =>
         "id",
         "membershipDate",
         "name",
+        "studentRoll",
       ]);
     assert.equal(JSON.stringify(body).includes("PRIVATE_"), false);
     const profile = await (await send("/000000000000000000000001")).json();
@@ -170,10 +172,13 @@ test("guest list and profile expose approved public fields only", () =>
       assert.equal(query.filter.status, "approved");
       assert.equal(query.options.readPreference, "primary");
       if (query.options.projection) {
+        assert.equal(
+          query.options.projection.studentId,
+          query.filter._id ? undefined : 1,
+        );
         for (const field of [
           "phone",
           "email",
-          "studentId",
           "reason",
           "reviewerId",
           "rejectionReason",
@@ -293,4 +298,89 @@ test("database failures fail safely without exposing private record details", ()
       assert.equal(response.status, 500);
       assert.equal((await response.text()).includes("PRIVATE_"), false);
     }
+  }));
+
+test("roll and section match exactly, combine with year and retain private projections", () =>
+  fixture(async ({ send, records, queries }) => {
+    records[0].studentId = "00123";
+    records[0].section = "Science 1";
+    records[1].studentId = "00123";
+    records[1].section = "Science 2";
+    records[2].studentId = "00123";
+    records[2].section = "Science 1";
+    records[2].academicYear = "2024-2025";
+    records[16].studentId = "00123";
+    records[16].section = "Science 1";
+    const query = new URLSearchParams({
+      studentRoll: " 00123 ",
+      section: " Science 1 ",
+      academicYear: "2025-2026",
+    });
+    const response = await send("?" + query);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.pagination.total, 1);
+    assert.equal(body.members[0].id, records[0]._id);
+    assert.deepEqual(Object.keys(body.members[0]).sort(), [
+      "academicYear",
+      "department",
+      "id",
+      "membershipDate",
+      "name",
+      "studentRoll",
+    ]);
+    assert.equal(queries[0].filter.studentId, "00123");
+    assert.equal(queries[0].filter.section, "Science 1");
+    assert.equal(queries[0].options.projection.studentId, 1);
+    assert.equal(body.members[0].studentRoll, "00123");
+    const profile = await (await send("/" + records[0]._id)).json();
+    assert.equal(Object.hasOwn(profile.member, "studentRoll"), false);
+    delete records[0].studentId;
+    const legacy = await (await send("?search=%5BLab%5D")).json();
+    assert.equal(legacy.members[0].studentRoll, null);
+    records[0].studentId = "00123";
+    assert.equal(queries[0].options.projection.section, undefined);
+    for (const path of [
+      "?studentRoll=001",
+      "?studentRoll=123",
+      "?section=Science",
+      "?section=.*",
+    ]) {
+      assert.equal((await (await send(path)).json()).pagination.total, 0);
+    }
+    assert.equal(
+      (await (await send("?section=Science%202")).json()).pagination.total,
+      1,
+    );
+    assert.equal(
+      (await (await send("?studentRoll=00123")).json()).pagination.total,
+      3,
+    );
+    assert.equal(
+      (
+        await (
+          await send(
+            "?studentRoll=00123&section=Science%201&academicYear=2025-2026&search=missing",
+          )
+        ).json()
+      ).pagination.total,
+      0,
+    );
+  }));
+
+test("invalid roll/section queries are rejected before database access", () =>
+  fixture(async ({ send, queries }) => {
+    for (const path of [
+      "?studentRoll=",
+      "?studentRoll=.*",
+      "?studentRoll=" + "1".repeat(41),
+      "?section=",
+      "?section=" + "s".repeat(61),
+      "?studentRoll[$ne]=x",
+      "?section[$ne]=x",
+      "?studentRoll=1&studentRoll=2",
+    ]) {
+      assert.equal((await send(path)).status, 400, path);
+    }
+    assert.equal(queries.length, 0);
   }));

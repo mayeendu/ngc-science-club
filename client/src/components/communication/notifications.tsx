@@ -9,10 +9,11 @@ import { listNotifications, markNotification } from "@/lib/communication-api";
 import { ClubApiError } from "@/lib/club-api";
 import { AccessDenied } from "@/components/auth/access-state";
 import { Button } from "@/components/ui/button";
-export function NotificationBell() {
+export function NotificationBell({ signedIn = true }: { signedIn?: boolean }) {
   const t = useT();
   const [count, setCount] = useState<number | null>(null);
   useEffect(() => {
+    if (!signedIn) return;
     const controller = new AbortController();
     let sequence = 0;
     const load = () => {
@@ -38,24 +39,23 @@ export function NotificationBell() {
       window.removeEventListener("club-notifications-updated", load);
       document.removeEventListener("visibilitychange", load);
     };
-  }, []);
+  }, [signedIn]);
   return (
     <Link
-      href="/dashboard/notifications"
+      href={signedIn ? "/dashboard/notifications" : "/login"}
       aria-label={
         count === null
           ? t("Notifications")
           : t("Notifications ({0} unread)", [count])
       }
-      className="inline-flex items-center gap-1 text-sm text-blue-700"
+      title={
+        count === null
+          ? t("Notifications")
+          : t("Notifications ({0} unread)", [count])
+      }
+      className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-blue-700 hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
       <Bell className="size-4" aria-hidden="true" />
-      {t("Notifications")}{" "}
-      {count !== null && (
-        <span className="rounded-full bg-blue-100 px-2 text-blue-900">
-          {count}
-        </span>
-      )}
     </Link>
   );
 }

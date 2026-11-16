@@ -8,14 +8,36 @@ const publicProfile = z.object({
   specialization: z.string(),
   photo: z.string(),
   bio: z.string(),
+  bcsBatch: z.string().optional(),
 });
 const adminProfile = publicProfile.extend({
+  email: z.string().optional(),
+  phone: z.string().optional(),
   published: z.boolean(),
   teacherAccountId: z.string(),
   assignedEventIds: z.array(z.string()),
   version: z.number(),
 });
 export type FacultyProfile = z.infer<typeof publicProfile>;
+export const teacherEntrySchema = z.strictObject({
+  name: z.string().trim().min(2).max(120),
+  designation: z.string().trim().min(2).max(120),
+  department: z.string().trim().min(2).max(100),
+  bcsBatch: z.string().trim().min(1).max(40),
+  email: z.string().trim().max(254).pipe(z.email()),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^(?:\+?88)?01[3-9]\d{8}$/),
+});
+export type TeacherEntry = z.infer<typeof teacherEntrySchema>;
+export function createTeacherEntry(input: TeacherEntry) {
+  return clubRequest(
+    "manage/teachers",
+    z.object({ success: z.literal(true), profile: publicProfile }),
+    clubJson("POST", teacherEntrySchema.parse(input)),
+  );
+}
 export type ManagedFaculty = z.infer<typeof adminProfile>;
 const id = z.string().regex(/^[a-f0-9]{24}$/);
 export const facultyFormSchema = z
@@ -63,10 +85,22 @@ export function listFaculty(
   page: number,
   department: string,
   signal: AbortSignal,
+  designation = "",
 ) {
   return clubRequest(
-    `faculty?${new URLSearchParams({ page: String(page), ...(department ? { department } : {}) })}`,
+    `faculty?${new URLSearchParams({ page: String(page), ...(department ? { department } : {}), ...(designation ? { designation } : {}) })}`,
     z.object({ ...pagination, items: z.array(publicProfile) }),
+    { signal },
+  );
+}
+export function facultyFilters(signal: AbortSignal) {
+  return clubRequest(
+    "faculty/filters",
+    z.object({
+      success: z.literal(true),
+      departments: z.array(z.string()),
+      designations: z.array(z.string()),
+    }),
     { signal },
   );
 }

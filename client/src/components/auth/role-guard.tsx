@@ -10,16 +10,18 @@ export function RoleGuard({
   dashboard,
   children,
   allowedRoles,
+  loginPath = "/login",
 }: {
   dashboard: AppRole;
   children: ReactNode;
   allowedRoles?: readonly AppRole[];
+  loginPath?: string;
 }) {
   const { data, error, isPending, refetch } = useSession();
   const router = useRouter();
   useEffect(() => {
-    if (!isPending && !error && !data) router.replace("/login");
-  }, [data, error, isPending, router]);
+    if (!isPending && !error && !data) router.replace(loginPath);
+  }, [data, error, isPending, router, loginPath]);
   if (isPending) return <AccessLoading />;
   if (error) return <AccessError retry={() => void refetch()} />;
   if (!data) return <AccessLoading />;
@@ -30,6 +32,7 @@ export function RoleGuard({
     <VerifiedOverview
       key={`${data.user.id}:${role}:${dashboard}:${data.session.expiresAt}`}
       dashboard={dashboard}
+      loginPath={loginPath}
       expiresAt={new Date(data.session.expiresAt).getTime()}
     >
       {children}
@@ -39,10 +42,12 @@ export function RoleGuard({
 
 function VerifiedOverview({
   dashboard,
+  loginPath,
   expiresAt,
   children,
 }: {
   dashboard: AppRole;
+  loginPath: string;
   expiresAt: number;
   children: ReactNode;
 }) {
@@ -57,7 +62,7 @@ function VerifiedOverview({
     const expire = () => {
       sequence++;
       setStatus("expired");
-      router.replace("/login");
+      router.replace(loginPath);
     };
     // Schedule instead of trusting client dates as authorization evidence.
     const remaining = Number.isFinite(expiresAt) ? expiresAt - Date.now() : 0;
@@ -121,7 +126,7 @@ function VerifiedOverview({
       window.clearTimeout(timer);
       window.removeEventListener("focus", onFocus);
     };
-  }, [dashboard, expiresAt, router, attempt]);
+  }, [dashboard, expiresAt, router, attempt, loginPath]);
   if (status === "denied") return <AccessDenied />;
   if (status === "error")
     return (

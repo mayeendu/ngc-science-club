@@ -33,9 +33,10 @@ export function MemberSkeletons() {
 }
 export function MemberDirectory() {
   const t = useT();
-  const [draft, setDraft] = useState("");
-  const [search, setSearch] = useState("");
-  const [department, setDepartment] = useState("");
+  const [rollDraft, setRollDraft] = useState("");
+  const [sectionDraft, setSectionDraft] = useState("");
+  const [studentRoll, setStudentRoll] = useState("");
+  const [section, setSection] = useState("");
   const [academicYear, setAcademicYear] = useState("");
   const [page, setPage] = useState(1);
   const [revision, setRevision] = useState(0);
@@ -46,7 +47,7 @@ export function MemberDirectory() {
     const controller = new AbortController();
     Promise.all([
       listMembers(
-        { search, department, academicYear, page },
+        { studentRoll, section, academicYear, page },
         controller.signal,
       ),
       memberStats(controller.signal),
@@ -70,7 +71,7 @@ export function MemberDirectory() {
       controller.abort();
       window.removeEventListener("focus", focus);
     };
-  }, [search, department, academicYear, page, revision]);
+  }, [studentRoll, section, academicYear, page, revision]);
   function reload() {
     setList(null);
     setError(false);
@@ -116,53 +117,45 @@ export function MemberDirectory() {
           </section>
         )}
         <form
-          className="grid gap-4 rounded-xl border bg-white p-5 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid gap-4 rounded-xl border bg-white p-5 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]"
           onSubmit={(event) => {
             event.preventDefault();
-            setSearch(draft.trim());
+            setStudentRoll(rollDraft.trim());
+            setSection(sectionDraft.trim());
             resetPage();
             setRevision((value) => value + 1);
           }}
         >
           <div>
             <label
-              htmlFor="member-search"
+              htmlFor="member-roll"
               className="mb-2 block text-sm font-medium"
             >
-              {t("Search by name")}
+              {t("Student Roll")}
             </label>
             <Input
-              id="member-search"
-              value={draft}
-              maxLength={80}
-              onChange={(event) => setDraft(event.target.value)}
-              placeholder={t("Member name")}
+              id="member-roll"
+              value={rollDraft}
+              maxLength={40}
+              pattern={String.raw`[\p{L}\p{N}\/_\-]+`}
+              onChange={(event) => setRollDraft(event.target.value)}
+              placeholder={t("Exact student roll")}
             />
           </div>
           <div>
             <label
-              htmlFor="member-department"
+              htmlFor="member-section"
               className="mb-2 block text-sm font-medium"
             >
-              {t("Department")}
+              {t("Section")}
             </label>
-            <select
-              id="member-department"
-              value={department}
-              disabled={!stats}
-              onChange={(event) => {
-                setDepartment(event.target.value);
-                resetPage();
-              }}
-              className="w-full rounded-md border bg-white px-3 py-2 text-sm"
-            >
-              <option value="">{t("All departments")}</option>
-              {stats?.departments.map((item) => (
-                <option key={item.department} value={item.department}>
-                  {item.department}
-                </option>
-              ))}
-            </select>
+            <Input
+              id="member-section"
+              value={sectionDraft}
+              maxLength={60}
+              onChange={(event) => setSectionDraft(event.target.value)}
+              placeholder={t("Exact section, e.g. Science 1")}
+            />
           </div>
           <div>
             <label
@@ -218,7 +211,7 @@ export function MemberDirectory() {
             <h2 className="text-xl font-semibold">{t("No members found")}</h2>
             <p className="mt-2 text-slate-600">
               {t(
-                "Try another name or filter, or return after new memberships are approved.",
+                "Try another roll, section or academic year, or return after new memberships are approved.",
               )}
             </p>
           </div>
@@ -233,6 +226,10 @@ export function MemberDirectory() {
                   <CardTitle>
                     <h2 className="break-words text-xl">{member.name}</h2>
                   </CardTitle>
+                  <p className="break-words text-sm text-slate-600">
+                    {t("Student Roll")}:{" "}
+                    {member.studentRoll || t("Not recorded")}
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <p className="break-words text-slate-600">

@@ -807,3 +807,72 @@ test("reference form rejects partial details, invalid GPA, choices, contacts and
     assert.equal((await send("POST", { ...input, sscGpa: "4.5" })).status, 400);
     assert.equal(records.size, 0);
   }));
+
+const revisedForm = {
+  fullName: "Fictional Student",
+  studentId: "TEST-01",
+  section: "Science 1",
+  email: "fictional@example.com",
+  phone: "01712345678",
+  whatsappPhone: "01912345678",
+  guideTeacher: "Fictional Teacher",
+  guideTeacherSubject: "Physics",
+  sscGpa: "4.75",
+  optionalSubject: "Chemistry",
+  admissionGoal: "Engineering",
+  halfYearlyResult: "",
+  yearFinalResult: "A+",
+  preTestResult: "",
+  testResult: "",
+  presentAddress: "Fictional campus address",
+};
+test("revised reference form saves every new field privately for admin review", () =>
+  fixture(async ({ send, adminSend, publicProfile, state, records }) => {
+    assert.equal((await send("POST", revisedForm)).status, 201);
+    for (const [key, value] of Object.entries(revisedForm))
+      assert.equal(records.get(state.userId)[key], value);
+    const own = await (await send()).json();
+    assert.equal("presentAddress" in own.application, false);
+    state.role = "admin";
+    const list = await (await adminSend()).json();
+    for (const [key, value] of Object.entries(revisedForm))
+      assert.equal(list.applications[0][key], value);
+    const id = state.userId;
+    await adminSend(
+      "PATCH",
+      { decision: "approved" },
+      {},
+      "/" + id + "/review",
+    );
+    const publicBody = await (await publicProfile(id)).json();
+    for (const key of [
+      "email",
+      "phone",
+      "presentAddress",
+      "yearFinalResult",
+      "guideTeacherSubject",
+    ])
+      assert.equal(key in publicBody.member, false);
+  }));
+test("revised reference form rejects incomplete invalid and privileged fields without writes", () =>
+  fixture(async ({ send, records }) => {
+    for (const change of [
+      { email: "invalid" },
+      { sscGpa: "5.01" },
+      { presentAddress: "" },
+      { guideTeacherSubject: "" },
+      { testResult: "x".repeat(101) },
+      { role: "admin" },
+      { status: "approved" },
+      { userId: "other" },
+      { submittedAt: "2026-01-01" },
+    ])
+      assert.equal(
+        (await send("POST", { ...revisedForm, ...change })).status,
+        400,
+      );
+    const partial = { ...revisedForm };
+    delete partial.presentAddress;
+    assert.equal((await send("POST", partial)).status, 400);
+    assert.equal(records.size, 0);
+  }));

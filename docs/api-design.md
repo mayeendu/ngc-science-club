@@ -120,3 +120,13 @@ Dashboards compose existing authorized endpoints; a URL containing admin or mana
 - Bound request size and question/answer arrays. Do not log passwords, cookies, verification links or whole request bodies.
 
 API examples and executable integration tests will be added only with the corresponding approved implementation milestone.
+
+Membership reference form revision (2026-11-15): see membership-application.md for the new fields, backward compatibility, private admin projections and unchanged pending approval workflow. No live database migration or deployment performed.
+
+Teacher data entry (2026-11-15): /faculty/add is visible only to teacher/admin accounts. POST /api/manage/teachers checks fresh staff RBAC, trusted origin and six strict fields (name, designation, department, bcsBatch, email, phone). It adds a published facultyProfiles directory record with server-owned IDs/timestamps/version, no linked login account or assigned events. Teachers navbar menu uses /faculty. Public projections include BCS batch; contacts remain private to admin management. Existing faculty CRUD remains admin-only. Additive optional fields preserve legacy records; no live migration, account/role changes or deployment.
+
+Teacher search (2026-11-15): directory and profile pages provide Department and Designation dropdowns. GET /api/faculty/filters lists at most 200 sorted distinct nonempty values per field from published, unarchived profiles only. GET /api/faculty supports optional validated designation (2-120 characters), combined with department using AND before pagination. Dropdown search on a profile shows matching teacher cards; Reset returns to the original profile. Existing public projections and role restrictions remain unchanged. No migration or live data changes.
+
+Member directory filters (2026-11-16): GET /api/members accepts optional studentRoll (1–40 Unicode letters/numbers, slash, underscore, hyphen) and section (1–60 characters). Both trim whitespace and match exactly; studentRoll maps to the stored private studentId field. Filters combine with name, department and academicYear before pagination/counting and always require approved status. Public list/profile projections remain unchanged: Roll, section and all other private application fields are excluded. No database writes, index changes or migrations.
+
+Member list response update (2026-11-16): GET /api/members now includes studentRoll: string | null on each approved member, explicitly authorized for card display. Read studentId only in the list projection and return it under studentRoll. GET /api/members/:id remains unchanged. Other private application fields are not exposed.

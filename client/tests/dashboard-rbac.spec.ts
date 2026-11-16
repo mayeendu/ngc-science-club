@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { AdminMembership } from "../src/lib/admin-membership-api";
+import { adminApplicationSchema } from "../src/lib/admin-membership-api";
+import { membershipFormSchema } from "../src/lib/validations/membership";
 import {
   memberProfileSchema,
   type OwnMemberProfile,
@@ -475,52 +477,55 @@ test("student can validate, submit once and see pending status on dashboard", as
     .getByRole("link", { name: "Apply for membership", exact: true })
     .click();
   await expect(page).toHaveURL(/\/membership\/apply$/);
-  await page
-    .getByRole("button", { name: "Submit application", exact: true })
-    .click();
-  await expect(
-    page.getByText("Class roll is required", { exact: true }),
-  ).toBeVisible();
-  await page
-    .getByLabel("Class Roll", { exact: true })
-    .fill("FICTIONAL-2026-01");
-  await page.getByLabel("Session", { exact: true }).fill("2026-2027");
+  await page.getByRole("button", { name: "Save member", exact: true }).click();
+  await expect(page.getByLabel("Roll No.", { exact: true })).toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
+  await page.getByLabel("Roll No.", { exact: true }).fill("TEST-01");
+  await page.getByLabel("Section", { exact: true }).fill("Science 1");
+  await page.getByLabel("Email", { exact: true }).fill("fictional@example.com");
   await page.getByLabel("Mobile No.", { exact: true }).fill("01712345678");
-  await page.getByLabel("SSC GPA", { exact: true }).fill("4.75");
-  await page.getByLabel("SSC Reg No.", { exact: true }).fill("1234567890");
-  await page
-    .getByLabel("Father's / Mother's Mobile No.", { exact: true })
-    .fill("01812345678");
   await page.getByLabel("WhatsApp No.", { exact: true }).fill("01912345678");
   await page
-    .getByLabel("Guide Teacher's Name", { exact: true })
+    .getByLabel("Guide Teacher Name", { exact: true })
     .fill("Fictional Teacher");
-  await page.getByRole("radio", { name: "Science 1", exact: true }).check();
-  await page.getByRole("radio", { name: "Math", exact: true }).check();
   await page
-    .getByRole("radio", { name: "College Hostel", exact: true })
-    .check();
-  await page.getByRole("radio", { name: "Medical", exact: true }).check();
-  await page.getByLabel("Signature", { exact: true }).fill("Fictional Student");
+    .getByLabel("Guide Teacher Subject", { exact: true })
+    .fill("Physics");
+  await page.getByLabel("SSC GPA", { exact: true }).fill("4.75");
+  await page.getByLabel("Optional Subject", { exact: true }).fill("Chemistry");
+  await page.getByLabel("Admission Goal", { exact: true }).fill("Engineering");
+  await page.getByLabel("Half Yearly", { exact: true }).fill("");
+  await page.getByLabel("Year Final", { exact: true }).fill("A+");
+  await page.getByLabel("Pre-Test", { exact: true }).fill("");
+  await page.getByLabel("Test", { exact: true }).fill("");
+  await page
+    .getByLabel("Present Address", { exact: true })
+    .fill("Fictional campus address");
   const request = page.waitForRequest(
     (req) =>
       req.method() === "POST" &&
       req.url().endsWith("/api/membership-applications"),
   );
-  await page
-    .getByRole("button", { name: "Submit application", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Save member", exact: true }).click();
   const body = (await request).postDataJSON();
   expect(body).toMatchObject({
-    studentId: "FICTIONAL-2026-01",
-    academicYear: "2026-2027",
-    sscGpa: "4.75",
-    sscRegistration: "1234567890",
+    studentId: "TEST-01",
     section: "Science 1",
-    optionalSubject: "Math",
-    residence: "College Hostel",
-    admissionGoal: "Medical",
-    signature: "Fictional Student",
+    email: "fictional@example.com",
+    phone: "01712345678",
+    whatsappPhone: "01912345678",
+    guideTeacher: "Fictional Teacher",
+    guideTeacherSubject: "Physics",
+    sscGpa: "4.75",
+    optionalSubject: "Chemistry",
+    admissionGoal: "Engineering",
+    halfYearlyResult: "",
+    yearFinalResult: "A+",
+    preTestResult: "",
+    testResult: "",
+    presentAddress: "Fictional campus address",
   });
   expect(body).not.toHaveProperty("submittedAt");
   await expect(
@@ -529,7 +534,7 @@ test("student can validate, submit once and see pending status on dashboard", as
       .getByText("Application status: pending", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Submit application", exact: true }),
+    page.getByRole("button", { name: "Save member", exact: true }),
   ).toHaveCount(0);
   await page
     .getByRole("link", { name: "Back to student dashboard", exact: true })
@@ -549,23 +554,168 @@ test("student can validate, submit once and see pending status on dashboard", as
 });
 
 for (const role of ["teacher", "admin"]) {
-  test(`${role} cannot open student membership form`, async ({ page }) => {
+  test(`${role} can open membership form directly without protected requests`, async ({
+    page,
+  }) => {
     await mockAuth(page, { role });
+    const membershipRequests: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("/api/membership-applications"))
+        membershipRequests.push(request.url());
+    });
     await page.goto("/membership/apply");
+    await expect(page).toHaveURL(/\/membership\/apply$/);
     await expect(
       page.getByRole("heading", { name: "Access Denied", exact: true }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Submit application", exact: true }),
     ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Save member", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByLabel("Roll No.", { exact: true })).toBeVisible();
+    expect(membershipRequests).toEqual([]);
   });
 }
 
-test("guest cannot open membership form", async ({ page }) => {
+test("guest can open membership form before signing in", async ({ page }) => {
   await mockAuth(page, { role: null, guest: true });
   await page.goto("/membership/apply");
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/membership\/apply$/);
+  await expect(page.getByLabel("Roll No.", { exact: true })).toBeVisible();
 });
+
+test("Apply Membership menu opens the student application form", async ({
+  page,
+}) => {
+  await mockAuth(page, { role: "student" });
+  await page.goto("/");
+  await page
+    .getByRole("navigation", { name: "Main navigation" })
+    .getByRole("link", { name: "Apply Membership", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/membership\/apply$/);
+  await expect(page.getByLabel("Roll No.", { exact: true })).toBeVisible();
+});
+
+test("Apply Membership returns guests to the form after login", async ({
+  page,
+}) => {
+  const fixture: Fixture = { role: "student", guest: true };
+  await mockAuth(page, fixture);
+  await page.route("**/api/auth/sign-in/email", async (route) => {
+    fixture.guest = false;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: {
+        "access-control-allow-origin": new URL(page.url()).origin,
+        "access-control-allow-credentials": "true",
+      },
+      body: JSON.stringify({
+        redirect: false,
+        token: "fictional",
+        user: {
+          id: "64b000000000000000000001",
+          name: "Fictional Student",
+          email: "fictional@example.com",
+          role: "student",
+        },
+      }),
+    });
+  });
+  await page.goto("/membership/apply");
+  await expect(page).toHaveURL(/\/membership\/apply$/);
+  await expect(page.getByLabel("Roll No.", { exact: true })).toBeVisible();
+  await page
+    .getByRole("link", { name: "Sign in to apply for membership", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/login\?next=%2Fmembership%2Fapply$/);
+  await page
+    .getByLabel("Email address", { exact: true })
+    .fill("fictional@example.com");
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("Fictional-Password!123");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(/\/membership\/apply$/);
+  await expect(page.getByLabel("Roll No.", { exact: true })).toBeVisible();
+});
+
+for (const account of ["guest", ...roles]) {
+  test(`${account} navbar has exact role menu and inline controls`, async ({
+    page,
+  }) => {
+    await mockAuth(page, {
+      role: account === "guest" ? null : account,
+      guest: account === "guest",
+    });
+    const privateRequests: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("/api/notifications"))
+        privateRequests.push(request.url());
+    });
+    await page.route("**/api/notifications**", (route) =>
+      route.fulfill({
+        headers: {
+          "access-control-allow-origin": new URL(page.url()).origin,
+          "access-control-allow-credentials": "true",
+        },
+        json: {
+          success: true,
+          items: [],
+          page: 1,
+          hasNext: false,
+          unreadCount: 0,
+        },
+      }),
+    );
+    await page.goto("/");
+    const nav = page.getByRole("navigation", {
+      name: "Main navigation",
+      exact: true,
+    });
+    if (account === "guest")
+      await expect(
+        nav.getByRole("link", { name: "Sign in", exact: true }),
+      ).toBeVisible();
+    else
+      await expect(
+        nav.getByText("Welcome Fictional Learner", { exact: true }),
+      ).toBeVisible();
+    const expected = [
+      "/",
+      "/",
+      "/members",
+      "/faculty",
+      ...(account === "student"
+        ? ["/membership/apply"]
+        : account === "guest"
+          ? []
+          : ["/faculty/add"]),
+      ...(account === "guest" ? [] : ["/dashboard/" + account]),
+      "/events",
+      account === "guest" ? "/login" : "/dashboard/notifications",
+      ...(account === "guest" ? ["/login", "/signup"] : []),
+    ];
+    expect(
+      await nav
+        .locator("a")
+        .evaluateAll((links) => links.map((link) => link.getAttribute("href"))),
+    ).toEqual(expected);
+    const bell = nav.getByRole("link", { name: /^Notifications/ });
+    await expect(bell).toHaveText("");
+    await expect(bell.locator("svg")).toBeVisible();
+    const centers = await nav
+      .locator('a, [role="group"], [role="switch"]')
+      .evaluateAll((elements) =>
+        elements.map((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.y + rect.height / 2;
+        }),
+      );
+    expect(Math.max(...centers) - Math.min(...centers)).toBeLessThan(2);
+    if (account === "guest") expect(privateRequests).toEqual([]);
+  });
+}
 
 test("membership status failure can be retried without losing authentication", async ({
   page,
@@ -664,6 +814,88 @@ test("admin confirms approval, filters results and student sees approved status"
     page
       .getByRole("main")
       .getByText("Application status: approved", { exact: true }),
+  ).toBeVisible();
+});
+
+test("admin application response validates metadata without weakening submission rules", () => {
+  const legacy = {
+    ...pendingAdminApplication(),
+    phone: "",
+    reason: "Join science",
+    residence: "With family",
+    sscGpa: null,
+    signature: "",
+    department: null,
+    academicYear: null,
+  };
+  const parsed = adminApplicationSchema.parse(legacy);
+  expect(parsed.department).toBe("");
+  expect(parsed.academicYear).toBe("");
+  expect(parsed.sscGpa).toBeUndefined();
+  expect(parsed.reason).toBe("Join science");
+  expect(
+    adminApplicationSchema.safeParse({ ...legacy, status: "invalid" }).success,
+  ).toBe(false);
+  expect(
+    adminApplicationSchema.safeParse({ ...legacy, submittedAt: "bad-date" })
+      .success,
+  ).toBe(false);
+  expect(
+    adminApplicationSchema.safeParse({ ...legacy, phone: { injected: true } })
+      .success,
+  ).toBe(false);
+  expect(membershipFormSchema.safeParse(legacy).success).toBe(false);
+});
+
+test("admin can load and approve stored applications with legacy form values", async ({
+  page,
+}) => {
+  const legacy = {
+    ...pendingAdminApplication(),
+    department: null,
+    academicYear: null,
+    phone: "",
+    reason: "Join science",
+    sscGpa: null,
+    signature: "",
+    residence: "With family",
+  } as unknown as AdminMembership;
+  const fixture: Fixture = {
+    role: "admin",
+    adminApplications: [
+      legacy,
+      {
+        ...pendingAdminApplication(),
+        id: "64b000000000000000000002",
+        fullName: "Fictional Current Applicant",
+      },
+    ],
+    reviewRequests: [],
+  };
+  await mockAuth(page, fixture);
+  await page.goto("/dashboard/admin/memberships");
+  await expect(
+    page.getByRole("heading", { name: "Fictional Applicant", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Fictional Current Applicant",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Approve", exact: true })
+    .first()
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Confirm approval", exact: true })
+    .click();
+  expect(fixture.reviewRequests).toEqual([{ decision: "approved" }]);
+  await page.getByLabel("Status", { exact: true }).selectOption("approved");
+  await expect(
+    page.getByRole("heading", { name: "Fictional Applicant", exact: true }),
   ).toBeVisible();
 });
 

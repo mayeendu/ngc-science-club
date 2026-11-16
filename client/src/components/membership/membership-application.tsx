@@ -2,12 +2,7 @@
 
 import { useT } from "@/components/i18n/language";
 import { useCallback, useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  ClipboardCheck,
-  LoaderCircle,
-} from "lucide-react";
+import { ArrowLeft, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -24,9 +19,7 @@ import {
   membershipRequest,
   type MembershipSummary,
 } from "@/lib/membership-api";
-import { AccessDenied } from "@/components/auth/access-state";
 import { Button } from "@/components/ui/button";
-import { ClubLogo } from "@/components/layout/club-logo";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -43,14 +36,15 @@ export function MembershipApplication({
   showForm?: boolean;
 }) {
   const { data } = useSession();
-  if (!data) return null;
-  if (parseRole(data.user.role) !== "student")
-    return showForm ? <AccessDenied /> : null;
+  const canApply = !!data && parseRole(data.user.role) === "student";
+  if (!showForm && !canApply) return null;
   return (
     <ApplicationContent
-      key={data.user.id}
+      key={`${data?.user.id ?? "guest"}:${canApply}`}
       showForm={showForm}
-      name={data.user.name}
+      name={data?.user.name ?? ""}
+      canApply={canApply}
+      signedIn={!!data}
     />
   );
 }
@@ -66,68 +60,93 @@ type State =
       kind: "loaded";
       application: MembershipSummary;
     };
-const fields = [
-  { name: "fullName", label: "Full Name In English", max: 100 },
-  { name: "studentId", label: "Class Roll", max: 40 },
-  { name: "academicYear", label: "Session", max: 40 },
-  { name: "sscGpa", label: "SSC GPA", max: 4 },
-  { name: "sscRegistration", label: "SSC Reg No.", max: 20 },
-  {
-    name: "section",
-    label: "Section",
-    options: ["Science 1", "Science 2", "Science 3"],
-  },
-  { name: "phone", label: "Mobile No.", max: 14 },
-  { name: "guardianPhone", label: "Father's / Mother's Mobile No.", max: 14 },
-  { name: "whatsappPhone", label: "WhatsApp No.", max: 14 },
-  { name: "guideTeacher", label: "Guide Teacher's Name", max: 100 },
-  {
-    name: "optionalSubject",
-    label: "Optional Subject",
-    options: ["Math", "Biology"],
-  },
-  {
-    name: "residence",
-    label: "Student's Residence",
-    options: ["College Hostel", "Others"],
-  },
-  {
-    name: "admissionGoal",
-    label: "Admission Goal",
-    options: ["Medical", "Engineering", "University"],
-  },
-  { name: "signature", label: "Signature", max: 100 },
-] as const;
 const sections = [
-  { title: "Student details", start: 0, end: 6 },
-  { title: "Contact details", start: 6, end: 10 },
-  { title: "Preferences and signature", start: 10, end: 14 },
+  {
+    title: "Academic Information",
+    columns: 3,
+    fields: [
+      { name: "fullName", label: "Full Name", max: 100 },
+      { name: "studentId", label: "Roll No.", max: 40 },
+      { name: "section", label: "Section", max: 60 },
+    ],
+  },
+  {
+    title: "Contact Information",
+    columns: 3,
+    fields: [
+      { name: "email", label: "Email", max: 254 },
+      { name: "phone", label: "Mobile No.", max: 14 },
+      { name: "whatsappPhone", label: "WhatsApp No.", max: 14 },
+    ],
+  },
+  {
+    title: "Guide Teacher Information",
+    columns: 2,
+    fields: [
+      { name: "guideTeacher", label: "Guide Teacher Name", max: 100 },
+      { name: "guideTeacherSubject", label: "Guide Teacher Subject", max: 100 },
+    ],
+  },
+  {
+    title: "Academic Background",
+    columns: 3,
+    fields: [
+      { name: "sscGpa", label: "SSC GPA", max: 4 },
+      { name: "optionalSubject", label: "Optional Subject", max: 100 },
+      { name: "admissionGoal", label: "Admission Goal", max: 150 },
+    ],
+  },
+  {
+    title: "Exam Result",
+    columns: 4,
+    fields: [
+      { name: "halfYearlyResult", label: "Half Yearly", max: 100 },
+      { name: "yearFinalResult", label: "Year Final", max: 100 },
+      { name: "preTestResult", label: "Pre-Test", max: 100 },
+      { name: "testResult", label: "Test", max: 100 },
+    ],
+  },
+  {
+    title: "Address",
+    columns: 1,
+    fields: [{ name: "presentAddress", label: "Present Address", max: 1000 }],
+  },
 ] as const;
 function ApplicationContent({
   showForm,
   name,
+  canApply,
+  signedIn,
 }: {
   showForm: boolean;
   name: string;
+  canApply: boolean;
+  signedIn: boolean;
 }) {
   const t = useT();
-  const [state, setState] = useState<State>({ kind: "loading" });
+  const [state, setState] = useState<State>(
+    canApply ? { kind: "loading" } : { kind: "loaded", application: null },
+  );
   const router = useRouter();
   const form = useForm<MembershipValues>({
     resolver: zodResolver(membershipFormSchema),
     defaultValues: {
       fullName: name,
       studentId: "",
-      department: "Science",
-      academicYear: "",
+      section: "",
+      email: "",
       phone: "",
-      reason: "Science club membership application.",
-      sscGpa: "",
-      sscRegistration: "",
-      guardianPhone: "",
       whatsappPhone: "",
       guideTeacher: "",
-      signature: "",
+      guideTeacherSubject: "",
+      sscGpa: "",
+      optionalSubject: "",
+      admissionGoal: "",
+      halfYearlyResult: "",
+      yearFinalResult: "",
+      preTestResult: "",
+      testResult: "",
+      presentAddress: "",
     },
   });
   const load = useCallback(
@@ -151,11 +170,20 @@ function ApplicationContent({
     [router],
   );
   useEffect(() => {
+    if (!canApply) return;
     const controller = new AbortController();
     void load(controller.signal);
     return () => controller.abort();
-  }, [load]);
+  }, [load, canApply]);
   async function submit(values: MembershipValues) {
+    if (!signedIn) {
+      router.push("/login?next=%2Fmembership%2Fapply");
+      return;
+    }
+    if (!canApply) {
+      toast.error("Only student accounts can apply.");
+      return;
+    }
     try {
       const application = await membershipRequest(values);
       setState({ kind: "loaded", application });
@@ -176,31 +204,16 @@ function ApplicationContent({
     <Card
       className={
         showForm
-          ? "gap-0 overflow-hidden rounded-3xl border border-border bg-card py-0 shadow-xl shadow-slate-900/5 ring-0"
+          ? "gap-0 border-0 bg-transparent py-0 shadow-none ring-0"
           : "rounded-2xl border border-border bg-card shadow-sm ring-0"
       }
     >
-      {showForm && (
-        <div className="brand-hero flex items-center gap-4 border-b px-5 py-7 sm:gap-5 sm:px-9 sm:py-9">
-          <div className="brand-logo-plate w-16 shrink-0 rounded-2xl border border-white/80 p-2 shadow-sm sm:w-20">
-            <ClubLogo decorative sizes="80px" />
-          </div>
-          <div className="min-w-0 space-y-1.5">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-              {t("Club membership")}
-            </h2>
-            <p className="max-w-lg text-sm leading-relaxed text-muted-foreground">
-              {t("To apply for membership complete the form below")}
-            </p>
-          </div>
-        </div>
-      )}
       <CardHeader className={showForm ? "sr-only" : ""}>
         <CardTitle>
           <h2>{t("Club membership")}</h2>
         </CardTitle>
       </CardHeader>
-      <CardContent className={showForm ? "p-5 sm:p-9" : ""}>
+      <CardContent className={showForm ? "p-0" : ""}>
         {state.kind === "loading" ? (
           <p
             role="status"
@@ -247,7 +260,7 @@ function ApplicationContent({
               )}
             </p>
             {state.application.rejectionReason && (
-              <p className="whitespace-pre-wrap break-words text-red-700">
+              <p className="whitespace-pre-wrap wrap-break-word text-red-700">
                 {t("Rejection reason:")} {state.application.rejectionReason}
               </p>
             )}
@@ -284,18 +297,23 @@ function ApplicationContent({
               className="space-y-7"
               noValidate
             >
-              <p className="flex gap-3 rounded-2xl border border-teal-600/15 bg-teal-50/60 p-4 text-sm leading-relaxed text-muted-foreground dark:bg-teal-950/20">
-                <ClipboardCheck
-                  aria-hidden="true"
-                  className="mt-0.5 size-5 shrink-0 text-teal-700 dark:text-teal-300"
-                />
-                {t(
-                  "Submit your student details for admin review. Applying does not automatically approve your membership.",
-                )}
-              </p>
+              {!canApply && (
+                <p className="text-sm text-muted-foreground">
+                  {signedIn ? (
+                    t("Only student accounts can apply.")
+                  ) : (
+                    <Link
+                      href="/login?next=%2Fmembership%2Fapply"
+                      className="text-teal-700 underline"
+                    >
+                      {t("Sign in to apply for membership")}
+                    </Link>
+                  )}
+                </p>
+              )}
               <fieldset
                 disabled={form.formState.isSubmitting}
-                className="min-w-0 space-y-8 disabled:opacity-70"
+                className="min-w-0 space-y-5 disabled:opacity-70"
               >
                 <legend className="sr-only">
                   {t("Membership application details")}
@@ -303,97 +321,68 @@ function ApplicationContent({
                 {sections.map((section, index) => (
                   <section
                     key={section.title}
-                    className="space-y-5"
-                    aria-labelledby={`membership-section-${section.start}`}
+                    aria-labelledby={`membership-section-${index}`}
+                    className={
+                      section.title === "Exam Result"
+                        ? "-mt-5 rounded-b-xl border border-t-0 border-border bg-card px-5 pb-5"
+                        : `space-y-4 rounded-xl border border-border bg-card p-5 ${section.title === "Academic Background" ? "rounded-b-none border-b-0" : ""}`
+                    }
                   >
-                    <div className="flex items-center gap-3 border-b border-border pb-4">
-                      <span
-                        aria-hidden="true"
-                        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
-                      >
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <h3
-                        id={`membership-section-${section.start}`}
-                        className="text-base font-semibold tracking-tight text-foreground"
-                      >
-                        {t(section.title)}
-                      </h3>
-                    </div>
-                    <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-                      {fields.slice(section.start, section.end).map((item) => (
+                    <h2
+                      id={`membership-section-${index}`}
+                      className="mb-4 text-lg font-semibold"
+                    >
+                      {t(section.title)}
+                    </h2>
+                    <div
+                      className={`grid gap-4 ${section.columns === 4 ? "sm:grid-cols-4" : section.columns === 3 ? "sm:grid-cols-3" : section.columns === 2 ? "sm:grid-cols-2" : ""}`}
+                    >
+                      {section.fields.map((item) => (
                         <FormField
                           key={item.name}
                           control={form.control}
                           name={item.name}
                           render={({ field }) => (
-                            <FormItem
-                              className={
-                                item.name === "fullName" ||
-                                item.name === "section" ||
-                                item.name === "admissionGoal" ||
-                                item.name === "signature"
-                                  ? "min-w-0 sm:col-span-2"
-                                  : "min-w-0"
-                              }
-                            >
-                              <FormLabel className="text-sm font-medium text-foreground">
-                                {t(item.label)}
-                              </FormLabel>
-                              {"options" in item ? (
-                                <FormControl>
-                                  <div
-                                    role="radiogroup"
-                                    aria-label={t(item.label)}
-                                    className="grid gap-2.5 aria-invalid:rounded-xl aria-invalid:outline aria-invalid:outline-destructive sm:grid-flow-col sm:auto-cols-fr"
-                                  >
-                                    {item.options.map((option) => (
-                                      <label
-                                        key={option}
-                                        className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 has-checked:border-primary has-checked:bg-primary/5 has-checked:text-foreground has-focus-visible:ring-2 has-focus-visible:ring-ring has-focus-visible:ring-offset-2 has-disabled:cursor-not-allowed"
-                                      >
-                                        <input
-                                          type="radio"
-                                          name={field.name}
-                                          value={option}
-                                          checked={field.value === option}
-                                          onChange={() =>
-                                            field.onChange(option)
-                                          }
-                                          onBlur={field.onBlur}
-                                          ref={field.ref}
-                                          className="size-4 shrink-0 accent-primary"
-                                        />
-                                        {t(option)}
-                                      </label>
-                                    ))}
-                                  </div>
-                                </FormControl>
-                              ) : (
-                                <FormControl>
+                            <FormItem className="min-w-0 gap-1">
+                              <FormLabel>{t(item.label)}</FormLabel>
+                              <FormControl>
+                                {item.name === "presentAddress" ? (
+                                  <textarea
+                                    {...field}
+                                    placeholder={`[${t(item.label)}]`}
+                                    maxLength={item.max}
+                                    className="min-h-20 w-full rounded-lg border border-slate-400 bg-background px-3 py-2 focus-visible:outline-2 focus-visible:outline-ring"
+                                  />
+                                ) : (
                                   <Input
                                     {...field}
-                                    value={field.value ?? ""}
+                                    placeholder={`[${t(item.label)}]`}
                                     maxLength={item.max}
                                     type={
-                                      item.name.toLowerCase().includes("phone")
-                                        ? "tel"
-                                        : "text"
-                                    }
-                                    className="h-12 rounded-xl border-border bg-background px-4 text-base shadow-xs transition-colors hover:border-primary/40 focus-visible:border-primary focus-visible:ring-primary/15 md:text-sm"
-                                    autoComplete={
-                                      item.name === "fullName" ? "name" : "off"
+                                      item.name === "email"
+                                        ? "email"
+                                        : item.name
+                                              .toLowerCase()
+                                              .includes("phone")
+                                          ? "tel"
+                                          : "text"
                                     }
                                     inputMode={
                                       item.name === "sscGpa"
                                         ? "decimal"
-                                        : item.name === "sscRegistration"
-                                          ? "numeric"
-                                          : undefined
+                                        : undefined
                                     }
+                                    autoComplete={
+                                      item.name === "fullName"
+                                        ? "name"
+                                        : item.name === "email"
+                                          ? "email"
+                                          : "off"
+                                    }
+                                    className="h-11 rounded-lg border-slate-400 bg-background px-3 text-base shadow-none"
                                   />
-                                </FormControl>
-                              )}
+                                )}
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -402,31 +391,33 @@ function ApplicationContent({
                     </div>
                   </section>
                 ))}
-                <div className="flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="max-w-md text-xs leading-relaxed text-muted-foreground">
-                    {t(
-                      "Date is recorded automatically when you submit. Type your full name as your signature.",
-                    )}
-                  </p>
+                <div className="flex gap-3">
                   <Button
                     type="submit"
-                    className="h-12 w-full shrink-0 gap-2 rounded-xl px-6 font-semibold shadow-sm sm:w-auto"
-                    disabled={form.formState.isSubmitting}
+                    className="h-11 rounded-lg bg-teal-700 px-5 text-white hover:bg-teal-800"
                   >
                     {form.formState.isSubmitting && (
                       <LoaderCircle
                         aria-hidden="true"
-                        className="size-4 motion-safe:animate-spin"
+                        className="size-4 animate-spin"
                       />
                     )}
                     {form.formState.isSubmitting
-                      ? t("Submitting\u2026")
-                      : t("Submit application")}
-                    {!form.formState.isSubmitting && (
-                      <ArrowRight aria-hidden="true" className="size-4" />
-                    )}
+                      ? t("Submitting…")
+                      : t("Save member")}
                   </Button>
+                  <Link
+                    href="/dashboard/student"
+                    className="inline-flex h-11 items-center rounded-lg border border-teal-700 px-5 font-medium text-teal-700"
+                  >
+                    {t("Cancel")}
+                  </Link>
                 </div>
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    "Submit your student details for admin review. Applying does not automatically approve your membership.",
+                  )}
+                </p>
               </fieldset>
             </form>
           </Form>

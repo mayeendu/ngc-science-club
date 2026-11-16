@@ -7,6 +7,7 @@ import Image from "next/image";
 import {
   listFaculty,
   facultyDetail,
+  facultyFilters,
   type FacultyProfile,
 } from "@/lib/faculty-api";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,12 @@ export function FacultyCard({
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p>{profile.specialization}</p>
+        {profile.specialization && <p>{profile.specialization}</p>}
+        {profile.bcsBatch && (
+          <p>
+            {t("BCS Batch")}: {profile.bcsBatch}
+          </p>
+        )}
         {detail ? (
           <p className="whitespace-pre-wrap break-words">{profile.bio}</p>
         ) : (
@@ -61,19 +67,47 @@ export function FacultyDirectory({ id }: { id?: string }) {
   const [items, setItems] = useState<FacultyProfile[] | null>(null),
     [page, setPage] = useState(1),
     [department, setDepartment] = useState(""),
-    [filter, setFilter] = useState(""),
+    [designation, setDesignation] = useState(""),
+    [filter, setFilter] = useState({ department: "", designation: "" }),
+    [searchResults, setSearchResults] = useState(false),
+    [options, setOptions] = useState<{
+      departments: string[];
+      designations: string[];
+    } | null>(null),
+    [optionsError, setOptionsError] = useState(""),
     [hasNext, setHasNext] = useState(false),
     [error, setError] = useState(""),
     [revision, setRevision] = useState(0);
+  const detail = !!id && !searchResults;
+  useEffect(() => {
+    const controller = new AbortController();
+    facultyFilters(controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted) {
+          setOptions(result);
+          setOptionsError("");
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted)
+          setOptionsError("Unable to load teacher search options.");
+      });
+    return () => controller.abort();
+  }, [revision]);
   useEffect(() => {
     const controller = new AbortController();
     const load = async () => {
       try {
-        if (id) {
+        if (id && detail) {
           const result = await facultyDetail(id, controller.signal);
           if (!controller.signal.aborted) setItems([result.profile]);
         } else {
-          const result = await listFaculty(page, filter, controller.signal);
+          const result = await listFaculty(
+            page,
+            filter.department,
+            controller.signal,
+            filter.designation,
+          );
           if (!controller.signal.aborted) {
             setItems(result.items);
             setHasNext(result.hasNext);
@@ -88,7 +122,7 @@ export function FacultyDirectory({ id }: { id?: string }) {
     };
     void load();
     return () => controller.abort();
-  }, [id, page, filter, revision]);
+  }, [id, detail, page, filter, revision]);
   const reload = () => {
     setError("");
     setItems(null);
@@ -97,29 +131,80 @@ export function FacultyDirectory({ id }: { id?: string }) {
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
       <h1 className="text-3xl font-bold">
-        {t(id ? "Faculty mentor profile" : "Faculty mentors")}
+        {t(detail ? "Faculty mentor profile" : "Teachers")}
       </h1>
-      {!id && (
+      {
         <form
           className="flex flex-wrap items-end gap-3"
           onSubmit={(event) => {
             event.preventDefault();
             setPage(1);
-            setFilter(department.trim());
+            setFilter({ department, designation });
+            setSearchResults(true);
             reload();
           }}
         >
           <label className="grid gap-1">
             {t("Department")}
-            <input
-              maxLength={100}
+            <select
               value={department}
               onChange={(event) => setDepartment(event.target.value)}
-              className="rounded border p-2"
-            />
+              disabled={!options}
+              className="min-w-44 rounded border bg-background p-2"
+            >
+              <option value="">{t("All departments")}</option>
+              {options?.departments.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
           </label>
-          <Button type="submit">{t("Filter faculty")}</Button>
+          <label className="grid gap-1">
+            {t("Designation")}
+            <select
+              value={designation}
+              onChange={(event) => setDesignation(event.target.value)}
+              disabled={!options}
+              className="min-w-44 rounded border bg-background p-2"
+            >
+              <option value="">{t("All designations")}</option>
+              {options?.designations.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Button type="submit" disabled={!options}>
+            {t("Search teachers")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setDepartment("");
+              setDesignation("");
+              setFilter({ department: "", designation: "" });
+              setSearchResults(false);
+              setPage(1);
+              reload();
+            }}
+          >
+            {t("Reset filters")}
+          </Button>
         </form>
+      }
+      {!options && !optionsError && (
+        <p role="status">{t("Loading teacher search options…")}</p>
+      )}
+      {optionsError && (
+        <div>
+          <p role="alert">{t(optionsError)}</p>
+          <Button variant="outline" onClick={reload}>
+            {t("Retry teacher search options")}
+          </Button>
+        </div>
       )}
       <Button variant="outline" onClick={reload}>
         {t("Refresh faculty")}
@@ -133,11 +218,11 @@ export function FacultyDirectory({ id }: { id?: string }) {
       ) : (
         <div className="grid gap-5 sm:grid-cols-2">
           {items.map((profile) => (
-            <FacultyCard key={profile.id} profile={profile} detail={!!id} />
+            <FacultyCard key={profile.id} profile={profile} detail={detail} />
           ))}
         </div>
       )}
-      {!id && items && (
+      {!detail && items && (
         <nav
           aria-label={t("Faculty pages")}
           className="flex items-center gap-4"

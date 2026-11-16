@@ -8,17 +8,11 @@ import { NotificationBell } from "@/components/communication/notifications";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Loader2, LogOut, UserRound } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import toast from "@/lib/i18n/toast";
 import { signOut, useSession } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
-import {
-  appRoles,
-  dashboardPath,
-  dashboardRoles,
-  parseRole,
-  roleLabels,
-} from "@/lib/roles";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { dashboardPath, parseRole } from "@/lib/roles";
 export function Navbar() {
   const t = useT();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -26,6 +20,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { data: session, isPending, error } = useSession();
   const role = parseRole(session?.user.role);
+  const signedIn = !!session && !isPending && !error;
   async function handleSignOut() {
     if (isSigningOut) return;
     setIsSigningOut(true);
@@ -46,25 +41,23 @@ export function Navbar() {
   }
   if (pathname.startsWith("/dashboard")) return null;
   return (
-    <header className="border-b bg-white">
+    <header className="science-navbar border-b bg-white">
       <nav
         aria-label={t("Main navigation")}
-        className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4"
+        className="mx-auto flex min-h-16 max-w-screen-2xl items-center gap-4 overflow-x-auto px-4 py-3 [&_a]:whitespace-nowrap"
       >
         <Link
           href="/"
-          className="flex items-center gap-3 text-lg font-bold text-blue-700"
+          className="flex shrink-0 items-center gap-3 text-lg font-bold text-blue-700"
         >
           <ClubLogo
             decorative
-            className="w-16 rounded-lg border border-blue-100 p-1"
+            className="w-12 rounded-lg border border-blue-100 p-1"
           />
           <span>{t("NGC Science Club")}</span>
         </Link>
 
-        <LanguageSettings />
-        <Appearance />
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <Link href="/" className="text-sm">
             {t("Home")}
           </Link>
@@ -72,25 +65,44 @@ export function Navbar() {
           <Link href="/members" className="text-sm">
             {t("Members")}
           </Link>
+          <Link href="/faculty" className="text-sm">
+            {t("Teachers")}
+          </Link>
+          {signedIn && role === "student" && (
+            <Link
+              href="/membership/apply"
+              className={buttonVariants({ size: "sm" })}
+            >
+              {t("Apply Membership")}
+            </Link>
+          )}
+          {signedIn && (role === "teacher" || role === "admin") && (
+            <Link
+              href="/faculty/add"
+              className={buttonVariants({ size: "sm" })}
+            >
+              {t("Add teacher")}
+            </Link>
+          )}
+          {signedIn && (
+            <Link
+              href={role ? dashboardPath(role) : "/dashboard"}
+              className="text-sm font-medium"
+            >
+              {t("Dashboard")}
+            </Link>
+          )}
           <Link href="/events" className="text-sm">
             {t("Events")}
           </Link>
-          <Link href="/achievements" className="text-sm">
-            {t("Club achievements")}
-          </Link>
-          <Link href="/gallery" className="text-sm">
-            {t("Photo gallery")}
-          </Link>
-          <Link href="/certificates/verify" className="text-sm">
-            {t("Verify certificate")}
-          </Link>
-          <Link href="/faculty" className="text-sm">
-            {t("Faculty mentors")}
-          </Link>
-          <Link href="/announcements" className="text-sm">
-            {t("Announcements")}
-          </Link>
-
+          <NotificationBell
+            key={signedIn ? session.user.id : "guest"}
+            signedIn={signedIn}
+          />
+        </div>
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <LanguageSettings />
+          <Appearance />
           {isPending ? (
             <span role="status">
               <Loader2
@@ -104,35 +116,13 @@ export function Navbar() {
             </span>
           ) : session ? (
             <>
-              {role && <NotificationBell key={`${session.user.id}:${role}`} />}
-              {role ? (
-                appRoles
-                  .filter((dashboard) =>
-                    dashboardRoles[dashboard].includes(role),
-                  )
-                  .map((dashboard) => (
-                    <Link
-                      key={dashboard}
-                      href={dashboardPath(dashboard)}
-                      className="text-sm font-medium text-blue-700 hover:underline"
-                    >
-                      {t(roleLabels[dashboard])} {t("Dashboard")}
-                    </Link>
-                  ))
-              ) : (
-                <Link href="/dashboard" className="text-sm font-medium">
-                  {t("Dashboard")}
-                </Link>
-              )}
-
-              <span className="hidden text-sm text-slate-600 sm:inline">
-                <UserRound className="mr-1 inline size-4" />
-                {session.user.name}
+              <span className="whitespace-nowrap text-sm">
+                {t("Welcome {0}", [session.user.name])}
               </span>
-
               <Button
                 variant="outline"
                 size="sm"
+                className="h-6 text-xs"
                 onClick={handleSignOut}
                 disabled={isSigningOut}
               >
@@ -146,22 +136,26 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                render={<Link href="/login" />}
-                nativeButton={false}
+              <Link
+                href="/login"
+                className={buttonVariants({
+                  variant: "outline",
+                  size: "sm",
+                  className: "h-6 text-xs",
+                })}
               >
-                {t("Login")}
-              </Button>
+                {t("Sign in")}
+              </Link>
 
-              <Button
-                size="sm"
-                render={<Link href="/signup" />}
-                nativeButton={false}
+              <Link
+                href="/signup"
+                className={buttonVariants({
+                  size: "sm",
+                  className: "h-6 text-xs",
+                })}
               >
                 {t("Sign up")}
-              </Button>
+              </Link>
             </>
           )}
         </div>

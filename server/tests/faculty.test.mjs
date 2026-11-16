@@ -114,6 +114,31 @@ function memory(state) {
           return { modifiedCount: row ? 1 : 0 };
         },
         aggregate(pipeline, options) {
+          if (pipeline[1]?.$group) {
+            assert.equal(pipeline[0].$match.published, true);
+            assert.deepEqual(pipeline[0].$match.deletedAt, { $exists: false });
+            assert.equal(options.maxTimeMS, 10000);
+            assert.equal(pipeline[3].$limit, 200);
+            const field = pipeline[1].$group._id.slice(1);
+            const values = [
+              ...new Set(
+                state.rows
+                  .filter(
+                    (row) =>
+                      row.published &&
+                      !row.deletedAt &&
+                      typeof row[field] === "string" &&
+                      row[field] !== "",
+                  )
+                  .map((row) => row[field]),
+              ),
+            ]
+              .sort()
+              .slice(0, 200);
+            return {
+              toArray: async () => values.map((value) => ({ _id: value })),
+            };
+          }
           assert.deepEqual(pipeline[0], {
             $match: {
               teacherAccountId: state.identity,
@@ -292,4 +317,139 @@ test("concurrent edits require versions; teacher assignments derive identity fro
     assert.equal((await send("teacher/activities")).status, 403);
     assert.equal((await send("faculty?page=0")).status, 400);
     assert.equal((await send("faculty/not-an-id")).status, 400);
+  }));
+
+const teacherEntry = {
+  name: "Fictional Teacher",
+  designation: "Lecturer",
+  department: "Physics",
+  bcsBatch: "40th",
+  email: "fictional-teacher@example.com",
+  phone: "01712345678",
+};
+test("teacher entry allows fresh staff roles and publishes professional fields with private contacts", () =>
+  fixture(async ({ send, state }) => {
+    for (const role of ["teacher", "admin"]) {
+      state.role = role;
+      const response = await send("manage/teachers", "POST", teacherEntry);
+      assert.equal(response.status, 201);
+      const { profile } = await response.json();
+      assert.equal(profile.name, teacherEntry.name);
+      assert.equal("email" in profile, false);
+      assert.equal("phone" in profile, false);
+      const record = state.rows.find((row) => String(row._id) === profile.id);
+      assert.equal(record.email, teacherEntry.email);
+      assert.equal(record.phone, teacherEntry.phone);
+      assert.equal(record.teacherAccountId, "");
+      assert.equal(record.published, true);
+      assert.ok(record.createdAt instanceof Date);
+      const publicProfile = (await (await send("faculty/" + profile.id)).json())
+        .profile;
+      assert.equal(publicProfile.bcsBatch, "40th");
+      assert.equal("email" in publicProfile, false);
+      assert.equal("phone" in publicProfile, false);
+    }
+    state.role = "admin";
+    const managed = await (await send("admin/faculty")).json();
+    assert.equal(managed.items[0].email, teacherEntry.email);
+    assert.equal(managed.items[0].phone, teacherEntry.phone);
+  }));
+test("teacher entry rejects guests students expired roles forged fields invalid inputs and foreign origins", () =>
+  fixture(async ({ send, state }) => {
+    assert.equal(
+      (await send("manage/teachers", "POST", teacherEntry, { Cookie: "" }))
+        .status,
+      401,
+    );
+    for (const role of ["student", "teacher,admin", undefined]) {
+      state.role = role;
+      assert.equal(
+        (await send("manage/teachers", "POST", teacherEntry)).status,
+        403,
+      );
+    }
+    state.role = "teacher";
+    state.expired = true;
+    assert.equal(
+      (await send("manage/teachers", "POST", teacherEntry)).status,
+      401,
+    );
+    state.expired = false;
+    for (const change of [
+      { name: "" },
+      { designation: "x" },
+      { department: "" },
+      { bcsBatch: "" },
+      { email: "bad" },
+      { phone: "123" },
+      { role: "teacher" },
+      { published: false },
+      { teacherAccountId: teacherId },
+      { createdAt: "2026-01-01" },
+    ])
+      assert.equal(
+        (await send("manage/teachers", "POST", { ...teacherEntry, ...change }))
+          .status,
+        400,
+      );
+    for (const Origin of ["https://untrusted.example", ""])
+      assert.equal(
+        (await send("manage/teachers", "POST", teacherEntry, { Origin }))
+          .status,
+        403,
+      );
+    assert.equal(state.writes, 0);
+  }));
+
+test("faculty dropdowns and combined department/designation filtering only use public records", () =>
+  fixture(async ({ send, state }) => {
+    for (const row of [
+      { department: "Physics", designation: "Lecturer", published: true },
+      { department: "Physics", designation: "Professor", published: true },
+      { department: "Chemistry", designation: "Lecturer", published: true },
+      {
+        department: "Private department",
+        designation: "Private designation",
+        published: false,
+      },
+      {
+        department: "Deleted department",
+        designation: "Deleted designation",
+        published: true,
+        deletedAt: new Date(),
+      },
+    ])
+      state.rows.push({ ...input, _id: new ObjectId(), version: 1, ...row });
+    const response = await send("faculty/filters", "GET", undefined, {
+      Cookie: "",
+    });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), {
+      success: true,
+      departments: ["Chemistry", "Physics"],
+      designations: ["Lecturer", "Professor"],
+    });
+    const combined = await (
+      await send("faculty?department=Physics&designation=Lecturer")
+    ).json();
+    assert.equal(combined.items.length, 1);
+    assert.equal(combined.items[0].designation, "Lecturer");
+    assert.equal(combined.items[0].department, "Physics");
+    assert.equal("phone" in combined.items[0], false);
+    const designation = await (
+      await send("faculty?designation=Lecturer")
+    ).json();
+    assert.equal(designation.items.length, 2);
+    assert.equal(
+      (await (await send("faculty?designation=NoMatch")).json()).items.length,
+      0,
+    );
+    for (const suffix of [
+      "?designation=",
+      "?designation=" + "x".repeat(121),
+      "?designation[$ne]=Professor",
+    ])
+      assert.equal((await send("faculty" + suffix)).status, 400);
+    assert.equal((await send("faculty/filters?role=admin")).status, 400);
+    assert.equal(state.writes, 0);
   }));

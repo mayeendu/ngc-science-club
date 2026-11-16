@@ -6,6 +6,7 @@ import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
 import { Translated } from "@/components/i18n/language";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
@@ -34,6 +35,9 @@ export default function RootLayout({
         <div id="main-content" tabIndex={-1}>
           {children}
         </div>
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
         <Toaster position="top-right" toastOptions={{ duration: 3500 }} />
       </body>
     </html>

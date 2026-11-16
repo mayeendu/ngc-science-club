@@ -1,6 +1,7 @@
 import { AppError } from "../../utils/app-error.js";
 import {
   applicationSchema,
+  referenceApplicationSchema,
   applicationFormFields,
   applicationListSchema,
   applicationIdSchema,
@@ -24,6 +25,32 @@ export function createApplicationService(repository: ApplicationRepository) {
       return repository.updateOwnProfile(userId, input.data);
     },
     submit(userId: string, body: unknown) {
+      const reference = referenceApplicationSchema.safeParse(body);
+      if (reference.success)
+        return repository.create(userId, {
+          ...reference.data,
+          department: "Science",
+          academicYear: "Not provided",
+          reason: "Science club membership application.",
+        });
+      // Legacy clients remain compatible, but cannot smuggle partial new fields.
+      if (
+        body &&
+        typeof body === "object" &&
+        [
+          "email",
+          "guideTeacherSubject",
+          "halfYearlyResult",
+          "yearFinalResult",
+          "preTestResult",
+          "testResult",
+          "presentAddress",
+        ].some((key) => key in body)
+      )
+        throw new AppError(
+          400,
+          "Invalid application details. Check all required fields.",
+        );
       const result = applicationSchema.safeParse(body);
       if (
         !result.success ||
