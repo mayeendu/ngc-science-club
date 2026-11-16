@@ -693,6 +693,7 @@ for (const account of ["guest", ...roles]) {
           : ["/faculty/add"]),
       ...(account === "guest" ? [] : ["/dashboard/" + account]),
       "/events",
+      "/blog",
       account === "guest" ? "/login" : "/dashboard/notifications",
       ...(account === "guest" ? ["/login", "/signup"] : []),
     ];

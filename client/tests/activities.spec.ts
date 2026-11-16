@@ -52,7 +52,8 @@ test("homepage activity grid, local images, keyboard links and bilingual copy", 
   }
   for (const image of await section.getByRole("img").all()) {
     await image.scrollIntoViewIfNeeded();
-    await expect(image).toHaveAttribute("alt", /Illustrated placeholder:/);
+    await expect(image).toHaveAttribute("alt", /Students|students|Volunteers/);
+    await expect(image).toHaveAttribute("src", /\.jpg/);
     await expect
       .poll(() =>
         image.evaluate(

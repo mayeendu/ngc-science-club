@@ -44,10 +44,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Weekly", bn: "সাপ্তাহিক" },
     badgeClass: "bg-blue-50 text-blue-800",
-    image: "/images/activities/quiz.svg",
+    image: "/images/activities/quiz.jpg",
     alt: {
-      en: "Illustrated placeholder: quiz question cards with an atom",
-      bn: "প্রতীকী চিত্র: পরমাণুসহ কুইজের প্রশ্নপত্র",
+      en: "Students studying together with notebooks and a laptop",
+      bn: "খাতা ও ল্যাপটপ নিয়ে একসাথে পড়াশোনা করছে শিক্ষার্থীরা",
     },
     metadata: [
       { text: { en: "Weekly", bn: "সাপ্তাহিক" }, icon: CalendarDays },
@@ -63,10 +63,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Competition", bn: "প্রতিযোগিতা" },
     badgeClass: "bg-amber-50 text-amber-800",
-    image: "/images/activities/olympiad.svg",
+    image: "/images/activities/olympiad.jpg",
     alt: {
-      en: "Illustrated placeholder: science competition trophy and stars",
-      bn: "প্রতীকী চিত্র: বিজ্ঞান প্রতিযোগিতার ট্রফি ও তারা",
+      en: "Students collaborating on a physics experiment and recording results",
+      bn: "পদার্থবিজ্ঞানের পরীক্ষায় একসাথে কাজ ও ফলাফল লিখছে শিক্ষার্থীরা",
     },
     metadata: [
       { text: { en: "Competition", bn: "প্রতিযোগিতা" }, icon: Trophy },
@@ -83,10 +83,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Outdoor Learning", bn: "প্রকৃতিতে শিক্ষা" },
     badgeClass: "bg-teal-50 text-teal-800",
-    image: "/images/activities/study-tour.svg",
+    image: "/images/activities/study-tour.jpg",
     alt: {
-      en: "Illustrated placeholder: field notebook among hills and trees",
-      bn: "প্রতীকী চিত্র: পাহাড় ও গাছের মাঝে পর্যবেক্ষণের খাতা",
+      en: "Students learning together outdoors on a green campus lawn",
+      bn: "সবুজ ক্যাম্পাসের মাঠে একসাথে শিখছে শিক্ষার্থীরা",
     },
     metadata: [
       { text: { en: "Field Visits", bn: "মাঠপর্যায়ে ভ্রমণ" }, icon: MapPin },
@@ -106,10 +106,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Innovation", bn: "উদ্ভাবন" },
     badgeClass: "bg-violet-50 text-violet-800",
-    image: "/images/activities/innovation.svg",
+    image: "/images/activities/innovation.jpg",
     alt: {
-      en: "Illustrated placeholder: light bulb connected to a scientific circuit",
-      bn: "প্রতীকী চিত্র: বৈজ্ঞানিক বর্তনীর সঙ্গে সংযুক্ত আলোর বাল্ব",
+      en: "Students building a robotics project together in a workshop",
+      bn: "কর্মশালায় একসাথে রোবোটিক্স প্রকল্প তৈরি করছে শিক্ষার্থীরা",
     },
     metadata: [
       { text: { en: "Projects", bn: "প্রকল্প" }, icon: Lightbulb },
@@ -128,10 +128,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Skill Development", bn: "দক্ষতা উন্নয়ন" },
     badgeClass: "bg-orange-50 text-orange-800",
-    image: "/images/activities/workshop.svg",
+    image: "/images/activities/workshop.jpg",
     alt: {
-      en: "Illustrated placeholder: microscope and laboratory equipment",
-      bn: "প্রতীকী চিত্র: অণুবীক্ষণযন্ত্র ও গবেষণাগারের সরঞ্জাম",
+      en: "University students using physics equipment in a science laboratory",
+      bn: "বিজ্ঞানের গবেষণাগারে পদার্থবিজ্ঞানের যন্ত্র নিয়ে কাজ করছে শিক্ষার্থীরা",
     },
     metadata: [
       { text: { en: "Workshop", bn: "কর্মশালা" }, icon: Microscope },
@@ -148,10 +148,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Community", bn: "সমাজ" },
     badgeClass: "bg-green-50 text-green-800",
-    image: "/images/activities/conservation.svg",
+    image: "/images/activities/conservation.jpg",
     alt: {
-      en: "Illustrated placeholder: young plant growing above the earth",
-      bn: "প্রতীকী চিত্র: পৃথিবীর বুকে বেড়ে ওঠা চারাগাছ",
+      en: "Volunteers planting a young tree together in a grassy field",
+      bn: "সবুজ মাঠে একসাথে চারাগাছ রোপণ করছেন স্বেচ্ছাসেবকেরা",
     },
     metadata: [
       { text: { en: "Conservation", bn: "সংরক্ষণ" }, icon: Leaf },
@@ -176,7 +176,7 @@ function ActivityCard({
           alt={activity.alt[language]}
           fill
           sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 400px"
-          className="object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105"
+          className="object-cover object-[50%_30%] motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105"
         />
         <span
           className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${activity.badgeClass}`}

@@ -224,15 +224,15 @@ export function MemberDirectory() {
                     <GraduationCap className="size-6" aria-hidden="true" />
                   </div>
                   <CardTitle>
-                    <h2 className="break-words text-xl">{member.name}</h2>
+                    <h2 className="wrap-break-word text-xl">{member.name}</h2>
                   </CardTitle>
-                  <p className="break-words text-sm text-slate-600">
+                  <p className="wrap-break-word text-sm text-slate-600">
                     {t("Student Roll")}:{" "}
                     {member.studentRoll || t("Not recorded")}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <p className="break-words text-slate-600">
+                  <p className="wrap-break-word text-slate-600">
                     {member.department}
                   </p>
                   <p className="text-sm text-slate-600">

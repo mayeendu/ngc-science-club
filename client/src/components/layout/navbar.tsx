@@ -95,6 +95,13 @@ export function Navbar() {
           <Link href="/events" className="text-sm">
             {t("Events")}
           </Link>
+          <Link
+            href="/blog"
+            className="text-sm"
+            aria-current={pathname === "/blog" ? "page" : undefined}
+          >
+            {t("Blog")}
+          </Link>
           <NotificationBell
             key={signedIn ? session.user.id : "guest"}
             signedIn={signedIn}
