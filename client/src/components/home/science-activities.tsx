@@ -44,10 +44,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Weekly", bn: "সাপ্তাহিক" },
     badgeClass: "bg-blue-50 text-blue-800",
-    image: "/images/activities/quiz.jpg",
+    image: "/images/activities/quiz-bd.jpg",
     alt: {
-      en: "Students studying together with notebooks and a laptop",
-      bn: "খাতা ও ল্যাপটপ নিয়ে একসাথে পড়াশোনা করছে শিক্ষার্থীরা",
+      en: "Students attending the Dhaka regional Mathematics Olympiad in Bangladesh",
+      bn: "বাংলাদেশের ঢাকা আঞ্চলিক গণিত অলিম্পিয়াডে অংশ নিচ্ছে শিক্ষার্থীরা",
     },
     metadata: [
       { text: { en: "Weekly", bn: "সাপ্তাহিক" }, icon: CalendarDays },
@@ -63,10 +63,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Competition", bn: "প্রতিযোগিতা" },
     badgeClass: "bg-amber-50 text-amber-800",
-    image: "/images/activities/olympiad.jpg",
+    image: "/images/activities/olympiad-bd.jpg",
     alt: {
-      en: "Students collaborating on a physics experiment and recording results",
-      bn: "পদার্থবিজ্ঞানের পরীক্ষায় একসাথে কাজ ও ফলাফল লিখছে শিক্ষার্থীরা",
+      en: "Students gathered at the National Mathematics Olympiad in Dhaka, Bangladesh",
+      bn: "বাংলাদেশের ঢাকায় জাতীয় গণিত অলিম্পিয়াডে সমবেত শিক্ষার্থীরা",
     },
     metadata: [
       { text: { en: "Competition", bn: "প্রতিযোগিতা" }, icon: Trophy },
@@ -83,10 +83,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Outdoor Learning", bn: "প্রকৃতিতে শিক্ষা" },
     badgeClass: "bg-teal-50 text-teal-800",
-    image: "/images/activities/study-tour.jpg",
+    image: "/images/activities/study-tour-bd.jpg",
     alt: {
-      en: "Students learning together outdoors on a green campus lawn",
-      bn: "সবুজ ক্যাম্পাসের মাঠে একসাথে শিখছে শিক্ষার্থীরা",
+      en: "A group of students outdoors at 30 Godown in Barishal, Bangladesh",
+      bn: "বাংলাদেশের বরিশালের ত্রিশ গোডাউনে খোলা পরিবেশে একদল শিক্ষার্থী",
     },
     metadata: [
       { text: { en: "Field Visits", bn: "মাঠপর্যায়ে ভ্রমণ" }, icon: MapPin },
@@ -106,10 +106,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Innovation", bn: "উদ্ভাবন" },
     badgeClass: "bg-violet-50 text-violet-800",
-    image: "/images/activities/innovation.jpg",
+    image: "/images/activities/innovation-bd.jpg",
     alt: {
-      en: "Students building a robotics project together in a workshop",
-      bn: "কর্মশালায় একসাথে রোবোটিক্স প্রকল্প তৈরি করছে শিক্ষার্থীরা",
+      en: "Students presenting robotics projects at a STEM fair in Dhaka, Bangladesh",
+      bn: "বাংলাদেশের ঢাকায় স্টেম মেলায় রোবোটিক্স প্রকল্প উপস্থাপন করছে শিক্ষার্থীরা",
     },
     metadata: [
       { text: { en: "Projects", bn: "প্রকল্প" }, icon: Lightbulb },
@@ -128,10 +128,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Skill Development", bn: "দক্ষতা উন্নয়ন" },
     badgeClass: "bg-orange-50 text-orange-800",
-    image: "/images/activities/workshop.jpg",
+    image: "/images/activities/workshop-bd.jpg",
     alt: {
-      en: "University students using physics equipment in a science laboratory",
-      bn: "বিজ্ঞানের গবেষণাগারে পদার্থবিজ্ঞানের যন্ত্র নিয়ে কাজ করছে শিক্ষার্থীরা",
+      en: "Students working together at a creative workshop at Dhaka University, Bangladesh",
+      bn: "বাংলাদেশের ঢাকা বিশ্ববিদ্যালয়ে সৃজনশীল কর্মশালায় একসাথে কাজ করছে শিক্ষার্থীরা",
     },
     metadata: [
       { text: { en: "Workshop", bn: "কর্মশালা" }, icon: Microscope },
@@ -148,10 +148,10 @@ const activities: readonly Activity[] = [
     },
     badge: { en: "Community", bn: "সমাজ" },
     badgeClass: "bg-green-50 text-green-800",
-    image: "/images/activities/conservation.jpg",
+    image: "/images/activities/conservation-bd.jpg",
     alt: {
-      en: "Volunteers planting a young tree together in a grassy field",
-      bn: "সবুজ মাঠে একসাথে চারাগাছ রোপণ করছেন স্বেচ্ছাসেবকেরা",
+      en: "Students at a college tree-planting awareness rally in Mymensingh, Bangladesh",
+      bn: "বাংলাদেশের ময়মনসিংহে কলেজের বৃক্ষরোপণ সচেতনতা র‍্যালিতে শিক্ষার্থীরা",
     },
     metadata: [
       { text: { en: "Conservation", bn: "সংরক্ষণ" }, icon: Leaf },
@@ -254,6 +254,16 @@ export function ScienceActivities() {
             />
           ))}
         </div>
+        <p className="mt-5 text-center text-xs text-slate-500">
+          <a
+            href="/images/activities/bangladesh-credits.txt"
+            className="rounded underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            {language === "bn"
+              ? "ছবির উৎস ও লাইসেন্স"
+              : "Photo sources & licenses"}
+          </a>
+        </p>
       </div>
     </section>
   );

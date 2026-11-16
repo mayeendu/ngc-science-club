@@ -51,7 +51,7 @@ export default function LoginPage() {
       toast.success("Signed in successfully!");
       // Only accept the supported internal destination; never redirect to arbitrary URLs.
       const next = new URLSearchParams(window.location.search).get("next");
-      if (next === "/membership/apply") {
+      if (next === "/membership/apply" || next === "/blog/write") {
         // Reload the session after sign-in before mounting the protected form.
         window.location.assign(next);
         return;

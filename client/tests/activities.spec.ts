@@ -52,8 +52,8 @@ test("homepage activity grid, local images, keyboard links and bilingual copy", 
   }
   for (const image of await section.getByRole("img").all()) {
     await image.scrollIntoViewIfNeeded();
-    await expect(image).toHaveAttribute("alt", /Students|students|Volunteers/);
-    await expect(image).toHaveAttribute("src", /\.jpg/);
+    await expect(image).toHaveAttribute("alt", /Bangladesh/);
+    await expect(image).toHaveAttribute("src", /-bd\.jpg/);
     await expect
       .poll(() =>
         image.evaluate(
@@ -62,8 +62,14 @@ test("homepage activity grid, local images, keyboard links and bilingual copy", 
       )
       .toBe(true);
   }
-  await expect(section.getByRole("link")).toHaveCount(4);
-  for (const link of await section.getByRole("link").all())
+  await expect(section.getByRole("article").getByRole("link")).toHaveCount(4);
+  await expect(
+    section.getByRole("link", {
+      name: "Photo sources & licenses",
+      exact: true,
+    }),
+  ).toHaveAttribute("href", "/images/activities/bangladesh-credits.txt");
+  for (const link of await section.getByRole("article").getByRole("link").all())
     await expect(link).toHaveAttribute("href", "/events");
   await section.getByRole("link").first().focus();
   await expect(section.getByRole("link").first()).toBeFocused();

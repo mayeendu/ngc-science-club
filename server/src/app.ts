@@ -1,3 +1,8 @@
+import {
+  createBlogRepository,
+  type BlogRepository,
+} from "./modules/blog/blog.repository.js";
+import { createBlogRouter } from "./modules/blog/blog.routes.js";
 import express from "express";
 import { getDB } from "./config/db.js";
 import { createApiRateLimit } from "./middleware/api-rate-limit.js";
@@ -128,6 +133,7 @@ export function createApp(
     showcaseRepository?: ShowcaseRepository;
     certificateRepository?: CertificateRepository;
     reportRepository?: ReportRepository;
+    blogRepository?: BlogRepository;
     readiness?: () => Promise<void>;
   } = {},
 ) {
@@ -254,6 +260,14 @@ export function createApp(
   );
   const announcements =
     options.announcementRepository ?? createAnnouncementRepository();
+  app.use(
+    "/api/blog",
+    createBlogRouter(
+      authenticate,
+      requireRole("student", "teacher", "admin"),
+      options.blogRepository ?? createBlogRepository(),
+    ),
+  );
   app.use("/api/announcements", createPublicAnnouncementRouter(announcements));
   app.use(
     "/api/manage/announcements",

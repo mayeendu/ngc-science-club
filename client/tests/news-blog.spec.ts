@@ -1,6 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
+  await page.route("**/api/blog**", (route) =>
+    route.fulfill({
+      headers: headers(),
+      json: { success: true, items: [], page: 1, hasNext: false },
+    }),
+  );
   await page.route("**/api/auth/get-session**", (route) =>
     route.fulfill({
       headers: {
@@ -80,14 +86,21 @@ test("science notes follow activities, fit all layouts, and open accessible bili
       )
       .toBe(true);
   }
-  const read = section.getByRole("button", { name: /^Read more:/ }).first();
+  const read = section.getByRole("link", { name: /^Read more:/ }).first();
   await read.click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-  await expect(dialog).toContainText("Change one factor at a time.");
-  await page.keyboard.press("Escape");
-  await expect(dialog).not.toBeVisible();
-  await expect(read).toBeFocused();
+  await expect(page).toHaveURL(/\/blog\/first-experiment$/);
+  await expect(page.getByRole("article")).toContainText(
+    "Change one factor at a time.",
+  );
+  await expect(page.getByRole("article").getByRole("img")).toHaveAttribute(
+    "src",
+    /workshop-bd\.jpg/,
+  );
+  await page
+    .getByRole("link", { name: "Back to all blogs", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/blog$/);
+  await page.goto("/");
   await section.getByRole("heading", { level: 2 }).click();
   await section.screenshot({
     path: `test-results/news-${test.info().project.name}.png`,
@@ -97,10 +110,10 @@ test("science notes follow activities, fit all layouts, and open accessible bili
     "ক্লাবের সংবাদ ও বিজ্ঞানের নতুন ভাবনায় সাথে থাকো।",
   );
   await page
-    .getByRole("button", { name: /^আরও পড়ো:/ })
+    .getByRole("link", { name: /^আরও পড়ো:/ })
     .first()
     .click();
-  await expect(page.getByRole("dialog")).toContainText(
+  await expect(page.getByRole("article")).toContainText(
     "একবারে একটি বিষয় বদলাও।",
   );
 });
@@ -129,11 +142,14 @@ test("navbar Blog link opens the public bilingual blog page", async ({
   ).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(3);
   await page
-    .getByRole("button", { name: /^Read more:/ })
+    .getByRole("link", { name: /^Read more:/ })
     .first()
     .click();
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await page.keyboard.press("Escape");
+  await expect(page).toHaveURL(/\/blog\/first-experiment$/);
+  await expect(page.getByRole("article").getByRole("img")).toBeVisible();
+  await page
+    .getByRole("link", { name: "Back to all blogs", exact: true })
+    .click();
   await page.reload();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Science Club Blog",
@@ -152,6 +168,20 @@ test("navbar Blog link opens the public bilingual blog page", async ({
 test("published news uses actual title date and announcement destination", async ({
   page,
 }) => {
+  await page.route("**/api/announcements/fictional-news", (route) =>
+    route.fulfill({
+      headers: headers(),
+      json: {
+        success: true,
+        announcement: {
+          id: "fictional-news",
+          title: "Fictional science gathering",
+          body: "Fictional announcement for isolated tests.",
+          updatedAt: "2026-11-16T09:00:00.000Z",
+        },
+      },
+    }),
+  );
   await page.route("**/api/announcements?**", (route) =>
     route.fulfill({
       headers: headers(),
@@ -187,11 +217,69 @@ test("published news uses actual title date and announcement destination", async
       name: "Read more: Fictional science gathering",
       exact: true,
     }),
-  ).toHaveAttribute("href", "/announcements/fictional-news");
+  ).toHaveAttribute("href", "/blog/news-fictional-news");
   await expect(section.locator("time")).toHaveAttribute(
     "datetime",
     "2026-11-16T09:00:00.000Z",
   );
+  await section
+    .getByRole("link", {
+      name: "Read more: Fictional science gathering",
+      exact: true,
+    })
+    .click();
+  await expect(page).toHaveURL(/\/blog\/news-fictional-news$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Fictional science gathering",
+  );
+  await expect(page.getByRole("article")).toContainText(
+    "Fictional announcement for isolated tests.",
+  );
+  await expect(page.getByRole("article").getByRole("img")).toBeVisible();
+  await page
+    .getByRole("link", { name: "Back to all blogs", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/blog$/);
+});
+
+test("every science note has a reloadable article page with a header photo and back link", async ({
+  page,
+}) => {
+  await page.route("**/api/announcements?**", (route) =>
+    route.fulfill({
+      headers: headers(),
+      json: { success: true, items: [], page: 1, hasNext: false },
+    }),
+  );
+  for (const slug of [
+    "first-experiment",
+    "everyday-physics",
+    "campus-biodiversity",
+  ]) {
+    await page.goto("/blog");
+    await page.locator(`a[href="/blog/${slug}"]`).click();
+    await expect(page).toHaveURL(new RegExp(`/blog/${slug}$`));
+    const header = page.getByRole("article").locator("header");
+    await expect(header.getByRole("heading", { level: 1 })).toBeVisible();
+    const image = header.getByRole("img");
+    await expect(image).toHaveAttribute("src", /-bd\.jpg/);
+    await expect
+      .poll(() =>
+        image.evaluate(
+          (node: HTMLImageElement) => node.complete && node.naturalWidth > 0,
+        ),
+      )
+      .toBe(true);
+    await expect(
+      page.getByRole("article").locator("header + div > p"),
+    ).toHaveCount(3);
+    await page.reload();
+    await expect(header.getByRole("heading", { level: 1 })).toBeVisible();
+    await page
+      .getByRole("link", { name: "Back to all blogs", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/blog$/);
+  }
 });
 
 test("news failure keeps science notes available and retry restores published news", async ({
